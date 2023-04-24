@@ -1,0 +1,34 @@
+{
+  "name": "@flydotio/dockerfile",
+  "version": "0.0.1",
+  "description": "Dockerfile generator",
+  "main": "./index.js",
+  "bin": {
+    "dockerfile": "./index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "eslint": "eslint .",
+    "eslint:fix": "eslint --fix .",
+    "test": "mocha",
+    "test:capture": "TEST_CAPTURE=1 mocha"
+  },
+  "author": "Sam Ruby",
+  "license": "MIT",
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "yargs": "^17.7.1"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "eslint": "^8.38.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-promise": "^6.1.1",
+    "mocha": "^10.2.0"
+  },
+  "files": [
+    "index.js",
+    "gdf.js"
+  ]
+}
