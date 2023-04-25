@@ -1,5 +1,12 @@
-fly.toml
-Dockerfile
-.dockerignore
-node_modules
 .git
+node_modules
+.dockerignore
+.env
+Dockerfile
+fly.toml
+<% if (remix) { -%>
+
+/.cache
+/build
+/public/build
+<% } -%>
