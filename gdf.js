@@ -198,7 +198,7 @@ export class GDF {
     this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
 
     // select and render templates
-    const templates = ['Dockerfile.ejs']
+    const templates = ['Dockerfile.ejs', '.dockerignore.ejs']
     if (this.prisma) templates.unshift('docker-entrypoint.ejs')
 
     for (const template of templates) {
