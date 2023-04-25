@@ -2,9 +2,11 @@
 
 ## Overview
 
-Provides a Node.js generator to produce Dockerfiles and related files.  It is intended to support any framework that lists its dependencies, and includes a `start` script in `package.json`, and optionally includes a `build` script.
+Provides a Node.js generator to produce Dockerfiles and related files.  It is intended to support any framework that lists its dependencies, includes a `start` script in `package.json`, and optionally includes a `build` script.
 
 See [test](./test) for a list of frameworks and examples of Dockerfiles produced based on the associated `package.json` and lock files.
+
+See [blog post](https://fly.io/blog/flydotio-heart-js/) for more information.
 
 ## Usage
 
