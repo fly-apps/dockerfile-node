@@ -35,6 +35,20 @@ fs.readdirSync('test', { withFileTypes: true }).forEach(entry => {
 
     const pj = fs.readFileSync(path.join('test', entry.name, 'package.json'), 'utf-8')
 
+    it('should produce a .dockerignore', async function () {
+      await new GDF().run(workdir)
+
+      const actualResults = fs.readFileSync(path.join(workdir, '.dockerignore'), 'utf-8')
+
+      if (process.env.TEST_CAPTURE) {
+        fs.writeFileSync(path.join('test', entry.name, '.dockerignore'), actualResults)
+      }
+
+      const expectedResults = fs.readFileSync(path.join('test', entry.name, '.dockerignore'), 'utf-8')
+
+      expect(expectedResults).to.equal(actualResults)
+    })
+
     if (pj.includes('prisma')) {
       it('should produce a docker-entrypoint', async function () {
         await new GDF().run(workdir)
