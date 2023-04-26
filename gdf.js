@@ -191,20 +191,18 @@ export class GDF {
     return port
   }
 
-  // render each templates and write to the destination dir
+  // render each template and write to the destination dir
   async run (appdir, options = {}) {
     this.options = options
     this.#appdir = appdir
     this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
 
     // select and render templates
-    const templates = ['Dockerfile.ejs', '.dockerignore.ejs']
+    const templates = ['Dockerfile.ejs']
     if (this.prisma) templates.unshift('docker-entrypoint.ejs')
 
     for (const template of templates) {
-      const contents = await ejs.renderFile(path.join(GDF.templates, template), this)
-      const dest = path.join(appdir, template.replace(/\.ejs$/m, ''))
-      fs.writeFileSync(dest, contents)
+      const dest = await this.#writeTemplateFile(template)
 
       if (template === 'docker-entrypoint.ejs') fs.chmodSync(dest, 0o755)
     }
@@ -219,11 +217,17 @@ export class GDF {
           path.join(appdir, '.dockerignore')
         )
       } catch {
-        fs.copyFileSync(
-          path.join(GDF.templates, 'dockerignore'),
-          path.join(appdir, '.dockerignore')
-        )
+        await this.#writeTemplateFile('.dockerignore.ejs')
       }
     }
+  }
+
+  async #writeTemplateFile (template) {
+    const contents = await ejs.renderFile(path.join(GDF.templates, template), this)
+    const dest = path.join(this.#appdir, template.replace(/\.ejs$/m, ''))
+
+    fs.writeFileSync(dest, contents)
+
+    return dest
   }
 }
