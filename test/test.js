@@ -57,11 +57,14 @@ fs.readdirSync('test', { withFileTypes: true }).forEach(entry => {
         const { execSync } = await import('node:child_process')
 
         // build the docker image
-        const results = execSync(`docker buildx build -t ${dockerImageName} .`, { cwd: workdir })
+        try {
+          const results = execSync(`docker buildx build -t ${dockerImageName} .`, { cwd: workdir })
 
-        // const results = execSync(`docker inspect --type=image ${dockerImageName}`)
-
-        expect(results.toString()).to.not.match(/\bError:.*\b/)
+          expect(results.toString()).to.not.match(/\bError:.*\b/)
+        } catch (err) {
+          console.log(`${entry.name} failed to build, the process exited with code ${err.status}`)
+          expect('the test to run without an exception').to.equal('but it did not') // force test to fail, i don't know a better way to do this
+        }
       })
     }
 
