@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:1
+# syntax = docker/dockerfile:1.4
 
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=xxx
@@ -11,6 +11,9 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV=production
+
+ARG YARN_VERSION=xxx
+RUN npm install -g yarn@$YARN_VERSION --force
 
 
 # Throw-away build stage to reduce size of final image
