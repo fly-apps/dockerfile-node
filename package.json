@@ -12,7 +12,7 @@
     "eslint:fix": "eslint --fix .",
     "test": "mocha",
     "test:capture": "TEST_CAPTURE=1 mocha",
-    "test:with_docker": "DOCKER_BUILD=1 TEST_CAPTURE=1 mocha --timeout 60000"
+    "test:with_docker": "DOCKER_BUILD=1 mocha --timeout 60000"
   },
   "author": "Sam Ruby",
   "license": "MIT",
