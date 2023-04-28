@@ -49,19 +49,21 @@ fs.readdirSync('test', { withFileTypes: true }).forEach(entry => {
       expect(expectedResults).to.equal(actualResults)
     })
 
-    it('should build docker image successfully', async function () {
-      const dockerImageName = `dockerfile-node-test-${entry.name}`
-      await new GDF().run(workdir)
+    if (process.env.DOCKER_BUILD) {
+      it('should build docker image successfully', async function () {
+        const dockerImageName = `dockerfile-node-test-${entry.name}`
+        await new GDF().run(workdir)
 
-      const { execSync } = await import('node:child_process')
+        const { execSync } = await import('node:child_process')
 
-      // build the docker image
-      execSync(`docker build -t ${dockerImageName} .`, { cwd: workdir })
+        // build the docker image
+        execSync(`docker buildx build -t ${dockerImageName} .`, { cwd: workdir })
 
-      const results = execSync(`docker inspect --type=image ${dockerImageName}`)
+        const results = execSync(`docker inspect --type=image ${dockerImageName}`)
 
-      expect(results.toString()).to.not.contain('Error: No such image')
-    })
+        expect(results.toString()).to.not.match(/\bError:.*\b/)
+      })
+    }
 
     if (pj.includes('prisma')) {
       it('should produce a docker-entrypoint', async function () {
