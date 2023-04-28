@@ -57,9 +57,9 @@ fs.readdirSync('test', { withFileTypes: true }).forEach(entry => {
         const { execSync } = await import('node:child_process')
 
         // build the docker image
-        execSync(`docker buildx build -t ${dockerImageName} .`, { cwd: workdir })
+        const results = execSync(`docker buildx build -t ${dockerImageName} .`, { cwd: workdir })
 
-        const results = execSync(`docker inspect --type=image ${dockerImageName}`)
+        // const results = execSync(`docker inspect --type=image ${dockerImageName}`)
 
         expect(results.toString()).to.not.match(/\bError:.*\b/)
       })
