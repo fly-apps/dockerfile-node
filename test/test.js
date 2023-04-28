@@ -10,14 +10,14 @@ fs.readdirSync('test', { withFileTypes: true }).forEach(entry => {
   if (!entry.isDirectory()) return
   if (!fs.existsSync(path.join('test', entry.name, 'package.json'))) return
 
-  describe(entry.name, function () {
+  describe(entry.name, function() {
     const workdir = path.join(os.tmpdir(), entry.name)
 
     if (fs.existsSync(workdir)) fs.rmSync(workdir, { recursive: true })
 
     fs.cpSync(path.join('test', entry.name), workdir, { recursive: true })
 
-    it('should produce a dockerfile', async function () {
+    it('should produce a dockerfile', async function() {
       await new GDF().run(workdir)
 
       const actualResults = fs.readFileSync(path.join(workdir, 'Dockerfile'), 'utf-8')
@@ -35,7 +35,7 @@ fs.readdirSync('test', { withFileTypes: true }).forEach(entry => {
 
     const pj = fs.readFileSync(path.join('test', entry.name, 'package.json'), 'utf-8')
 
-    it('should produce a .dockerignore', async function () {
+    it('should produce a .dockerignore', async function() {
       await new GDF().run(workdir)
 
       const actualResults = fs.readFileSync(path.join(workdir, '.dockerignore'), 'utf-8')
@@ -49,8 +49,22 @@ fs.readdirSync('test', { withFileTypes: true }).forEach(entry => {
       expect(expectedResults).to.equal(actualResults)
     })
 
+    it('should build docker image successfully', async function() {
+      const docker_image_name = `dockerfile-node-test-${entry.name}`
+      await new GDF().run(workdir)
+
+      const { execSync } = await import('node:child_process')
+
+      // build the docker image
+      execSync(`docker build -t ${docker_image_name} .`, { cwd: workdir, });
+
+      const results = execSync(`docker inspect --type=image ${docker_image_name}`);
+
+      expect(results.toString()).to.not.contain('Error: No such image')
+    })
+
     if (pj.includes('prisma')) {
-      it('should produce a docker-entrypoint', async function () {
+      it('should produce a docker-entrypoint', async function() {
         await new GDF().run(workdir)
 
         const actualResults = fs.readFileSync(path.join(workdir, 'docker-entrypoint'), 'utf-8')
