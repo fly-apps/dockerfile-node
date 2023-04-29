@@ -86,7 +86,7 @@ for (const entry of entries) {
 
     after(function () {
       try {
-        execSync(`docker image rm dockerfile-node-test-${entry.name}`)
+        execSync('docker buildx prune --force')
       } catch (err) {
         // log and ignore
         console.log(err.message)
