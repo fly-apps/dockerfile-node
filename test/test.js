@@ -5,10 +5,13 @@ import fs from 'node:fs'
 import { expect } from 'chai'
 
 import { GDF } from '../gdf.js'
+import { execSync } from 'node:child_process'
 
-fs.readdirSync('test', { withFileTypes: true }).forEach(entry => {
-  if (!entry.isDirectory()) return
-  if (!fs.existsSync(path.join('test', entry.name, 'package.json'))) return
+const entries = fs.readdirSync('test', { withFileTypes: true })
+
+for (const entry of entries) {
+  if (!entry.isDirectory()) continue
+  if (!fs.existsSync(path.join('test', entry.name, 'package.json'))) continue
 
   describe(entry.name, function () {
     const workdir = path.join(os.tmpdir(), entry.name)
@@ -54,8 +57,6 @@ fs.readdirSync('test', { withFileTypes: true }).forEach(entry => {
         const dockerImageName = `dockerfile-node-test-${entry.name}`
         await new GDF().run(workdir)
 
-        const { execSync } = await import('node:child_process')
-
         // build the docker image
         try {
           const results = execSync(`docker buildx build -t ${dockerImageName} .`, { cwd: workdir })
@@ -82,5 +83,14 @@ fs.readdirSync('test', { withFileTypes: true }).forEach(entry => {
         expect(expectedResults).to.equal(actualResults)
       })
     }
+
+    after(function () {
+      try {
+        execSync(`docker image rm dockerfile-node-test-${entry.name}`)
+      } catch (err) {
+        // log and ignore
+        console.log(err.message)
+      }
+    })
   })
-})
+}
