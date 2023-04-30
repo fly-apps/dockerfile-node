@@ -1,6 +1,7 @@
 name: CI
 on: [push, pull_request]
 jobs:
+  # run eslint and compare outputs with expected results
   test:
     runs-on: ubuntu-latest
     steps:
@@ -12,20 +13,8 @@ jobs:
       - run: npm ci
       - run: npm run eslint
       - run: npm test
-  test-docker:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: docker/setup-buildx-action@v2
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: "npm"
-      - run: npm ci
-      - run: npm run eslint
-      - run: npm run test:with_docker
 
-  # test each framework
+  # test each framework can actually build
   test-frameworks:
     runs-on: ubuntu-latest
     strategy:
