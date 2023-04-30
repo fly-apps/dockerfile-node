@@ -24,3 +24,21 @@ jobs:
       - run: npm ci
       - run: npm run eslint
       - run: npm run test:with_docker
+
+  # test each framework
+  test-frameworks:
+    runs-on: ubuntu-latest
+    matrix:
+      framework:
+        - express
+        - fastify
+        - gatsby
+        - nest
+        - next-yarn
+        - nuxt
+        - remix-indie
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - run: docker buildx build . --build-arg NODE_VERSION=18
+        working-directory: ${{ matrix.framework }}
