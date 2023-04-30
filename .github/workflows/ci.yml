@@ -28,15 +28,16 @@ jobs:
   # test each framework
   test-frameworks:
     runs-on: ubuntu-latest
-    matrix:
-      framework:
-        - express
-        - fastify
-        - gatsby
-        - nest
-        - next-yarn
-        - nuxt
-        - remix-indie
+    strategy:
+      matrix:
+        framework:
+          - express
+          - fastify
+          - gatsby
+          - nest
+          - next-yarn
+          - nuxt
+          - remix-indie
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v2
