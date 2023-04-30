@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:1
+# syntax = docker/dockerfile:1.4
 
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=xxx
