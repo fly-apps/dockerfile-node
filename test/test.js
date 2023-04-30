@@ -5,7 +5,6 @@ import fs from 'node:fs'
 import { expect } from 'chai'
 
 import { GDF } from '../gdf.js'
-import { execSync } from 'node:child_process'
 
 const entries = fs.readdirSync('test', { withFileTypes: true })
 
