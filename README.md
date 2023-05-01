@@ -25,3 +25,9 @@ To assis with this process, outputs of tests can be captured automatically.  Thi
 ```
 npm run test:capture
 ```
+
+Additionally, each the outputs in each test directory can be directly tested to ensure that they can be successfully built by running docker buildx directory passing in the necessary build arguments.  For example:
+
+```
+docker buildx build . --build-arg NODE_VERSION=18
+```

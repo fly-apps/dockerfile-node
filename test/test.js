@@ -5,7 +5,6 @@ import fs from 'node:fs'
 import { expect } from 'chai'
 
 import { GDF } from '../gdf.js'
-import { execSync } from 'node:child_process'
 
 const entries = fs.readdirSync('test', { withFileTypes: true })
 
@@ -52,22 +51,6 @@ describe('dockerfile-node-test', function () {
 
         expect(expectedResults).to.equal(actualResults)
       })
-
-      if (process.env.DOCKER_BUILD) {
-        it('should build docker image successfully', async function () {
-          const dockerImageName = `dockerfile-node-test-${entry.name}`
-          await new GDF().run(workdir)
-
-          // build the docker image
-          try {
-            const results = execSync(`docker buildx build -t ${dockerImageName} .`, { cwd: workdir })
-
-            expect(results.toString()).to.not.match(/\bError:.*\b/)
-          } catch (err) {
-            expect('the test to run without an exception').to.equal('but it did not') // force test to fail, i don't know a better way to do this
-          }
-        })
-      }
 
       if (pj.includes('prisma')) {
         it('should produce a docker-entrypoint', async function () {
