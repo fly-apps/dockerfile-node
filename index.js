@@ -10,6 +10,7 @@ import { GDF } from './gdf.js'
 
 // defaults for all the flags that will be saved
 const defaults = {
+  legacyPeerDeps: false,
   windows: false
 }
 
@@ -23,6 +24,7 @@ try {
 // parse command line for options
 const options = yargs((hideBin(process.argv)))
   .boolean('root')
+  .boolean('legacy-peer-deps')
   .boolean('windows')
   .parse()
 

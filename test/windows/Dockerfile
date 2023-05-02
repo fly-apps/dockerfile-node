@@ -22,7 +22,7 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link package.json package-lock.json ./
-RUN npm install --production=false
+RUN npm install --include=dev
 
 # Generate Prisma Client
 COPY --link prisma .
@@ -35,7 +35,7 @@ COPY --link . .
 RUN npm run build
 
 # Remove development dependencies
-RUN npm prune --production
+RUN npm prune --omit=dev
 
 
 # Final stage for app image

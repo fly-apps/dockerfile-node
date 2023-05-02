@@ -119,9 +119,58 @@ export class GDF {
     return this.#packager
   }
 
+  // install all dependencies in package.json
+  get packagerInstall () {
+    let install = `${this.packager} install`
+
+    if (this.devDependencies && !this.pnpm) {
+      if (this.yarn) {
+        install += ' --production=false'
+      } else {
+        install += ' --include=dev'
+      }
+    }
+
+    if (this.options.legacyPeerDeps) {
+      if (this.npm) {
+        install += ' --legacy-peer-deps'
+      } else if (this.yarn && !this.yarnVersion.startsWith('1.')) {
+        install += ' --legacy-peer-deps'
+      }
+    }
+
+    return install
+  }
+
+  // Prune development dependencies
+  get packagerPrune () {
+    let prune
+
+    if (this.yarn) {
+      prune = 'yarn install --production=true'
+
+      if (this.options.legacyPeerDeps && !this.yarnVersion.startsWith('1.')) {
+        prune += ' --legacy-peer-deps'
+      }
+    } else if (this.pnpm) {
+      prune = 'pnpm prune --prod'
+    } else {
+      prune = 'npm prune --omit=dev'
+
+      if (this.options.legacyPeerDeps) prune += ' --legacy-peer-deps'
+    }
+
+    return prune
+  }
+
   // Is the packager yarn?
   get yarn () {
     return this.packager === 'yarn'
+  }
+
+  // Is the packager npm?
+  get npm () {
+    return this.packager === 'npm'
   }
 
   // Is the packager pnpm?

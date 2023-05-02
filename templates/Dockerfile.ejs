@@ -31,7 +31,7 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link <%= packageFiles.join(' ') %> ./
-RUN <%= packager %> install<% if (devDependencies) { %> --production=false<% } %>
+RUN <%= packagerInstall %>
 
 <% if (prisma) { -%>
 # Generate Prisma Client
@@ -49,11 +49,7 @@ RUN <%= packager %> run build
 <% } -%>
 <% if (devDependencies && !nestjs) { -%>
 # Remove development dependencies
-<% if (yarn) { -%>
-RUN yarn install --production=true
-<% } else { -%>
-RUN npm prune --production
-<% } -%>
+RUN <%= packagerPrune %>
 
 <% } -%>
 

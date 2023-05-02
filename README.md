@@ -17,7 +17,8 @@ npx @flydotio/dockerfile
 
 ### Options:
 
-* `--windows` - make Dockerfile work for Windows users that may have set `git config --global core.autocrlf true`
+* `--legacy-peer-deps` - [ignore peer dependencies](https://docs.npmjs.com/cli/v7/using-npm/config#legacy-peer-deps).
+* `--windows` - make Dockerfile work for Windows users that may have set `git config --global core.autocrlf true`.
 
 ## Testing
 
