@@ -20,8 +20,11 @@ describe('dockerfile-node-test', function () {
 
       fs.cpSync(path.join('test', entry.name), workdir, { recursive: true })
 
+      const pj = fs.readFileSync(path.join('test', entry.name, 'package.json'), 'utf-8')
+      const options =JSON.parse(pj).dockerfile || {}
+
       it('should produce a dockerfile', async function () {
-        await new GDF().run(workdir)
+        await new GDF().run(workdir, options)
 
         const actualResults = fs.readFileSync(path.join(workdir, 'Dockerfile'), 'utf-8')
           .replaceAll(/^(ARG\s+\w+\s*=).*?(\s*\\?)$/gm, '$1xxx$2')
@@ -36,10 +39,8 @@ describe('dockerfile-node-test', function () {
         expect(expectedResults).to.equal(actualResults)
       })
 
-      const pj = fs.readFileSync(path.join('test', entry.name, 'package.json'), 'utf-8')
-
       it('should produce a .dockerignore', async function () {
-        await new GDF().run(workdir)
+        await new GDF().run(workdir, options)
 
         const actualResults = fs.readFileSync(path.join(workdir, '.dockerignore'), 'utf-8')
 
@@ -54,7 +55,7 @@ describe('dockerfile-node-test', function () {
 
       if (pj.includes('prisma')) {
         it('should produce a docker-entrypoint', async function () {
-          await new GDF().run(workdir)
+          await new GDF().run(workdir, options)
 
           const actualResults = fs.readFileSync(path.join(workdir, 'docker-entrypoint'), 'utf-8')
 

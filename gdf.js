@@ -191,12 +191,12 @@ export class GDF {
     const stat = fs.statSync(entrypoint, { throwIfNoEntry: false })
     if (!stat) return fixups
 
-    if (this.options.windows || stat.mode & fs.constants.S_IXUSR) {
-      fixups.push('chmod +x ./docker-entrypoint.sh')
+    if (this.options.windows || !(stat.mode & fs.constants.S_IXUSR)) {
+      fixups.push('chmod +x ./docker-entrypoint')
     }
 
-    if (this.options.windows || fs.readFileSync(entrypoint, 'utf-8').includes('\n')) {
-      fixups.push('sed -i "s/\\r$//g" ./docker-entrypoint.sh')
+    if (this.options.windows || fs.readFileSync(entrypoint, 'utf-8').includes('\r')) {
+      fixups.push('sed -i "s/\\r$//g" ./docker-entrypoint')
     }
 
     return fixups

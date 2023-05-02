@@ -44,10 +44,6 @@ FROM base
 # Copy built application
 COPY --from=build /app /app
 
-# Adjust entrypoint to be executable on Linux
-RUN chmod +x ./docker-entrypoint.sh && \
-    sed -i "s/\r$//g" ./docker-entrypoint.sh
-
 # Entrypoint prepares the database.
 ENTRYPOINT [ "/app/docker-entrypoint" ]
 
