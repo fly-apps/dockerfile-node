@@ -66,13 +66,17 @@ RUN addgroup --system --gid 1001 nodejs && \
 USER <%= user %>:nodejs
 
 <% } -%>
-<% if (prisma) { -%>
+<% if (entrypoint) { -%>
 <% if (entrypointFixups.length) { -%>
 # Adjust entrypoint to be executable on Linux
 RUN <%- entrypointFixups.join(' && \\\n    ') %>
 
 <% } -%>
+<% if (prisma) { -%>
 # Entrypoint prepares the database.
+<% } else { -%>
+# Entrypoint sets up the container.
+<% } -%>
 ENTRYPOINT [ "/app/docker-entrypoint" ]
 
 <% } -%>

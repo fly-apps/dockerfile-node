@@ -230,6 +230,11 @@ export class GDF {
     }
   }
 
+  // Does this Dockerfile need an entrypoint script?
+  get entrypoint () {
+    return this.prisma || this.options.swap
+  }
+
   // determine if the entrypoint needs to be adjusted to run on Linux
   // generally only needed when developing on windows
   get entrypointFixups () {
@@ -269,7 +274,7 @@ export class GDF {
 
     // select and render templates
     const templates = ['Dockerfile.ejs']
-    if (this.prisma) templates.unshift('docker-entrypoint.ejs')
+    if (this.entrypoint) templates.unshift('docker-entrypoint.ejs')
 
     for (const template of templates) {
       const dest = await this.#writeTemplateFile(template)

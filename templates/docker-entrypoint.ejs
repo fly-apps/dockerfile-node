@@ -1,8 +1,20 @@
 #!/bin/bash -e
 
+<% if (options.swap) { -%>
+# allocate swap space
+fallocate -l <%= options.swap %> /swapfile
+chmod 0600 /swapfile
+mkswap /swapfile
+echo 10 > /proc/sys/vm/swappiness
+swapon /swapfile
+echo 1 > /proc/sys/vm/overcommit_memory
+
+<% } -%>
+<% if (prisma) { -%>
 # If running the web server then migrate existing database
 if [ "${*}" == "{{ .packager }} run start" ]; then
   npx prisma migrate deploy
 fi
 
+<% } -%>
 exec "${@}"
