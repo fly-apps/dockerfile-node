@@ -21,7 +21,7 @@ describe('dockerfile-node-test', function () {
       fs.cpSync(path.join('test', entry.name), workdir, { recursive: true })
 
       const pj = fs.readFileSync(path.join('test', entry.name, 'package.json'), 'utf-8')
-      const options =JSON.parse(pj).dockerfile || {}
+      const options = JSON.parse(pj).dockerfile || {}
 
       it('should produce a dockerfile', async function () {
         await new GDF().run(workdir, options)
