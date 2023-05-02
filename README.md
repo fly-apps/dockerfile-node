@@ -1,4 +1,4 @@
-[![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](https://github.com/mkenney/software-guides/blob/master/STABILITY-BADGES.md#experimental)
+[![stability-alpha](https://img.shields.io/badge/stability-alpha-f4d03f.svg)](https://github.com/mkenney/software-guides/blob/master/STABILITY-BADGES.md#alpha)
 
 ## Overview
 
@@ -10,10 +10,27 @@ See [blog post](https://fly.io/blog/flydotio-heart-js/) for more information.
 
 ## Usage
 
+To run once:
+
 ```
-npx @flydotio/dockerfile
+npx --yes @flydotio/dockerfile@latest
 ```
 
+Or install it with your favorite package manager:
+
+```
+npm install @flydotio/dockerfile --save-dev
+pnpm add -D @flydotio/dockerfile
+yarn add @flydotio/dockerfile --dev
+```
+
+Once installed, you can run and re-run using:
+
+```
+npx dockerfile
+```
+
+Options are saved between runs into `package.json`. To invert a boolean options, add or remove a no- prefix from the option name.
 
 ### Options:
 
