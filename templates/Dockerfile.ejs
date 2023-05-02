@@ -71,6 +71,11 @@ USER <%= user %>:nodejs
 
 <% } -%>
 <% if (prisma) { -%>
+<% if (entrypointFixups.length) { -%>
+# Adjust entrypoint to be executable on Linux
+RUN <%- entrypointFixups.join(' && \\\n    ') %>
+
+<% } -%>
 # Entrypoint prepares the database.
 ENTRYPOINT [ "/app/docker-entrypoint" ]
 

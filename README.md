@@ -14,6 +14,11 @@ See [blog post](https://fly.io/blog/flydotio-heart-js/) for more information.
 npx @flydotio/dockerfile
 ```
 
+
+### Options:
+
+* `--windows` - make Dockerfile work for Windows users that may have set `git config --global core.autocrlf true`
+
 ## Testing
 
 A single invocation of `npm test` will run all of the tests defined.  Additionally `npm run eslint` will run eslint.

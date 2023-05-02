@@ -181,6 +181,27 @@ export class GDF {
     }
   }
 
+  // determine if the entrypoint needs to be adjusted to run on Linux
+  // generally only needed when developing on windows
+  get entrypointFixups () {
+    const fixups = []
+
+    const entrypoint = path.join(this.#appdir, 'docker-entrypoint')
+
+    const stat = fs.statSync(entrypoint, { throwIfNoEntry: false })
+    if (!stat) return fixups
+
+    if (this.options.windows || stat.mode & fs.constants.S_IXUSR) {
+      fixups.push('chmod +x ./docker-entrypoint.sh')
+    }
+
+    if (this.options.windows || fs.readFileSync(entrypoint, 'utf-8').includes('\n')) {
+      fixups.push('sed -i "s/\\r$//g" ./docker-entrypoint.sh')
+    }
+
+    return fixups
+  }
+
   // Port to be used
   get port () {
     let port = 3000
