@@ -7,7 +7,7 @@ import { execSync } from 'node:child_process'
 
 import * as ejs from 'ejs'
 import chalk from 'chalk'
-import * as Diff from 'diff'
+import * as Diff from 'jsdiff'
 import * as readline from 'node:readline'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
