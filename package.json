@@ -1,6 +1,6 @@
 {
   "name": "@flydotio/dockerfile",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Dockerfile generator",
   "main": "./index.js",
   "bin": {
@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "chalk": "^5.2.0",
+    "diff": "^5.1.0",
     "ejs": "^3.1.9",
-    "jsdiff": "^1.1.1",
     "yargs": "^17.7.1"
   },
   "repository": {

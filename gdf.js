@@ -7,7 +7,7 @@ import { execSync } from 'node:child_process'
 
 import * as ejs from 'ejs'
 import chalk from 'chalk'
-import * as Diff from 'jsdiff'
+import * as Diff from 'diff'
 import * as readline from 'node:readline'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
@@ -351,7 +351,6 @@ export class GDF {
 
           case 'n':
             console.log(`${chalk.bold.yellow('skip'.padStart(11, ' '))}  ${name}`)
-            fs.writeFileSync(dest, proposed)
             return dest
 
           case 'q':
