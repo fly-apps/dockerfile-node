@@ -319,56 +319,62 @@ export class GDF {
         return dest
       }
 
+      let prompt
       let question
 
-      if (this.#answer !== 'a') {
-        console.log(`${chalk.bold.red('conflict'.padStart(11))}  ${name}`)
+      try {
+        if (this.#answer !== 'a') {
+          console.log(`${chalk.bold.red('conflict'.padStart(11))}  ${name}`)
 
-        const prompt = readline.createInterface({
-          input: process.stdin,
-          output: process.stdout
-        })
-
-        // support node 16 which doesn't have a promisfied readline interface
-        question = query => {
-          return new Promise(resolve => {
-            prompt.question(query, resolve)
+          prompt = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
           })
+
+          // support node 16 which doesn't have a promisfied readline interface
+          question = query => {
+            return new Promise(resolve => {
+              prompt.question(query, resolve)
+            })
+          }
         }
-      }
 
-      while (true) {
-        if (question) {
-          this.#answer = await question(`Overwrite ${dest}? (enter "h" for help) [Ynaqdh] `)
+        while (true) {
+          if (question) {
+            this.#answer = await question(`Overwrite ${dest}? (enter "h" for help) [Ynaqdh] `)
+          }
+
+          switch (this.#answer.toLocaleLowerCase()) {
+            case '':
+            case 'y':
+            case 'a':
+              console.log(`${chalk.bold.yellow('force'.padStart(11, ' '))}  ${name}`)
+              fs.writeFileSync(dest, proposed)
+              return dest
+
+            case 'n':
+              console.log(`${chalk.bold.yellow('skip'.padStart(11, ' '))}  ${name}`)
+              return dest
+
+            case 'q':
+              process.exit(0)
+              break
+
+            case 'd':
+              console.log(Diff.createPatch(name, current, proposed, 'current', 'proposed').trimEnd() + '\n')
+              break
+
+            default:
+              console.log('        Y - yes, overwrite')
+              console.log('        n - no, do not overwrite')
+              console.log('        a - all, overwrite this and all others')
+              console.log('        q - quit, abort')
+              console.log('        d - diff, show the differences between the old and the new')
+              console.log('        h - help, show this help')
+          }
         }
-
-        switch (this.#answer) {
-          case 'y':
-          case 'a':
-            console.log(`${chalk.bold.yellow('force'.padStart(11, ' '))}  ${name}`)
-            fs.writeFileSync(dest, proposed)
-            return dest
-
-          case 'n':
-            console.log(`${chalk.bold.yellow('skip'.padStart(11, ' '))}  ${name}`)
-            return dest
-
-          case 'q':
-            process.exit(0)
-            break
-
-          case 'd':
-            console.log(Diff.createPatch(name, current, proposed, 'current', 'proposed').trimEnd() + '\n')
-            break
-
-          default:
-            console.log('        Y - yes, overwrite')
-            console.log('        n - no, do not overwrite')
-            console.log('        a - all, overwrite this and all others')
-            console.log('        q - quit, abort')
-            console.log('        d - diff, show the differences between the old and the new')
-            console.log('        h - help, show this help')
-        }
+      } finally {
+        if (prompt) prompt.close()
       }
     } else {
       console.log(`${chalk.bold.green('create'.padStart(11, ' '))}  ${name}`)
