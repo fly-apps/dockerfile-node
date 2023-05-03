@@ -8,12 +8,12 @@ import { GDF } from '../gdf.js'
 
 const entries = fs.readdirSync('test', { withFileTypes: true })
 
-describe('dockerfile-node-test', function () {
+describe('dockerfile-node-test', function() {
   for (const entry of entries) {
     if (!entry.isDirectory()) continue
     if (!fs.existsSync(path.join('test', entry.name, 'package.json'))) continue
 
-    describe(entry.name, function () {
+    describe(entry.name, function() {
       const workdir = path.join(os.tmpdir(), entry.name)
 
       if (fs.existsSync(workdir)) fs.rmSync(workdir, { recursive: true })
@@ -24,7 +24,7 @@ describe('dockerfile-node-test', function () {
       const options = JSON.parse(pj).dockerfile || {}
       options.force = true
 
-      it('should produce a dockerfile', async function () {
+      it('should produce a dockerfile', async function() {
         await new GDF().run(workdir, options)
 
         const actualResults = fs.readFileSync(path.join(workdir, 'Dockerfile'), 'utf-8')
@@ -40,7 +40,7 @@ describe('dockerfile-node-test', function () {
         expect(expectedResults).to.equal(actualResults)
       })
 
-      it('should produce a .dockerignore', async function () {
+      it('should produce a .dockerignore', async function() {
         await new GDF().run(workdir, options)
 
         const actualResults = fs.readFileSync(path.join(workdir, '.dockerignore'), 'utf-8')
@@ -55,7 +55,7 @@ describe('dockerfile-node-test', function () {
       })
 
       if (pj.includes('prisma')) {
-        it('should produce a docker-entrypoint', async function () {
+        it('should produce a docker-entrypoint', async function() {
           await new GDF().run(workdir, options)
 
           const actualResults = fs.readFileSync(path.join(workdir, 'docker-entrypoint'), 'utf-8')
