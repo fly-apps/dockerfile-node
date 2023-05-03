@@ -6,7 +6,7 @@ import path from 'node:path'
 import { execSync } from 'node:child_process'
 
 import * as ejs from 'ejs'
-import chalk from 'Chalk'
+import chalk from 'chalk'
 import * as Diff from 'diff'
 import * as readline from 'node:readline'
 
