@@ -22,6 +22,7 @@ describe('dockerfile-node-test', function () {
 
       const pj = fs.readFileSync(path.join('test', entry.name, 'package.json'), 'utf-8')
       const options = JSON.parse(pj).dockerfile || {}
+      options.force = true
 
       it('should produce a dockerfile', async function () {
         await new GDF().run(workdir, options)

@@ -6,6 +6,9 @@ import path from 'node:path'
 import { execSync } from 'node:child_process'
 
 import * as ejs from 'ejs'
+import chalk from 'Chalk'
+import * as Diff from 'diff'
+import * as readline from 'node:readline'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
@@ -21,6 +24,9 @@ export class GDF {
 
   // which packager is used (npm, pnpm, yarn)
   #packager
+
+  // previous answer to conflict prompt
+  #answer = ''
 
   // Does this application use remix.run?
   get remix () {
@@ -272,6 +278,8 @@ export class GDF {
     this.#appdir = appdir
     this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
 
+    if (options.force) this.#answer = 'a'
+
     // select and render templates
     const templates = ['Dockerfile.ejs']
     if (this.entrypoint) templates.unshift('docker-entrypoint.ejs')
@@ -297,11 +305,76 @@ export class GDF {
     }
   }
 
+  // write template file, prompting when there is a conflict
   async #writeTemplateFile (template) {
-    const contents = await ejs.renderFile(path.join(GDF.templates, template), this)
-    const dest = path.join(this.#appdir, template.replace(/\.ejs$/m, ''))
+    const proposed = await ejs.renderFile(path.join(GDF.templates, template), this)
+    const name = template.replace(/\.ejs$/m, '')
+    const dest = path.join(this.#appdir, name)
 
-    fs.writeFileSync(dest, contents)
+    if (fs.statSync(dest, { throwIfNoEntry: false })) {
+      const current = fs.readFileSync(dest, 'utf-8')
+
+      if (current === proposed) {
+        console.log(`   ${chalk.bold.blue('identical')}  ${name}`)
+        return dest
+      }
+
+      let question
+
+      if (this.#answer !== 'a') {
+        console.log(`${chalk.bold.red('conflict'.padStart(11))}  ${name}`)
+
+        const prompt = readline.createInterface({
+          input: process.stdin,
+          output: process.stdout
+        })
+
+        // support node 16 which doesn't have a promisfied readline interface
+        question = query => {
+          return new Promise(resolve => {
+            prompt.question(query, resolve)
+          })
+        }
+      }
+
+      while (true) {
+        if (question) {
+          this.#answer = await question(`Overwrite ${dest}? (enter "h" for help) [Ynaqdh] `)
+        }
+
+        switch (this.#answer) {
+          case 'y':
+          case 'a':
+            console.log(`${chalk.bold.yellow('force'.padStart(11, ' '))}  ${name}`)
+            fs.writeFileSync(dest, proposed)
+            return dest
+
+          case 'n':
+            console.log(`${chalk.bold.yellow('skip'.padStart(11, ' '))}  ${name}`)
+            fs.writeFileSync(dest, proposed)
+            return dest
+
+          case 'q':
+            process.exit(0)
+            break
+
+          case 'd':
+            console.log(Diff.createPatch(name, current, proposed, 'current', 'proposed').trimEnd() + '\n')
+            break
+
+          default:
+            console.log('        Y - yes, overwrite')
+            console.log('        n - no, do not overwrite')
+            console.log('        a - all, overwrite this and all others')
+            console.log('        q - quit, abort')
+            console.log('        d - diff, show the differences between the old and the new')
+            console.log('        h - help, show this help')
+        }
+      }
+    } else {
+      console.log(`${chalk.bold.green('create'.padStart(11, ' '))}  ${name}`)
+      fs.writeFileSync(dest, proposed)
+    }
 
     return dest
   }
