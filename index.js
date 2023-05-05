@@ -24,9 +24,27 @@ try {
 
 // parse command line for options
 const options = yargs((hideBin(process.argv)))
-  .boolean('legacy-peer-deps')
-  .string('swap')
-  .boolean('windows')
+  .usage('$0 [args]')
+  .epilog('Options are saved between runs into package.json. more info:\n https://github.com/fly-apps/dockerfile-node#readme')
+  .option('force', {
+    describe: 'force overwrite of existing files',
+    type: 'boolean'
+  })
+  .option('legacy-peer-deps', {
+    alias: 'l',
+    describe: 'ignore peer dependencies',
+    type: 'boolean'
+  })
+  .option('swap', {
+    alias: 's',
+    describe: 'allocate swap space (eg. 1G, 1GiB, 1024M)',
+    type: 'string'
+  })
+  .option('windows', {
+    alias: 'w',
+    describe: 'make Dockerfile work for Windows users that may have set `git config --global core.autocrlf true`',
+    type: 'boolean'
+  })
   .parse()
 
 // parse and update package.json for default options
