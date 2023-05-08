@@ -162,6 +162,11 @@ export class GDF {
       }
     }
 
+    // optionally include scripts
+    if (this.options.ignoreScripts) {
+      install += ' --ignore-scripts'
+    }
+
     return install
   }
 

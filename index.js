@@ -10,6 +10,7 @@ import { GDF } from './gdf.js'
 
 // defaults for all the flags that will be saved
 const defaults = {
+  ignoreScripts: false,
   legacyPeerDeps: false,
   swap: '',
   windows: false
@@ -28,6 +29,11 @@ const options = yargs((hideBin(process.argv)))
   .epilog('Options are saved between runs into package.json. more info:\n https://github.com/fly-apps/dockerfile-node#readme')
   .option('force', {
     describe: 'force overwrite of existing files',
+    type: 'boolean'
+  })
+  .option('ignore-scripts', {
+    alias: 'i',
+    describe: 'ignore scripts',
     type: 'boolean'
   })
   .option('legacy-peer-deps', {
