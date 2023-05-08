@@ -129,6 +129,22 @@ export class GDF {
   get packagerInstall() {
     let install = `${this.packager} install`
 
+    const packageFiles = this.packageFiles
+
+    // clean install
+    if (this.packager === 'npm' && packageFiles.includes('package-lock.json')) {
+      install = 'npm ci'
+    } else if (packageFiles.includes('yarn.lock')) {
+      if (this.yarnVersion.startsWith('1.')) {
+        install += ' --frozen-lockfile'
+      } else {
+        install += ' --immutable --immutable-cache --check-cache'
+      }
+    } else if (packageFiles.includes('pnpm-lock.yaml')) {
+      install += ' --frozen-lockfile'
+    }
+
+    // optionally include dev dependencies
     if (this.devDependencies && !this.pnpm) {
       if (this.yarn) {
         install += ' --production=false'
@@ -137,6 +153,7 @@ export class GDF {
       }
     }
 
+    // optionally include legacy peer dependencies
     if (this.options.legacyPeerDeps) {
       if (this.npm) {
         install += ' --legacy-peer-deps'

@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1.4
 
 # Adjust NODE_VERSION as desired
-ARG NODE_VERSION=20.0.0
+ARG NODE_VERSION=xxx
 FROM node:${NODE_VERSION}-slim as base
 
 LABEL fly_launch_runtime="Node.js"
@@ -22,7 +22,7 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link package.json package-lock.json ./
-RUN npm install
+RUN npm ci
 
 # Copy application code
 COPY --link . .
