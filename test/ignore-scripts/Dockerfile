@@ -4,9 +4,9 @@
 ARG NODE_VERSION=xxx
 FROM node:${NODE_VERSION}-slim as base
 
-LABEL fly_launch_runtime="Remix/Prisma"
+LABEL fly_launch_runtime="Node.js"
 
-# Remix/Prisma app lives here
+# Node.js app lives here
 WORKDIR /app
 
 # Set production environment
@@ -18,21 +18,14 @@ FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential openssl 
+    apt-get install -y python-is-python3 pkg-config build-essential 
 
 # Install node modules
 COPY --link package.json package-lock.json ./
-RUN npm ci --include=dev
-
-# Generate Prisma Client
-COPY --link prisma .
-RUN npx prisma generate
+RUN npm ci --include=dev --ignore-scripts
 
 # Copy application code
 COPY --link . .
-
-# Build application
-RUN npm run build
 
 # Remove development dependencies
 RUN npm prune --omit=dev
@@ -44,9 +37,6 @@ FROM base
 # Copy built application
 COPY --from=build /app /app
 
-# Entrypoint prepares the database.
-ENTRYPOINT [ "/app/docker-entrypoint" ]
-
 # Start the server by default, this can be overwritten at runtime
-EXPOSE 8080
-CMD [ "npm", "run", "start" ]
+EXPOSE 3000
+CMD [ "npx", "fastify", "start", "--address", "0.0.0.0", "-l", "info", "app.js" ]

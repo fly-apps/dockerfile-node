@@ -22,7 +22,7 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link package.json package-lock.json ./
-RUN npm install --include=dev --legacy-peer-deps
+RUN npm ci --include=dev --legacy-peer-deps
 
 # Copy application code
 COPY --link . .
