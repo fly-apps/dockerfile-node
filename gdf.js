@@ -30,34 +30,34 @@ export class GDF {
 
   // Does this application use remix.run?
   get remix() {
-    return !!(this.#pj.dependencies.remix ||
-      this.#pj.dependencies['@remix-run/node'])
+    return !!(this.#pj.dependencies?.remix ||
+      this.#pj.dependencies?.['@remix-run/node'])
   }
 
   // Does this application use prisma?
   get prisma() {
-    return !!(this.#pj.dependencies['@prisma/client'] ||
+    return !!(this.#pj.dependencies?.['@prisma/client'] ||
       this.#pj.devDependencies?.prisma)
   }
 
   // Does this application use next.js?
   get nextjs() {
-    return !!this.#pj.dependencies.next
+    return !!this.#pj.dependencies?.next
   }
 
   // Does this application use nuxt.js?
   get nuxtjs() {
-    return !!this.#pj.dependencies.nuxt
+    return !!this.#pj.dependencies?.nuxt
   }
 
   // Does this application use gatsby?
   get gatsby() {
-    return !!this.#pj.dependencies.gatsby
+    return !!this.#pj.dependencies?.gatsby
   }
 
   // Does this application use nest?
   get nestjs() {
-    return !!this.#pj.dependencies['@nestjs/core']
+    return !!this.#pj.dependencies?.['@nestjs/core']
   }
 
   // what node version should be used?
