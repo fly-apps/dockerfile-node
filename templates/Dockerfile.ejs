@@ -12,9 +12,14 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV=production
 <% if (yarn && yarnVersion != yarnClassic) { -%>
-
 ARG YARN_VERSION=<%= yarnVersion %>
+<% if(yarnVersion.startsWith('3.')) {-%>
+# Install Yarn 3
+RUN corepack enable
+RUN yarn set version ${YARN_VERSION}
+<% } else { -%>
 RUN npm install -g yarn@$YARN_VERSION --force
+<% } -%>
 <% } else if (pnpm) { -%>
 
 ARG PNPM_VERSION=<%= pnpmVersion %>

@@ -77,11 +77,17 @@ export class GDF {
 
   // What yarn version should be used?
   get yarnVersion() {
-    try {
-      return execSync('yarn --version', { encoding: 'utf8' })
-        .match(/\d+\.\d+\.\d+/)?.[0] || this.yarnClassic
-    } catch {
-      return this.yarnClassic
+    const version = this.#pj.packageManager?.match(/(\d+\.\d+\.\d+)/)?.[0] // Should return something like "1.22.10"
+
+    if (version !== undefined) {
+      return version
+    } else {
+      try {
+        return execSync('yarn --version', { encoding: 'utf8' })
+          .match(/\d+\.\d+\.\d+/)?.[0] || this.yarnClassic
+      } catch {
+        return this.yarnClassic
+      }
     }
   }
 
@@ -137,8 +143,11 @@ export class GDF {
     } else if (packageFiles.includes('yarn.lock')) {
       if (this.yarnVersion.startsWith('1.')) {
         install += ' --frozen-lockfile'
-      } else {
+      } else if (this.yarnVersion.startsWith('2.')) {
         install += ' --immutable --immutable-cache --check-cache'
+      } else {
+        // yarn 3+
+        install += ' --immutable'
       }
     } else if (packageFiles.includes('pnpm-lock.yaml')) {
       install += ' --frozen-lockfile'
