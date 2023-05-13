@@ -28,6 +28,7 @@ jobs:
           - gatsby
           - nest
           - next-yarn
+          - next-yarn3
           - nuxt
           - remix-indie
     steps:
