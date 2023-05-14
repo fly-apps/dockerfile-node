@@ -346,7 +346,7 @@ export class GDF {
       const current = fs.readFileSync(dest, 'utf-8')
 
       if (current === proposed) {
-        console.log(`   ${chalk.bold.blue('identical')}  ${name}`)
+        console.log(`${chalk.bold.blue('identitcal'.padStart(11))}  ${name}`)
         return dest
       }
 
