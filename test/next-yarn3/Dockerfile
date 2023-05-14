@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1.4
 
 # Adjust NODE_VERSION as desired
-ARG NODE_VERSION=18.13.0
+ARG NODE_VERSION=xxx
 FROM node:${NODE_VERSION}-slim as base
 
 LABEL fly_launch_runtime="Next.js"
@@ -11,10 +11,11 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV=production
-ARG YARN_VERSION=3.5.1
+ARG YARN_VERSION=xxx
+
 # Install Yarn 3
-RUN corepack enable
-RUN yarn set version ${YARN_VERSION}
+RUN corepack enable && \
+    yarn set version ${YARN_VERSION}
 
 
 # Throw-away build stage to reduce size of final image

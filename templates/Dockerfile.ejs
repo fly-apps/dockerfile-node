@@ -14,9 +14,10 @@ ENV NODE_ENV=production
 <% if (yarn && yarnVersion != yarnClassic) { -%>
 ARG YARN_VERSION=<%= yarnVersion %>
 <% if(yarnVersion.startsWith('3.')) {-%>
+
 # Install Yarn 3
-RUN corepack enable
-RUN yarn set version ${YARN_VERSION}
+RUN corepack enable && \
+    yarn set version ${YARN_VERSION}
 <% } else { -%>
 RUN npm install -g yarn@$YARN_VERSION --force
 <% } -%>
