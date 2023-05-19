@@ -26,7 +26,7 @@ describe('dockerfile-node-test', function() {
       options.force = true
 
       it('should produce a dockerfile', async function() {
-        await new GDF().run(workdir, {...defaults, ...options})
+        await new GDF().run(workdir, { ...defaults, ...options })
 
         const actualResults = fs.readFileSync(path.join(workdir, 'Dockerfile'), 'utf-8')
           .replaceAll(/^(ARG\s+\w+\s*=).*?(\s*\\?)$/gm, '$1xxx$2')
