@@ -36,17 +36,17 @@ RUN apt-get update -qq && \
     if (prisma) { %>openssl <% } %>
 
 # Install node modules
-COPY --link <%= packageFiles.join(' ') %> ./
+COPY<% if (options.link) { %> --link<% } %> <%= packageFiles.join(' ') %> ./
 RUN <%= packagerInstall %>
 
 <% if (prisma) { -%>
 # Generate Prisma Client
-COPY --link prisma .
+COPY<% if (options.link) { %> --link<% } %> prisma .
 RUN npx prisma generate
 
 <% } -%>
 # Copy application code
-COPY --link . .
+COPY<% if (options.link) { %> --link<% } %> . .
 
 <% if (build) { -%>
 # Build application

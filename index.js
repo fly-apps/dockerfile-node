@@ -9,9 +9,10 @@ import { hideBin } from 'yargs/helpers'
 import { GDF } from './gdf.js'
 
 // defaults for all the flags that will be saved
-const defaults = {
+export const defaults = {
   ignoreScripts: false,
   legacyPeerDeps: false,
+  link: true,
   swap: '',
   windows: false
 }
@@ -37,8 +38,11 @@ const options = yargs((hideBin(process.argv)))
     type: 'boolean'
   })
   .option('legacy-peer-deps', {
-    alias: 'l',
     describe: 'ignore peer dependencies',
+    type: 'boolean'
+  })
+  .option('link', {
+    describe: 'use COPY --link whenever possible',
     type: 'boolean'
   })
   .option('swap', {
