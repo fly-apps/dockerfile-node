@@ -10,6 +10,7 @@ import { GDF } from './gdf.js'
 
 // defaults for all the flags that will be saved
 export const defaults = {
+  distroless: false,
   ignoreScripts: false,
   legacyPeerDeps: false,
   link: true,
@@ -28,6 +29,10 @@ try {
 const options = yargs((hideBin(process.argv)))
   .usage('$0 [args]')
   .epilog('Options are saved between runs into package.json. more info:\n https://github.com/fly-apps/dockerfile-node#readme')
+  .option('distroless', {
+    describe: 'use base image from gcr.io/distroless',
+    type: 'boolean'
+  })
   .option('force', {
     describe: 'force overwrite of existing files',
     type: 'boolean'

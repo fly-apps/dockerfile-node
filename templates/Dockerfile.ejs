@@ -1,11 +1,13 @@
 # syntax = docker/dockerfile:1
 
 # Adjust NODE_VERSION as desired
-ARG NODE_VERSION=<%= nodeVersion %>
-FROM node:${NODE_VERSION}-slim as base
+ARG NODE_VERSION=<%= distroless ? parseInt(nodeVersion) : nodeVersion %>
+FROM node:${NODE_VERSION}-slim as <% if (distroless) { -%>build<% } else { %>base<% } %>
 
+<% if (!distroless) { -%>
 LABEL fly_launch_runtime="<%= runtime %>"
 
+<% } -%>
 # <%= runtime %> app lives here
 WORKDIR /app
 
@@ -26,10 +28,12 @@ RUN npm install -g yarn@$YARN_VERSION --force
 ARG PNPM_VERSION=<%= pnpmVersion %>
 RUN npm install -g pnpm@$PNPM_VERSION
 <% } %>
+<% if (!distroless) { -%>
 
 # Throw-away build stage to reduce size of final image
 FROM base as build
 
+<% } -%>
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
     apt-get install -y <%= python %> pkg-config build-essential <%
@@ -60,7 +64,19 @@ RUN <%= packagerPrune %>
 <% } -%>
 
 # Final stage for app image
+<% if (distroless) { -%>
+FROM gcr.io/distroless/nodejs${NODE_VERSION}
+
+LABEL fly_launch_runtime="<%= runtime %>"
+
+# <%= runtime %> app lives here
+WORKDIR /app
+
+# Set production environment
+ENV NODE_ENV=production
+<% } else { -%>
 FROM base
+<% } -%>
 
 # Copy built application
 COPY --from=build /app /app

@@ -3,12 +3,13 @@
 import fs from 'node:fs'
 import url from 'node:url'
 import path from 'node:path'
+import * as readline from 'node:readline'
 import { execSync } from 'node:child_process'
 
 import * as ejs from 'ejs'
 import chalk from 'chalk'
 import * as Diff from 'diff'
-import * as readline from 'node:readline'
+import * as ShellQuote from 'shell-quote'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
@@ -64,12 +65,7 @@ export class GDF {
   get nodeVersion() {
     const ltsVersion = '18.16.0'
 
-    try {
-      return execSync('node -v', { encoding: 'utf8' })
-        .match(/\d+\.\d+\.\d+/)?.[0] || ltsVersion
-    } catch {
-      return ltsVersion
-    }
+    return process.version.match(/\d+\.\d+\.\d+/)?.[0] || ltsVersion
   }
 
   // classic version of yarn (installed by default)
@@ -99,6 +95,16 @@ export class GDF {
     } catch {
       return 'latest'
     }
+  }
+
+  // Use gcr.io distroless base image?
+  get distroless() {
+    if (!this.options.distroless) return false
+
+    if (this.entrypoint) return false
+
+    const version = parseInt(this.nodeVersion)
+    return (version >= 16) && ((version & 1) === 0)
   }
 
   // List of package files needed to install
@@ -251,6 +257,13 @@ export class GDF {
 
   // command to start the web server
   get startCommand() {
+    if (this.options.distroless) {
+      const start = this.#pj.scripts.start
+      const parsed = ShellQuote.parse(start)
+      if (parsed[0] === 'node') parsed.shift()
+      return parsed
+    }
+
     if (this.gatsby) {
       return ['npx', 'gatsby', 'serve', '-H', '0.0.0.0']
     } else if (this.runtime === 'Node.js' && this.#pj.scripts?.start?.includes('fastify')) {
