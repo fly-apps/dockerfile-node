@@ -34,6 +34,7 @@ Options are saved between runs into `package.json`. To invert a boolean options,
 
 ### Options:
 
+* `--distroless` - use [distroless](https://github.com/GoogleContainerTools/distroless) base image to reduce image size
 * `--ignore-scripts` - do not execute any scripts defined in the project `package.json` and its dependencies.
 * `--force` - overwrite existing files
 * `--legacy-peer-deps` - [ignore peer dependencies](https://docs.npmjs.com/cli/v7/using-npm/config#legacy-peer-deps).
