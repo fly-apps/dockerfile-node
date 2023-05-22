@@ -12,7 +12,7 @@ echo 1 > /proc/sys/vm/overcommit_memory
 <% } -%>
 <% if (prisma) { -%>
 # If running the web server then migrate existing database
-if [ "${*}" == "{{ .packager }} run start" ]; then
+if [ "${*}" == "<%= packager %> run start" ]; then
   npx prisma migrate deploy
 fi
 
