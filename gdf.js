@@ -320,7 +320,12 @@ export class GDF {
   async run(appdir, options = {}) {
     this.options = options
     this.#appdir = appdir
-    this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
+    try {
+      this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
+    } catch (e) {
+      console.log(`${chalk.bold.red('[ERROR]')} Could not read package.json ${chalk.bold.italic(e.message)}`)
+      process.exit(1)
+    }
 
     if (options.force) this.#answer = 'a'
 
