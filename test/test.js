@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import { expect } from 'chai'
 
 import { GDF } from '../gdf.js'
-import { defaults } from '../index.js'
+import { defaults } from '../commands.js'
 
 const entries = fs.readdirSync('test', { withFileTypes: true })
 
