@@ -13,7 +13,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
   for (const entry of fs.readdirSync(path.join('test', group.name), { withFileTypes: true })) {
     if (!fs.existsSync(path.join('test', group.name, entry.name, 'package.json'))) continue
 
-    describe(entry.name, function () {
+    describe(entry.name, function() {
       const workdir = path.join(os.tmpdir(), group.name, entry.name)
       const testdir = path.join('test', group.name, entry.name)
 
@@ -25,7 +25,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
       const options = JSON.parse(pj).dockerfile || {}
       options.force = true
 
-      it('should produce a dockerfile', async function () {
+      it('should produce a dockerfile', async function() {
         await new GDF().run(workdir, { ...defaults, ...options })
 
         const actualResults = fs.readFileSync(path.join(workdir, 'Dockerfile'), 'utf-8')
@@ -41,7 +41,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
         expect(expectedResults).to.equal(actualResults)
       })
 
-      it('should produce a .dockerignore', async function () {
+      it('should produce a .dockerignore', async function() {
         await new GDF().run(workdir, options)
 
         const actualResults = fs.readFileSync(path.join(workdir, '.dockerignore'), 'utf-8')
@@ -56,7 +56,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
       })
 
       if (pj.includes('prisma')) {
-        it('should produce a docker-entrypoint', async function () {
+        it('should produce a docker-entrypoint', async function() {
           await new GDF().run(workdir, options)
 
           const actualResults = fs.readFileSync(path.join(workdir, 'docker-entrypoint'), 'utf-8')
