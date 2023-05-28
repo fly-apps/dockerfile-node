@@ -112,7 +112,7 @@ export class GDF {
     const result = ['package.json']
 
     for (const file of ['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock']) {
-      if (fs.statSync(path.join(this.#appdir, file), { throwIfNoEntry: false })) {
+      if (fs.existsSync(path.join(this.#appdir, file))) {
         result.push(file)
       }
     }
@@ -337,9 +337,7 @@ export class GDF {
     }
 
     // ensure that there is a dockerignore file
-    try {
-      fs.statSync(path.join(appdir, '.dockerignore'))
-    } catch {
+    if (!fs.existsSync(path.join(appdir, '.dockerignore'))) {
       try {
         fs.copyFileSync(
           path.join(appdir, '.gitignore'),
@@ -357,7 +355,7 @@ export class GDF {
     const name = template.replace(/\.ejs$/m, '')
     const dest = path.join(this.#appdir, name)
 
-    if (fs.statSync(dest, { throwIfNoEntry: false })) {
+    if (fs.existsSync(dest)) {
       const current = fs.readFileSync(dest, 'utf-8')
 
       if (current === proposed) {
