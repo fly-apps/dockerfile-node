@@ -2,6 +2,7 @@
 
 import fs from 'node:fs'
 import process from 'node:process'
+import url from 'node:url'
 
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -92,4 +93,6 @@ if (pj) {
 }
 
 // generate dockerfile and related artifacts
-new GDF().run(process.cwd(), { ...defaults, ...options })
+if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
+  new GDF().run(process.cwd(), { ...defaults, ...options })
+}
