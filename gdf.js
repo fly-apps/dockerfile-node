@@ -308,6 +308,8 @@ export class GDF {
 
   // Port to be used
   get port() {
+    if (this.options.port) return this.options.port
+
     let port = 3000
 
     if (this.gatsby) port = 8080

@@ -14,6 +14,7 @@ export const defaults = {
   ignoreScripts: false,
   legacyPeerDeps: false,
   link: true,
+  port: 0,
   swap: '',
   windows: false
 }
@@ -49,6 +50,10 @@ const options = yargs((hideBin(process.argv)))
   .option('link', {
     describe: 'use COPY --link whenever possible',
     type: 'boolean'
+  })
+  .option('port', {
+    describe: 'expose port',
+    type: 'integer'
   })
   .option('swap', {
     alias: 's',
