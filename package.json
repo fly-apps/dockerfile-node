@@ -10,7 +10,7 @@
   "scripts": {
     "eslint": "eslint .",
     "eslint:fix": "eslint --fix .",
-    "test": "mocha",
+    "test": "mocha  --spec test/test.js",
     "test:capture": "TEST_CAPTURE=1 mocha"
   },
   "author": "Sam Ruby",
