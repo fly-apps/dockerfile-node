@@ -2,7 +2,6 @@
 
 import fs from 'node:fs'
 import process from 'node:process'
-import url from 'node:url'
 
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
