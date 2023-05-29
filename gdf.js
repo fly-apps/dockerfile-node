@@ -76,7 +76,7 @@ export class GDF {
   // Does this application use sqlite3?
   get sqlite3() {
     return !!this.#pj.dependencies?.sqlite3 ||
-      !!this.#pj.dependencies['better-sqlite3']
+      !!this.#pj.dependencies?.['better-sqlite3']
   }
 
   // what node version should be used?
