@@ -8,6 +8,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { GDF } from './gdf.js'
+import './fly.js'
 
 // defaults for all the flags that will be saved
 export const defaults = {

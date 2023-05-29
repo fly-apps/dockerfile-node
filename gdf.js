@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import fs from 'node:fs'
 import url from 'node:url'
 import path from 'node:path'
@@ -16,9 +14,23 @@ const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 // Generate Dockerfile class
 export class GDF {
   static templates = path.join(__dirname, 'templates')
+  static runners = []
+
+  // enable geneator to be extended via mixins
+  static extend(mixin) {
+    const descriptors = Object.getOwnPropertyDescriptors(mixin.prototype)
+
+    for (const [method, descriptor] of Object.entries(descriptors)) {
+      if (method === 'run') {
+        this.runners.push(descriptor.value)
+      } else if (method !== 'constructor') {
+        Object.defineProperty(this.prototype, method, descriptor)
+      }
+    }
+  }
 
   // Where the app is.  Used both for scanning and is updated with new files.
-  #appdir
+  _appdir = null
 
   // Parsed package.json file contents.
   #pj
@@ -59,6 +71,12 @@ export class GDF {
   // Does this application use nest?
   get nestjs() {
     return !!this.#pj.dependencies?.['@nestjs/core']
+  }
+
+  // Does this application use sqlite3?
+  get sqlite3() {
+    return !!this.#pj.dependencies?.sqlite3 ||
+      !!this.#pj.dependencies['better-sqlite3']
   }
 
   // what node version should be used?
@@ -112,7 +130,7 @@ export class GDF {
     const result = ['package.json']
 
     for (const file of ['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock']) {
-      if (fs.existsSync(path.join(this.#appdir, file))) {
+      if (fs.existsSync(path.join(this._appdir, file))) {
         result.push(file)
       }
     }
@@ -290,7 +308,7 @@ export class GDF {
   get entrypointFixups() {
     const fixups = []
 
-    const entrypoint = path.join(this.#appdir, 'docker-entrypoint')
+    const entrypoint = path.join(this._appdir, 'docker-entrypoint')
 
     const stat = fs.statSync(entrypoint, { throwIfNoEntry: false })
     if (!stat) return fixups
@@ -321,7 +339,7 @@ export class GDF {
   // render each template and write to the destination dir
   async run(appdir, options = {}) {
     this.options = options
-    this.#appdir = appdir
+    this._appdir = appdir
     this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
 
     if (options.force) this.#answer = 'a'
@@ -347,19 +365,24 @@ export class GDF {
         await this.#writeTemplateFile('.dockerignore.ejs')
       }
     }
+
+    // run mixin runners
+    for (let runner of GDF.runners) {
+      runner.apply(this);
+    }
   }
 
   // write template file, prompting when there is a conflict
   async #writeTemplateFile(template) {
     const proposed = await ejs.renderFile(path.join(GDF.templates, template), this)
     const name = template.replace(/\.ejs$/m, '')
-    const dest = path.join(this.#appdir, name)
+    const dest = path.join(this._appdir, name)
 
     if (fs.existsSync(dest)) {
       const current = fs.readFileSync(dest, 'utf-8')
 
       if (current === proposed) {
-        console.log(`${chalk.bold.blue('identitcal'.padStart(11))}  ${name}`)
+        console.log(`${chalk.bold.blue('identical'.padStart(11))}  ${name}`)
         return dest
       }
 

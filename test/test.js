@@ -13,7 +13,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
   for (const entry of fs.readdirSync(path.join('test', group.name), { withFileTypes: true })) {
     if (!fs.existsSync(path.join('test', group.name, entry.name, 'package.json'))) continue
 
-    describe(entry.name, function() {
+    describe(`${group.name}: ${entry.name}`, function() {
       const workdir = path.join(os.tmpdir(), group.name, entry.name)
       const testdir = path.join('test', group.name, entry.name)
 
@@ -55,7 +55,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
         expect(expectedResults).to.equal(actualResults)
       })
 
-      if (pj.includes('prisma')) {
+      if (fs.existsSync(path.join(testdir, 'docker-entrypoint'))) {
         it('should produce a docker-entrypoint', async function() {
           await new GDF().run(workdir, options)
 
@@ -66,6 +66,24 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
           }
 
           const expectedResults = fs.readFileSync(path.join(testdir, 'docker-entrypoint'), 'utf-8')
+
+          expect(expectedResults).to.equal(actualResults)
+        })
+      }
+
+      if (fs.existsSync(path.join(testdir, 'fly.toml'))) {
+        it('should produce a fly.toml', async function() {
+          let expectedResults = fs.readFileSync(path.join(testdir, 'fly.toml'), 'utf-8')
+          fs.writeFileSync(path.join(workdir, 'fly.toml'), '')
+
+          await new GDF().run(workdir, options)
+
+          const actualResults = fs.readFileSync(path.join(workdir, 'fly.toml'), 'utf-8')
+
+          if (process.env.TEST_CAPTURE) {
+            fs.writeFileSync(path.join(testdir, 'fly.toml'), actualResults)
+            expectedResults = actualResults
+          }
 
           expect(expectedResults).to.equal(actualResults)
         })
