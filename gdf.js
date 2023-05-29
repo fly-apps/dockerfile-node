@@ -9,6 +9,17 @@ import chalk from 'chalk'
 import * as Diff from 'diff'
 import * as ShellQuote from 'shell-quote'
 
+// defaults for all the flags that will be saved
+export const defaults = {
+  distroless: false,
+  ignoreScripts: false,
+  legacyPeerDeps: false,
+  link: true,
+  port: 0,
+  swap: '',
+  windows: false
+}
+
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
 // Generate Dockerfile class

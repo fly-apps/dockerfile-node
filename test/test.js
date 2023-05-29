@@ -4,8 +4,8 @@ import fs from 'node:fs'
 
 import { expect } from 'chai'
 
-import { GDF } from '../gdf.js'
-import { defaults } from '../index.js'
+import { GDF, defaults } from '../gdf.js'
+import '../fly.js'
 
 for (const group of fs.readdirSync('test', { withFileTypes: true })) {
   if (!group.isDirectory()) continue

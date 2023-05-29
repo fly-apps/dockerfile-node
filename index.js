@@ -7,19 +7,8 @@ import url from 'node:url'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { GDF } from './gdf.js'
+import { GDF, defaults } from './gdf.js'
 import './fly.js'
-
-// defaults for all the flags that will be saved
-export const defaults = {
-  distroless: false,
-  ignoreScripts: false,
-  legacyPeerDeps: false,
-  link: true,
-  port: 0,
-  swap: '',
-  windows: false
-}
 
 // read previous values from package.json
 let pj = null
@@ -93,8 +82,4 @@ if (pj) {
   }
 }
 
-// generate dockerfile and related artifacts
-// if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
-if (process.argv[1].endsWith('/dockerfile')) {
-  new GDF().run(process.cwd(), { ...defaults, ...options })
-}
+new GDF().run(process.cwd(), { ...defaults, ...options })
