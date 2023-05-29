@@ -94,6 +94,7 @@ if (pj) {
 }
 
 // generate dockerfile and related artifacts
-if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
+// if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
+if (process.argv[1].endsWith('/dockerfile')) {
   new GDF().run(process.cwd(), { ...defaults, ...options })
 }
