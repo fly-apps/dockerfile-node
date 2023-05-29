@@ -367,8 +367,8 @@ export class GDF {
     }
 
     // run mixin runners
-    for (let runner of GDF.runners) {
-      runner.apply(this);
+    for (const runner of GDF.runners) {
+      runner.apply(this)
     }
   }
 
