@@ -289,7 +289,6 @@ export class GDF {
     if (this.options.distroless) {
       const start = this.#pj.scripts.start
       const parsed = ShellQuote.parse(start)
-      if (parsed[0] === 'node') parsed.shift()
       return parsed
     }
 
@@ -333,6 +332,16 @@ export class GDF {
     }
 
     return fixups
+  }
+
+  // Tabs vs spaces
+  get usingTabs() {
+    return this.remix
+  }
+
+  // ESM vs CJS
+  get typeModule() {
+    return this.#pj.type === 'module'
   }
 
   // Port to be used

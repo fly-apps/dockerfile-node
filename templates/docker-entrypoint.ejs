@@ -1,20 +1,49 @@
-#!/bin/bash -e
+#!/usr/bin/env node
+<% tab = n => (usingTabs ? "\t" : "  ").repeat(n) -%>
 
+<% if (typeModule) { -%>
+import { spawn } from 'node:child_process'
 <% if (options.swap) { -%>
-# allocate swap space
-fallocate -l <%= options.swap %> /swapfile
-chmod 0600 /swapfile
-mkswap /swapfile
-echo 10 > /proc/sys/vm/swappiness
-swapon /swapfile
-echo 1 > /proc/sys/vm/overcommit_memory
+import { writeFileSync } from 'node:fs'
+<% } -%>
+<% } else { -%>
+const { spawn } = require('node:child_process')
+<% if (options.swap) { -%>
+const { writeFileSync } = require('node:fs')
+<% } -%>
+<% } -%>
+
+;(async () => {
+<% if (options.swap) { -%>
+<%= tab(1) %>// allocate swap space
+<%= tab(1) %>await exec("fallocate -l <%= options.swap %> /swapfile")
+<%= tab(1) %>await exec("chmod 0600 /swapfile")
+<%= tab(1) %>await exec("mkswap /swapfile")
+<%= tab(1) %>writeFileSync("/proc/sys/vm/swappiness", "10")
+<%= tab(1) %>await exec("swapon /swapfile")
+<%= tab(1) %>writeFileSync("/proc/sys/vm/overcommit_memory", "1")
 
 <% } -%>
 <% if (prisma) { -%>
-# If running the web server then migrate existing database
-if [ "${*}" == "<%= packager %> run start" ]; then
-  npx prisma migrate deploy
-fi
+<%= tab(1) %>// If running the web server then migrate existing database
+<%= tab(1) %>if (process.argv.slice(2).join(' ') === "<%= packager %> run start") {
+<%= tab(2) %>await exec("npx prisma migrate deploy")
+<%= tab(1) %>}
 
 <% } -%>
-exec "${@}"
+<%= tab(1) %>// launch application
+<%= tab(1) %>await exec(process.argv.slice(2).join(' '))
+})()
+
+<%= tab(0) %>function exec(command) {
+<%= tab(1) %>const child = spawn(command, { shell: true, stdio: 'inherit' })
+<%= tab(1) %>return new Promise((resolve, reject) => {
+<%= tab(2) %>child.on('exit', code => {
+<%= tab(3) %>if (code === 0) {
+<%= tab(4) %>resolve()
+<%= tab(3) %>} else {
+<%= tab(4) %>reject()
+<%= tab(3) %>}
+<%= tab(2) %>})
+<%= tab(1) %>})
+<%= tab(0) %>}

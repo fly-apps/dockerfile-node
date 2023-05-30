@@ -94,19 +94,19 @@ USER <%= user %>:nodejs
 RUN <%- entrypointFixups.join(' && \\\n    ') %>
 
 <% } -%>
+<% if (sqlite3) { -%>
+# Setup sqlite3 on a separate volume
+RUN mkdir -p /data
+VOLUME /data
+ENV DATABASE_URL="sqlite3:///data/production.sqlite3"
+
+<% } -%>
 <% if (prisma) { -%>
 # Entrypoint prepares the database.
 <% } else { -%>
 # Entrypoint sets up the container.
 <% } -%>
 ENTRYPOINT [ "/app/docker-entrypoint" ]
-
-<% } -%>
-<% if (sqlite3) { -%>
-# Setup sqlite3 on a separate volume
-RUN mkdir -p /data
-VOLUME /data
-ENV DATABASE_URL="sqlite3:///data/production.sqlite3"
 
 <% } -%>
 # Start the server by default, this can be overwritten at runtime
