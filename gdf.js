@@ -15,6 +15,7 @@ export const defaults = {
   ignoreScripts: false,
   legacyPeerDeps: false,
   link: true,
+  litefs: false,
   port: 0,
   swap: '',
   windows: false
@@ -87,7 +88,24 @@ export class GDF {
   // Does this application use sqlite3?
   get sqlite3() {
     return !!this.#pj.dependencies?.sqlite3 ||
-      !!this.#pj.dependencies?.['better-sqlite3']
+      !!this.#pj.dependencies?.['better-sqlite3'] ||
+      this.litefs
+  }
+
+  // Does this application use litefs?
+  get litefs() {
+    return this.options.litefs ||
+      !!this.#pj.dependencies?.['litefs-js']
+  }
+
+  // packages needed for deployment
+  get deployPackages() {
+    const packages = []
+
+    if (this.litefs) packages.push('ca-certificates', 'fuse3')
+    if (this.remix && this.sqlite3) packages.push('sqlite3')
+
+    return packages.sort()
   }
 
   // what node version should be used?
@@ -351,7 +369,6 @@ export class GDF {
     let port = 3000
 
     if (this.gatsby) port = 8080
-    if (this.remix) port = 8080
 
     return port
   }
@@ -367,6 +384,7 @@ export class GDF {
     // select and render templates
     const templates = ['Dockerfile.ejs']
     if (this.entrypoint) templates.unshift('docker-entrypoint.ejs')
+    if (this.litefs) templates.unshift('litefs.yml.ejs')
 
     for (const template of templates) {
       const dest = await this.#writeTemplateFile(template)

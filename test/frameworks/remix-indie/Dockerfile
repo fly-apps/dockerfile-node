@@ -48,5 +48,5 @@ COPY --from=build /app /app
 ENTRYPOINT [ "/app/docker-entrypoint" ]
 
 # Start the server by default, this can be overwritten at runtime
-EXPOSE 8080
+EXPOSE 3000
 CMD [ "npm", "run", "start" ]

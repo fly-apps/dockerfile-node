@@ -26,7 +26,7 @@ const { writeFileSync } = require('node:fs')
 <% } -%>
 <% if (prisma) { -%>
 <%= tab(1) %>// If running the web server then migrate existing database
-<%= tab(1) %>if (process.argv.slice(2).join(' ') === "<%= packager %> run start") {
+<%= tab(1) %>if (process.argv.slice(2).join(' ') === "<%= packager %> run start"<% if (litefs) { %> && process.env.FLY_REGION == process.env.PRIMARY_REGION<% } %>) {
 <%= tab(2) %>await exec("npx prisma migrate deploy")
 <%= tab(1) %>}
 

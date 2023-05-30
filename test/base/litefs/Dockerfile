@@ -4,9 +4,9 @@
 ARG NODE_VERSION=xxx
 FROM node:${NODE_VERSION}-slim as base
 
-LABEL fly_launch_runtime="Remix/Prisma"
+LABEL fly_launch_runtime="Node.js"
 
-# Remix/Prisma app lives here
+# Node.js app lives here
 WORKDIR /app
 
 # Set production environment
@@ -18,38 +18,36 @@ FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential openssl 
+    apt-get install -y python-is-python3 pkg-config build-essential 
 
 # Install node modules
 COPY --link package.json package-lock.json ./
-RUN npm ci --include=dev
-
-# Generate Prisma Client
-COPY --link prisma .
-RUN npx prisma generate
+RUN npm ci
 
 # Copy application code
 COPY --link . .
-
-# Build application
-RUN npm run build
-
-# Remove development dependencies
-RUN npm prune --omit=dev
 
 
 # Final stage for app image
 FROM base
 
+# Install, configure litefs
+COPY --from=flyio/litefs:0.4.0 /usr/local/bin/litefs /usr/local/bin/litefs
+COPY --link litefs.yml /etc/litefs.yml
+
+# Install packages needed for deployment
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y ca-certificates fuse3 && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
 # Copy built application
 COPY --from=build /app /app
 
-# Adjust entrypoint to be executable on Linux
-RUN chmod +x ./docker-entrypoint && \
-    sed -i "s/\r$//g" ./docker-entrypoint
-
-# Entrypoint prepares the database.
-ENTRYPOINT [ "/app/docker-entrypoint" ]
+# Setup sqlite3 on a separate volume
+RUN mkdir -p /data /litefs 
+VOLUME /data
+ENV DATABASE_URL="sqlite3:///litefs/sqlite.db" && \
+    PORT=3001 
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000

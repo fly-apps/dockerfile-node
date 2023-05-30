@@ -37,6 +37,10 @@ const options = yargs((hideBin(process.argv)))
     describe: 'ignore peer dependencies',
     type: 'boolean'
   })
+  .option('litefs', {
+    describe: 'configure and enable litefs',
+    type: 'boolean'
+  })
   .option('link', {
     describe: 'use COPY --link whenever possible',
     type: 'boolean'

@@ -71,6 +71,22 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
         })
       }
 
+      if (fs.existsSync(path.join(testdir, 'litefs.yml'))) {
+        it('should produce a litefs.yml', async function() {
+          await new GDF().run(workdir, options)
+
+          const actualResults = fs.readFileSync(path.join(workdir, 'litefs.yml'), 'utf-8')
+
+          if (process.env.TEST_CAPTURE) {
+            fs.writeFileSync(path.join(testdir, 'litefs.yml'), actualResults)
+          }
+
+          const expectedResults = fs.readFileSync(path.join(testdir, 'litefs.yml'), 'utf-8')
+
+          expect(expectedResults).to.equal(actualResults)
+        })
+      }
+
       if (fs.existsSync(path.join(testdir, 'fly.toml'))) {
         it('should produce a fly.toml', async function() {
           let expectedResults = fs.readFileSync(path.join(testdir, 'fly.toml'), 'utf-8')

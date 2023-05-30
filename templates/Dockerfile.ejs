@@ -78,6 +78,19 @@ ENV NODE_ENV=production
 FROM base
 <% } -%>
 
+<% if (litefs) { -%>
+# Install, configure litefs
+COPY --from=flyio/litefs:0.4.0 /usr/local/bin/litefs /usr/local/bin/litefs
+COPY --link litefs.yml /etc/litefs.yml
+
+<% } -%>
+<% if (deployPackages.length > 0) { -%>
+# Install packages needed for deployment
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y <%= deployPackages.join(' ')%> && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+<% } -%>
 # Copy built application
 COPY --from=build /app /app
 
@@ -88,17 +101,18 @@ RUN addgroup --system --gid 1001 nodejs && \
 USER <%= user %>:nodejs
 
 <% } -%>
+<% if (sqlite3) { -%>
+# Setup sqlite3 on a separate volume
+RUN mkdir -p /data<% if (litefs) { %> /litefs <% } %>
+VOLUME /data
+ENV DATABASE_URL="sqlite3:///<%= litefs ? 'litefs' : 'data' %>/sqlite.db"<% if (litefs) { %> && \
+    PORT=<%= port+1 %> <% } %>
+
+<% } -%>
 <% if (entrypoint) { -%>
 <% if (entrypointFixups.length) { -%>
 # Adjust entrypoint to be executable on Linux
 RUN <%- entrypointFixups.join(' && \\\n    ') %>
-
-<% } -%>
-<% if (sqlite3) { -%>
-# Setup sqlite3 on a separate volume
-RUN mkdir -p /data
-VOLUME /data
-ENV DATABASE_URL="sqlite3:///data/production.sqlite3"
 
 <% } -%>
 <% if (prisma) { -%>

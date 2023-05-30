@@ -36,6 +36,7 @@ Options are saved between runs into `package.json`. To invert a boolean options,
 * `--ignore-scripts` - do not execute any scripts defined in the project `package.json` and its dependencies.
 * `--force` - overwrite existing files
 * `--legacy-peer-deps` - [ignore peer dependencies](https://docs.npmjs.com/cli/v7/using-npm/config#legacy-peer-deps).
+* `--litefs` - configure and enable [litefs](https://fly.io/docs/litefs/).
 * `--no-link` - don't add [--link](https://docs.docker.com/engine/reference/builder/#copy---link) to COPY statements.  Some tools (like at the moment, [buildah](https://www.redhat.com/en/topics/containers/what-is-buildah)) don't yet support this feature.
 * `--port=n` - expose port (default may vary based on framework, but otherwise is `3000`)
 * `--swap=n` - allocate swap space.  See [falloc options](https://man7.org/linux/man-pages/man1/fallocate.1.html#OPTIONS) for suffixes
