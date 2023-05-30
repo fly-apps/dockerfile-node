@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
@@ -9,6 +10,26 @@ import { GDF } from './gdf.js'
 // Fly.io mixin
 GDF.extend(class extends GDF {
   run() {
+    if (!this.flySetup()) return
+
+    // create volume for sqlite3
+    if (this.sqlite3) this.flyMakeVolume()
+
+    // attach consul for litefs
+    if (this.litefs) this.flyAttachConsul()
+
+    // set secrets for remix apps
+    if (this.remix) this.flyRemixSecrets(this.flyApp)
+
+    // set up for deploy
+    if (fs.existsSync('.github/workflows/deploy.yml')) {
+      this.flyGithubPrep()
+    }
+  }
+
+  // Verify that fly.toml exists, flyctl is in the path, extract appname
+  // and secrets, and save information into this object.
+  flySetup() {
     this.flyTomlFile = path.join(this._appdir, 'fly.toml')
 
     // ensure fly.toml exists
@@ -53,11 +74,18 @@ GDF.extend(class extends GDF {
 
     if (this.flyctl.includes(' ')) this.flyctl = JSON.stringify(this.flyctl)
 
-    // create volume for sqlite3
-    if (this.sqlite3) this.flyMakeVolume()
+    // get a list of secrets
+    if (this.flyApp) {
+      try {
+        this.flySecrets = JSON.parse(
+          execSync(`${this.flyctl} secrets list --json`, { encoding: 'utf8' })
+        ).map(secret => secret.Name)
+      } catch {
+        return // likely got an error like "Could not find App"
+      }
+    }
 
-    // attach consul for litefs
-    if (this.litefs) this.flyAttachConsul()
+    return true
   }
 
   // add volume to fly.toml and create it if app exists
@@ -114,18 +142,76 @@ GDF.extend(class extends GDF {
     if (!this.flyToml.includes('primary_region')) return // v2
 
     // see if secret is already set?
-    try {
-      const secrets = JSON.parse(
-        execSync(`${this.flyctl} secrets list --json`, { encoding: 'utf8' }))
-      if (secrets.some(secret => secret.Name === 'FLY_CONSUL_URL')) return
-    } catch {
-      return // likely got an error like "Could not find App"
-    }
+    if (this.flySecrets.includes('FLY_CONSUL_URL')) return
 
     console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl consul attach`)
     execSync(
       `${this.flyctl} consul attach --app ${this.flyApp}`,
       { stdio: 'inherit' }
     )
+  }
+
+  // set various secrets for Remix (and Epic Stack) applications
+  flyRemixSecrets(app) {
+    let secrets = this.flySecrets
+
+    if (app !== this.flyApp) {
+      // get a list of secrets for selected app
+      try {
+        secrets = JSON.parse(
+          execSync(`${this.flyctl} secrets list --app ${app} --json`, { encoding: 'utf8' })
+        ).map(secret => secret.Name)
+      } catch {
+        return // likely got an error like "Could not find App"
+      }
+    }
+
+    const required = [
+      'SESSION_SECRET',
+      'ENCRYPTION_SECRET',
+      'INTERNAL_COMMAND_TOKEN'
+    ]
+
+    for (const name of required) {
+      if (secrets.includes(name)) return
+      if (name !== 'SESSION_SECRET' && !this.epicStack) continue
+
+      const value = crypto.randomBytes(32).toString('hex')
+
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl secrets set ${name}`)
+      execSync(
+        `${this.flyctl} secrets set ${name}=${value} --app ${this.flyApp}`,
+        { stdio: 'inherit' }
+      )
+    }
+  }
+
+  // prep for deployment via github actions, inclusing settting up a staging app
+  flyGithubPrep() {
+    const deploy = fs.readFileSync('.github/workflows/deploy.yml', 'utf-8')
+
+    if (!fs.existsSync('.git')) {
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  git init`)
+      execSync('git init', { stdio: 'inherit' })
+    }
+
+    if (deploy.includes('🚀 Deploy Staging') && deploy.includes('-staging')) {
+      const stagingApp = `${this.flyApp}-staging`
+
+      try {
+        const apps = JSON.parse(
+          execSync(`${this.flyctl} apps list --json`, { encoding: 'utf8' })
+        ).map(app => app.Name)
+
+        if (!apps.include(stagingApp)) {
+          console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl apps create ${stagingApp}`)
+          execSync(`${this.flyctl} apps create ${stagingApp}`, { stdio: 'inherit' })
+        }
+      } catch {
+        return // likely got an error like "Could not find App"
+      }
+
+      this.flyRemixSecrets(stagingApp)
+    }
   }
 })

@@ -59,6 +59,11 @@ export class GDF {
       this.#pj.dependencies?.['@remix-run/node'])
   }
 
+  // Is this an EpicStack application?
+  get epicStack() {
+    return !!this.#pj['epic-stack']
+  }
+
   // Does this application use prisma?
   get prisma() {
     return !!(this.#pj.dependencies?.['@prisma/client'] ||
