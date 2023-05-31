@@ -137,9 +137,8 @@ GDF.extend(class extends GDF {
   flyAttachConsul() {
     if (!this.flyApp) return
 
-    // Check fly.toml to guess if v1 or v2
+    // bail if v1 app
     if (this.flyToml.includes('enable_consul')) return // v1-ism
-    if (!this.flyToml.includes('primary_region')) return // v2
 
     // see if secret is already set?
     if (this.flySecrets.includes('FLY_CONSUL_URL')) return
