@@ -386,9 +386,9 @@ export class GDF {
 
   get configDir() {
     if (this.remix && fs.existsSync('./other')) {
-      return "other/"
+      return 'other/'
     } else {
-      return ""
+      return ''
     }
   }
 
