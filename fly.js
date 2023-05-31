@@ -202,7 +202,7 @@ GDF.extend(class extends GDF {
         const apps = JSON.parse(
           execSync(`${this.flyctl} apps list --json`, { encoding: 'utf8' })
         )
-        
+
         const base = apps.find(app => app.Name === this.flyApp)
 
         if (base && !apps.find(app => app.Name === stagingApp)) {
