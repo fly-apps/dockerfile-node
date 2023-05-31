@@ -13,6 +13,7 @@ jobs:
         with:
           node-version: 18
           cache: "npm"
+      - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: npm ci
       - run: npm run eslint
       - run: npm test
