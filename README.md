@@ -42,6 +42,18 @@ Options are saved between runs into `package.json`. To invert a boolean options,
 * `--swap=n` - allocate swap space.  See [falloc options](https://man7.org/linux/man-pages/man1/fallocate.1.html#OPTIONS) for suffixes
 * `--windows` - make Dockerfile work for Windows users that may have set `git config --global core.autocrlf true`.
 
+## Platform specific processing
+
+In addition to creating Dockerfiles and associated artifacts, `dockerfile-node` can run platform specific processing.  At the present time the first and only platform taking advantage of this is naturally fly.io.
+
+If, and only if, `flyctl` is installed, part of the path, and there exists a valid `fly.toml` file in the current directory, dockerfile-node will:
+
+ * configure and create volume(s) for sqlite3
+ * attach consul for litefs
+ * set secrets for remix apps
+ * initialize git
+ * define a staging app if one is mentioned in `.github/workflows/deploy.yml`
+
 ## Testing
 
 A single invocation of `npm test` will run all of the tests defined.  Additionally `npm run eslint` will run eslint.
