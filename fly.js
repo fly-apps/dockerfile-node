@@ -180,7 +180,7 @@ GDF.extend(class extends GDF {
 
       console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl secrets set ${name}`)
       execSync(
-        `${this.flyctl} secrets set ${name}=${value} --app ${this.flyApp}`,
+        `${this.flyctl} secrets set ${name}=${value} --app ${app}`,
         { stdio: 'inherit' }
       )
     }
@@ -201,11 +201,14 @@ GDF.extend(class extends GDF {
       try {
         const apps = JSON.parse(
           execSync(`${this.flyctl} apps list --json`, { encoding: 'utf8' })
-        ).map(app => app.Name)
+        )
+        
+        const base = apps.find(app => app.Name === this.flyApp)
 
-        if (!apps.include(stagingApp)) {
-          console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl apps create ${stagingApp}`)
-          execSync(`${this.flyctl} apps create ${stagingApp}`, { stdio: 'inherit' })
+        if (base && !apps.find(app => app.Name === stagingApp)) {
+          const cmd = `apps create ${stagingApp} --org ${base.Organization.Slug}`
+          console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl ${cmd}`)
+          execSync(`${this.flyctl} ${cmd}`, { stdio: 'inherit' })
         }
       } catch {
         return // likely got an error like "Could not find App"
