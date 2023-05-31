@@ -81,7 +81,7 @@ FROM base
 <% if (litefs) { -%>
 # Install, configure litefs
 COPY --from=flyio/litefs:0.4.0 /usr/local/bin/litefs /usr/local/bin/litefs
-COPY --link litefs.yml /etc/litefs.yml
+COPY --link <%= configDir %>litefs.yml /etc/litefs.yml
 
 <% } -%>
 <% if (deployPackages.length > 0) { -%>
@@ -120,7 +120,7 @@ RUN <%- entrypointFixups.join(' && \\\n    ') %>
 <% } else { -%>
 # Entrypoint sets up the container.
 <% } -%>
-ENTRYPOINT [ "/app/docker-entrypoint" ]
+ENTRYPOINT [ "/app/<%= configDir %>docker-entrypoint.js" ]
 
 <% } -%>
 # Start the server by default, this can be overwritten at runtime

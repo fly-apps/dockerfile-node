@@ -49,7 +49,7 @@ RUN chmod +x ./docker-entrypoint && \
     sed -i "s/\r$//g" ./docker-entrypoint
 
 # Entrypoint prepares the database.
-ENTRYPOINT [ "/app/docker-entrypoint" ]
+ENTRYPOINT [ "/app/docker-entrypoint.js" ]
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000

@@ -384,6 +384,14 @@ export class GDF {
     return port
   }
 
+  get configDir() {
+    if (this.remix && fs.existsSync('./other')) {
+      return "other/"
+    } else {
+      return ""
+    }
+  }
+
   // render each template and write to the destination dir
   async run(appdir, options = {}) {
     this.options = options
@@ -393,12 +401,20 @@ export class GDF {
     if (options.force) this.#answer = 'a'
 
     // select and render templates
-    const templates = ['Dockerfile.ejs']
-    if (this.entrypoint) templates.unshift('docker-entrypoint.ejs')
-    if (this.litefs) templates.unshift('litefs.yml.ejs')
+    const templates = {
+      'Dockerfile.ejs': 'Dockerfile'
+    }
 
-    for (const template of templates) {
-      const dest = await this.#writeTemplateFile(template)
+    if (this.entrypoint) {
+      templates['docker-entrypoint.ejs'] = `${this.configDir}docker-entrypoint.js`
+    }
+
+    if (this.litefs) {
+      templates['litefs.yml.ejs'] = `${this.configDir}litefs.yml`
+    }
+
+    for (const [template, filename] of Object.entries(templates)) {
+      const dest = await this.#writeTemplateFile(template, filename)
 
       if (template === 'docker-entrypoint.ejs') fs.chmodSync(dest, 0o755)
     }
@@ -411,7 +427,7 @@ export class GDF {
           path.join(appdir, '.dockerignore')
         )
       } catch {
-        await this.#writeTemplateFile('.dockerignore.ejs')
+        await this.#writeTemplateFile('.dockerignore.ejs', '.dockerignore')
       }
     }
 
@@ -422,9 +438,8 @@ export class GDF {
   }
 
   // write template file, prompting when there is a conflict
-  async #writeTemplateFile(template) {
+  async #writeTemplateFile(template, name) {
     const proposed = await ejs.renderFile(path.join(GDF.templates, template), this)
-    const name = template.replace(/\.ejs$/m, '')
     const dest = path.join(this._appdir, name)
 
     if (fs.existsSync(dest)) {
