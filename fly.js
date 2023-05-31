@@ -16,7 +16,7 @@ GDF.extend(class extends GDF {
     if (this.sqlite3) this.flyMakeVolume()
 
     // attach consul for litefs
-    if (this.litefs) this.flyAttachConsul()
+    if (this.litefs) this.flyAttachConsul(this.flyApp)
 
     // set secrets for remix apps
     if (this.remix) this.flyRemixSecrets(this.flyApp)
@@ -134,8 +134,8 @@ GDF.extend(class extends GDF {
   }
 
   // add volume to fly.toml and create it if app exists
-  flyAttachConsul() {
-    if (!this.flyApp) return
+  flyAttachConsul(app) {
+    if (!app) return
 
     // bail if v1 app
     if (this.flyToml.includes('enable_consul')) return // v1-ism
@@ -145,7 +145,7 @@ GDF.extend(class extends GDF {
 
     console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl consul attach`)
     execSync(
-      `${this.flyctl} consul attach --app ${this.flyApp}`,
+      `${this.flyctl} consul attach --app ${app}`,
       { stdio: 'inherit' }
     )
   }
@@ -213,7 +213,11 @@ GDF.extend(class extends GDF {
         return // likely got an error like "Could not find App"
       }
 
-      this.flyRemixSecrets(stagingApp)
+      // attach consul for litefs
+      if (this.litefs) this.flyAttachConsul(stagingApp)
+
+      // set secrets for remix apps
+      if (this.remix) this.flyRemixSecrets(stagingApp)
     }
   }
 })
