@@ -21,7 +21,7 @@ RUN apt-get update -qq && \
     apt-get install -y python-is-python3 pkg-config build-essential 
 
 # Install node modules
-COPY --link package.json package-lock.json ./
+COPY --link package-lock.json package.json ./
 RUN npm ci
 
 # Copy application code
@@ -46,7 +46,7 @@ COPY --from=build /app /app
 # Setup sqlite3 on a separate volume
 RUN mkdir -p /data /litefs 
 VOLUME /data
-ENV DATABASE_URL="sqlite3:///litefs/sqlite.db" && \
+ENV DATABASE_URL="file:///litefs/sqlite.db" \
     PORT=3001 
 
 # Start the server by default, this can be overwritten at runtime
