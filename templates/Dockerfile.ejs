@@ -105,7 +105,7 @@ USER <%= user %>:nodejs
 # Setup sqlite3 on a separate volume
 RUN mkdir -p /data<% if (litefs) { %> /litefs <% } %>
 VOLUME /data
-ENV DATABASE_URL="sqlite3:///<%= litefs ? 'litefs' : 'data' %>/sqlite.db"<% if (litefs) { %> && \
+ENV DATABASE_URL="file:///<%= litefs ? 'litefs' : 'data' %>/sqlite.db"<% if (litefs) { %> \
     PORT=<%= port+1 %> <% } %>
 
 <% } -%>
