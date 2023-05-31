@@ -163,13 +163,19 @@ export class GDF {
   get packageFiles() {
     const result = ['package.json']
 
-    for (const file of ['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock']) {
+    const files = [
+      'package-lock.json', '.npmrc',
+      'pnpm-lock.yaml',
+      'yarn.lock', '.yarnrc'
+    ]
+
+    for (const file of files) {
       if (fs.existsSync(path.join(this._appdir, file))) {
         result.push(file)
       }
     }
 
-    return result
+    return result.sort()
   }
 
   // Which packager should be used?
