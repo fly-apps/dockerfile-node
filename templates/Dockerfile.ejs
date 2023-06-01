@@ -105,9 +105,24 @@ USER <%= user %>:nodejs
 # Setup sqlite3 on a separate volume
 RUN mkdir -p /data<% if (litefs) { %> /litefs <% } %>
 VOLUME /data
+<% if (epicStack) { -%>
+ENV LITEFS_DIR="/litefs"
+ENV DATABASE_FILENAME="sqlite.db"
+ENV DATABASE_PATH="$LITEFS_DIR/$DATABASE_FILENAME"
+ENV DATABASE_URL="file://$DATABASE_PATH"
+ENV CACHE_DATABASE_FILENAME="cache.db"
+ENV CACHE_DATABASE_PATH="$LITEFS_DIR/$CACHE_DATABASE_FILENAME"
+ENV PORT=<%= port+1 %>
+<% } else { -%>
 ENV DATABASE_URL="file:///<%= litefs ? 'litefs' : 'data' %>/sqlite.db"<% if (litefs) { %> \
     PORT=<%= port+1 %> <% } %>
+<% } -%>
 
+<% if (remix) { -%>
+# add shortcut for connecting to database CLI
+RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
+
+<% } -%>
 <% } -%>
 <% if (entrypoint) { -%>
 <% if (entrypointFixups.length) { -%>
@@ -120,7 +135,7 @@ RUN <%- entrypointFixups.join(' && \\\n    ') %>
 <% } else { -%>
 # Entrypoint sets up the container.
 <% } -%>
-ENTRYPOINT [ "/app/<%= configDir %>docker-entrypoint.js" ]
+ENTRYPOINT [ <% if (litefs) { %>"litefs", "mount", "--", <% } %>"/app/<%= configDir %>docker-entrypoint.js" ]
 
 <% } -%>
 # Start the server by default, this can be overwritten at runtime
