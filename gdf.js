@@ -218,9 +218,11 @@ export class GDF {
     }
 
     // optionally include dev dependencies
-    if (this.devDependencies && !this.pnpm) {
+    if (this.devDependencies) {
       if (this.yarn) {
         install += ' --production=false'
+      } else if (this.pnpm) {
+        install += ' --prod=false'
       } else {
         install += ' --include=dev'
       }
