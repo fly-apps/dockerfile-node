@@ -4,9 +4,9 @@
 ARG NODE_VERSION=xxx
 FROM node:${NODE_VERSION}-slim as base
 
-LABEL fly_launch_runtime="Next.js"
+LABEL fly_launch_runtime="Remix"
 
-# Next.js app lives here
+# Remix app lives here
 WORKDIR /app
 
 # Set production environment
@@ -25,13 +25,16 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --prod=false
 
 # Copy application code
 COPY --link . .
 
 # Build application
 RUN pnpm run build
+
+# Remove development dependencies
+RUN pnpm prune --prod
 
 
 # Final stage for app image
