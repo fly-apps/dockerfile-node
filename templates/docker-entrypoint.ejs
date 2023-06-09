@@ -13,21 +13,21 @@ const { writeFileSync } = require('node:fs')
 <% } -%>
 <% } -%>
 
-;(async () => {
+;(async() => {
 <% if (options.swap) { -%>
 <%= tab(1) %>// allocate swap space
-<%= tab(1) %>await exec("fallocate -l <%= options.swap %> /swapfile")
-<%= tab(1) %>await exec("chmod 0600 /swapfile")
-<%= tab(1) %>await exec("mkswap /swapfile")
-<%= tab(1) %>writeFileSync("/proc/sys/vm/swappiness", "10")
-<%= tab(1) %>await exec("swapon /swapfile")
-<%= tab(1) %>writeFileSync("/proc/sys/vm/overcommit_memory", "1")
+<%= tab(1) %>await exec('fallocate -l <%= options.swap %> /swapfile')
+<%= tab(1) %>await exec('chmod 0600 /swapfile')
+<%= tab(1) %>await exec('mkswap /swapfile')
+<%= tab(1) %>writeFileSync('/proc/sys/vm/swappiness', '10')
+<%= tab(1) %>await exec('swapon /swapfile')
+<%= tab(1) %>writeFileSync('/proc/sys/vm/overcommit_memory', '1')
 
 <% } -%>
 <% if (prisma) { -%>
 <%= tab(1) %>// If running the web server then migrate existing database
-<%= tab(1) %>if (process.argv.slice(2).join(' ') === "<%= packager %> run start"<% if (litefs) { %> && process.env.FLY_REGION == process.env.PRIMARY_REGION<% } %>) {
-<%= tab(2) %>await exec("npx prisma migrate deploy")
+<%= tab(1) %>if (process.argv.slice(2).join(' ') === '<%= packager %> run start'<% if (litefs) { %> && process.env.FLY_REGION === process.env.PRIMARY_REGION<% } %>) {
+<%= tab(2) %>await exec('npx prisma migrate deploy')
 <%= tab(1) %>}
 
 <% } -%>
@@ -42,7 +42,7 @@ const { writeFileSync } = require('node:fs')
 <%= tab(3) %>if (code === 0) {
 <%= tab(4) %>resolve()
 <%= tab(3) %>} else {
-<%= tab(4) %>reject()
+<%= tab(4) %>reject(new Error(`${command} failed rc=${code}`))
 <%= tab(3) %>}
 <%= tab(2) %>})
 <%= tab(1) %>})

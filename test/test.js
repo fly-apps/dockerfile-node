@@ -55,17 +55,21 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
         expect(expectedResults).to.equal(actualResults)
       })
 
-      if (fs.existsSync(path.join(testdir, 'docker-entrypoint'))) {
+      if (fs.existsSync(path.join(testdir, 'docker-entrypoint.js'))) {
         it('should produce a docker-entrypoint', async function() {
           await new GDF().run(workdir, options)
 
-          const actualResults = fs.readFileSync(path.join(workdir, 'docker-entrypoint'), 'utf-8')
+          let entrypoint = path.join(workdir, 'docker-entrypoint.js')
+          const other = path.join(workdir, 'other', 'docker-entrypoint.js')
+          if (fs.existsSync(other)) entrypoint = other
+
+          const actualResults = fs.readFileSync(entrypoint, 'utf-8')
 
           if (process.env.TEST_CAPTURE) {
-            fs.writeFileSync(path.join(testdir, 'docker-entrypoint'), actualResults)
+            fs.writeFileSync(path.join(testdir, 'docker-entrypoint.js'), actualResults)
           }
 
-          const expectedResults = fs.readFileSync(path.join(testdir, 'docker-entrypoint'), 'utf-8')
+          const expectedResults = fs.readFileSync(path.join(testdir, 'docker-entrypoint.js'), 'utf-8')
 
           expect(expectedResults).to.equal(actualResults)
         })

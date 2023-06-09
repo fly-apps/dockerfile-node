@@ -349,17 +349,17 @@ export class GDF {
   get entrypointFixups() {
     const fixups = []
 
-    const entrypoint = path.join(this._appdir, 'docker-entrypoint')
+    const entrypoint = path.join(this._appdir, 'docker-entrypoint.js')
 
     const stat = fs.statSync(entrypoint, { throwIfNoEntry: false })
     if (!stat) return fixups
 
     if (this.options.windows || !(stat.mode & fs.constants.S_IXUSR)) {
-      fixups.push('chmod +x ./docker-entrypoint')
+      fixups.push('chmod +x ./docker-entrypoint.js')
     }
 
     if (this.options.windows || fs.readFileSync(entrypoint, 'utf-8').includes('\r')) {
-      fixups.push('sed -i "s/\\r$//g" ./docker-entrypoint')
+      fixups.push('sed -i "s/\\r$//g" ./docker-entrypoint.js')
     }
 
     return fixups
@@ -367,7 +367,8 @@ export class GDF {
 
   // Tabs vs spaces
   get usingTabs() {
-    return this.remix
+    // disable for now as remix isn't using this generator and it conflicts with eslint
+    return false // this.remix
   }
 
   // ESM vs CJS

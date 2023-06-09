@@ -45,8 +45,8 @@ FROM base
 COPY --from=build /app /app
 
 # Adjust entrypoint to be executable on Linux
-RUN chmod +x ./docker-entrypoint && \
-    sed -i "s/\r$//g" ./docker-entrypoint
+RUN chmod +x ./docker-entrypoint.js && \
+    sed -i "s/\r$//g" ./docker-entrypoint.js
 
 # Entrypoint prepares the database.
 ENTRYPOINT [ "/app/docker-entrypoint.js" ]
