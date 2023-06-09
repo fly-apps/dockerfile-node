@@ -143,4 +143,10 @@ EXPOSE <%= port %>
 <% if (nuxtjs) { -%>
 ENV HOST=0
 <% } -%>
+<% if (adonisjs) { -%>
+ENV CACHE_VIEWS="true"
+ENV SESSION_DRIVER="cookie"
+ENV DRIVE_DISK="local"
+ENV DB_CONNECTION="pg"
+<% } -%>
 CMD <%- JSON.stringify(startCommand, null, 1).replaceAll(/\n\s*/g, " ") %>
