@@ -167,7 +167,6 @@ GDF.extend(class extends GDF {
 
     const required = [
       'SESSION_SECRET',
-      'ENCRYPTION_SECRET',
       'INTERNAL_COMMAND_TOKEN'
     ]
 
