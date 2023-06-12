@@ -334,6 +334,10 @@ export class GDF {
       return parsed
     }
 
+    if (this.adonisjs) {
+      return ['node', '/app/build/server.js']
+    }
+
     if (this.gatsby) {
       return ['npx', 'gatsby', 'serve', '-H', '0.0.0.0']
     } else if (this.runtime === 'Node.js' && this.#pj.scripts?.start?.includes('fastify')) {
