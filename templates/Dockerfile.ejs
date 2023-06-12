@@ -147,6 +147,8 @@ ENV HOST=0
 ENV CACHE_VIEWS="true"
 ENV SESSION_DRIVER="cookie"
 ENV DRIVE_DISK="local"
+<% if (postgres) { -%>
 ENV DB_CONNECTION="pg"
+<% } -%>
 <% } -%>
 CMD <%- JSON.stringify(startCommand, null, 1).replaceAll(/\n\s*/g, " ") %>

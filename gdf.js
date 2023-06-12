@@ -90,6 +90,11 @@ export class GDF {
     return !!this.#pj.dependencies?.['@adonisjs/core']
   }
 
+  // Does this application use postgres?
+  get postgres() {
+    return this.adonisjs && !!this.#pj.dependencies?.pg
+  }
+
   // Does this application use nest?
   get nestjs() {
     return !!this.#pj.dependencies?.['@nestjs/core']
