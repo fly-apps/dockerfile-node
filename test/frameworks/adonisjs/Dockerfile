@@ -45,8 +45,10 @@ ENTRYPOINT [ "/app/docker-entrypoint.js" ]
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
+ENV HOST="0.0.0.0"
+ENV PORT="3000"
 ENV CACHE_VIEWS="true"
 ENV SESSION_DRIVER="cookie"
 ENV DRIVE_DISK="local"
 ENV DB_CONNECTION="pg"
-CMD [ "npm", "run", "start" ]
+CMD [ "node", "/app/build/server.js" ]
