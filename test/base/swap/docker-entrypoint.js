@@ -3,6 +3,8 @@
 const { spawn } = require('node:child_process')
 const { writeFileSync } = require('node:fs')
 
+const env = {...process.env}
+
 ;(async() => {
   // allocate swap space
   await exec('fallocate -l 512M /swapfile')
@@ -17,7 +19,7 @@ const { writeFileSync } = require('node:fs')
 })()
 
 function exec(command) {
-  const child = spawn(command, { shell: true, stdio: 'inherit' })
+  const child = spawn(command, { shell: true, stdio: 'inherit', env })
   return new Promise((resolve, reject) => {
     child.on('exit', code => {
       if (code === 0) {
