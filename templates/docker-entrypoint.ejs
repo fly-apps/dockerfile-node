@@ -15,7 +15,7 @@ const { writeFileSync } = require('node:fs')
 
 const env = {...process.env}
 
-<% if (adonisjs) { -%>
+<% if (adonisjs && postgres) { -%>
 if (process.env.DATABASE_URL) {
 <%= tab(1) %>try {
 <%= tab(2) %>const databaseUrl = new URL(process.env.DATABASE_URL)
@@ -28,8 +28,8 @@ if (process.env.DATABASE_URL) {
 <%= tab(2) %>console.error('Invalid DATABASE_URL')
 <%= tab(1) %>}
 }
-<% } -%>
 
+<% } -%>
 ;(async() => {
 <% if (options.swap) { -%>
 <%= tab(1) %>// allocate swap space
