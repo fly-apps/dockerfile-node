@@ -144,6 +144,8 @@ EXPOSE <%= port %>
 ENV HOST=0
 <% } -%>
 <% if (adonisjs) { -%>
+ENV HOST="0.0.0.0"
+ENV PORT="3000"
 ENV CACHE_VIEWS="true"
 ENV SESSION_DRIVER="cookie"
 ENV DRIVE_DISK="local"
