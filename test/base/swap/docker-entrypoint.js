@@ -3,7 +3,7 @@
 const { spawn } = require('node:child_process')
 const { writeFileSync } = require('node:fs')
 
-const env = {...process.env}
+const env = { ...process.env }
 
 ;(async() => {
   // allocate swap space

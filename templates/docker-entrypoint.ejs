@@ -13,7 +13,7 @@ const { writeFileSync } = require('node:fs')
 <% } -%>
 <% } -%>
 
-const env = {...process.env}
+const env = { ...process.env }
 
 <% if (adonisjs && postgres) { -%>
 if (process.env.DATABASE_URL) {

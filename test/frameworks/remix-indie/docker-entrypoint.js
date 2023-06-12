@@ -2,7 +2,7 @@
 
 const { spawn } = require('node:child_process')
 
-const env = {...process.env}
+const env = { ...process.env }
 
 ;(async() => {
   // If running the web server then migrate existing database
