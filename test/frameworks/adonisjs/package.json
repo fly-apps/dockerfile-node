@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "node ace build --production",
+    "build": "echo mocked",
     "start": "node build/server.js",
     "gcp-build": "npm run build",
     "dev": "node ace serve --watch",
