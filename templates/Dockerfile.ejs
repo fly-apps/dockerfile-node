@@ -57,7 +57,7 @@ COPY<% if (options.link) { %> --link<% } %> . .
 RUN <%= packager %> run build
 
 <% } -%>
-<% if (devDependencies && !nestjs) { -%>
+<% if (devDependencies && !nestjs && !adonisjs) { -%>
 # Remove development dependencies
 RUN <%= packagerPrune %>
 
@@ -100,6 +100,10 @@ RUN addgroup --system --gid 1001 nodejs && \
     useradd <%= user %> --gid nodejs --home /app --shell /bin/bash
 USER <%= user %>:nodejs
 
+<% } -%>
+<% if (adonisjsFileUpload) { -%>
+RUN mkdir -p /app/tmp/uploads
+VOLUME /app/tmp/uploads
 <% } -%>
 <% if (sqlite3) { -%>
 # Setup sqlite3 on a separate volume

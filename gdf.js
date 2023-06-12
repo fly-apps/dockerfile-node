@@ -90,6 +90,16 @@ export class GDF {
     return !!this.#pj.dependencies?.['@adonisjs/core']
   }
 
+  get adonisjsFileUpload() {
+    console.log('adonisjsFileUpload', fs.existsSync(path.join(this._appdir, 'config/drive.ts')))
+    if (!fs.existsSync(path.join(this._appdir, 'config/drive.ts'))) {
+      return false
+    }
+
+    const driveConfig = fs.readFileSync(path.join(this._appdir, 'config/drive.ts'), 'utf8')
+    return driveConfig.includes("Application.tmpPath('uploads')")
+  }
+
   // Does this application use postgres?
   get postgres() {
     return this.adonisjs && !!this.#pj.dependencies?.pg
