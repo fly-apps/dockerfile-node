@@ -13,6 +13,23 @@ const { writeFileSync } = require('node:fs')
 <% } -%>
 <% } -%>
 
+const env = { ...process.env }
+
+<% if (adonisjs && postgres) { -%>
+if (process.env.DATABASE_URL) {
+<%= tab(1) %>try {
+<%= tab(2) %>const databaseUrl = new URL(process.env.DATABASE_URL)
+<%= tab(2) %>env.PG_HOST = databaseUrl.hostname
+<%= tab(2) %>env.PG_PORT = databaseUrl.port
+<%= tab(2) %>env.PG_USER = databaseUrl.username
+<%= tab(2) %>env.PG_PASSWORD = databaseUrl.password
+<%= tab(2) %>env.PG_DB_NAME = databaseUrl.pathname.slice(1)
+<%= tab(1) %>} catch (err) {
+<%= tab(2) %>console.error('Invalid DATABASE_URL')
+<%= tab(1) %>}
+}
+
+<% } -%>
 ;(async() => {
 <% if (options.swap) { -%>
 <%= tab(1) %>// allocate swap space
@@ -36,7 +53,7 @@ const { writeFileSync } = require('node:fs')
 })()
 
 <%= tab(0) %>function exec(command) {
-<%= tab(1) %>const child = spawn(command, { shell: true, stdio: 'inherit' })
+<%= tab(1) %>const child = spawn(command, { shell: true, stdio: 'inherit', env })
 <%= tab(1) %>return new Promise((resolve, reject) => {
 <%= tab(2) %>child.on('exit', code => {
 <%= tab(3) %>if (code === 0) {

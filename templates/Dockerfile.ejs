@@ -57,7 +57,7 @@ COPY<% if (options.link) { %> --link<% } %> . .
 RUN <%= packager %> run build
 
 <% } -%>
-<% if (devDependencies && !nestjs) { -%>
+<% if (devDependencies && !nestjs && !adonisjs) { -%>
 # Remove development dependencies
 RUN <%= packagerPrune %>
 
@@ -101,6 +101,10 @@ RUN addgroup --system --gid 1001 nodejs && \
 USER <%= user %>:nodejs
 
 <% } -%>
+<% if (adonisjsFileUpload) { -%>
+RUN mkdir -p /app/tmp/uploads
+VOLUME /app/tmp/uploads
+<% } -%>
 <% if (sqlite3) { -%>
 # Setup sqlite3 on a separate volume
 RUN mkdir -p /data<% if (litefs) { %> /litefs <% } %>
@@ -142,5 +146,15 @@ ENTRYPOINT [ <% if (litefs) { %>"litefs", "mount", "--", <% } %>"/app/<%= config
 EXPOSE <%= port %>
 <% if (nuxtjs) { -%>
 ENV HOST=0
+<% } -%>
+<% if (adonisjs) { -%>
+ENV HOST="0.0.0.0"
+ENV PORT="3000"
+ENV CACHE_VIEWS="true"
+ENV SESSION_DRIVER="cookie"
+ENV DRIVE_DISK="local"
+<% if (postgres) { -%>
+ENV DB_CONNECTION="pg"
+<% } -%>
 <% } -%>
 CMD <%- JSON.stringify(startCommand, null, 1).replaceAll(/\n\s*/g, " ") %>

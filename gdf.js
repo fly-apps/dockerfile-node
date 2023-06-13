@@ -85,6 +85,26 @@ export class GDF {
     return !!this.#pj.dependencies?.gatsby
   }
 
+  // Does this application use adonisjs?
+  get adonisjs() {
+    return !!this.#pj.dependencies?.['@adonisjs/core']
+  }
+
+  get adonisjsFileUpload() {
+    console.log('adonisjsFileUpload', fs.existsSync(path.join(this._appdir, 'config/drive.ts')))
+    if (!fs.existsSync(path.join(this._appdir, 'config/drive.ts'))) {
+      return false
+    }
+
+    const driveConfig = fs.readFileSync(path.join(this._appdir, 'config/drive.ts'), 'utf8')
+    return driveConfig.includes("Application.tmpPath('uploads')")
+  }
+
+  // Does this application use postgres?
+  get postgres() {
+    return this.adonisjs && !!this.#pj.dependencies?.pg
+  }
+
   // Does this application use nest?
   get nestjs() {
     return !!this.#pj.dependencies?.['@nestjs/core']
@@ -305,6 +325,7 @@ export class GDF {
     if (this.nuxtjs) runtime = 'Nuxt.js'
     if (this.nestjs) runtime = 'NestJS'
     if (this.gatsby) runtime = 'Gatsby'
+    if (this.adonisjs) runtime = 'AdonisJS'
 
     if (this.prisma) runtime += '/Prisma'
 
@@ -321,6 +342,10 @@ export class GDF {
       const start = this.#pj.scripts.start
       const parsed = ShellQuote.parse(start)
       return parsed
+    }
+
+    if (this.adonisjs) {
+      return ['node', '/app/build/server.js']
     }
 
     if (this.gatsby) {
@@ -341,7 +366,7 @@ export class GDF {
 
   // Does this Dockerfile need an entrypoint script?
   get entrypoint() {
-    return this.prisma || this.options.swap
+    return this.prisma || this.options.swap || this.adonisjs
   }
 
   // determine if the entrypoint needs to be adjusted to run on Linux
