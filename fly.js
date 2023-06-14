@@ -174,7 +174,7 @@ GDF.extend(class extends GDF {
     ]
 
     for (const name of required) {
-      if (secrets.includes(name)) return
+      if (secrets.includes(name)) continue
       if (name !== 'SESSION_SECRET' && !this.epicStack) continue
 
       const value = crypto.randomBytes(32).toString('hex')
@@ -206,7 +206,7 @@ GDF.extend(class extends GDF {
     ]
 
     for (const name of required) {
-      if (secrets.includes(name)) return
+      if (secrets.includes(name)) continue
 
       const value = crypto.randomBytes(32).toString('hex')
 
