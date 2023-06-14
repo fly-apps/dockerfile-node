@@ -118,7 +118,7 @@ ENV CACHE_DATABASE_FILENAME="cache.db"
 ENV CACHE_DATABASE_PATH="$LITEFS_DIR/$CACHE_DATABASE_FILENAME"
 ENV PORT=<%= port+1 %>
 <% } else { -%>
-ENV DATABASE_URL="file:///<%= litefs ? 'litefs' : 'data' %>/sqlite.db"<% if (litefs) { %> \
+ENV DATABASE_URL="file://<%= litefs ? 'litefs' : 'data' %>/sqlite.db"<% if (litefs) { %> \
     PORT=<%= port+1 %> <% } %>
 <% } -%>
 
