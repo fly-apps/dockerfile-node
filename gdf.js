@@ -91,7 +91,6 @@ export class GDF {
   }
 
   get adonisjsFileUpload() {
-    console.log('adonisjsFileUpload', fs.existsSync(path.join(this._appdir, 'config/drive.ts')))
     if (!fs.existsSync(path.join(this._appdir, 'config/drive.ts'))) {
       return false
     }
