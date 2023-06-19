@@ -75,6 +75,9 @@
   "engines": {
     "node": ">=14"
   },
+  "dockerfile": {
+    "swap": "512M"
+  },
   "prisma": {
     "seed": "ts-node --require tsconfig-paths/register prisma/seed.ts"
   }
