@@ -41,8 +41,21 @@ RUN npm prune --omit=dev
 # Final stage for app image
 FROM base
 
+# Install packages needed for deployment
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y sqlite3 && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
 # Copy built application
 COPY --from=build /app /app
+
+# Setup sqlite3 on a separate volume
+RUN mkdir -p /data
+VOLUME /data
+ENV DATABASE_URL="file:///data/sqlite.db"
+
+# add shortcut for connecting to database CLI
+RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
 
 # Entrypoint prepares the database.
 ENTRYPOINT [ "/app/docker-entrypoint.js" ]

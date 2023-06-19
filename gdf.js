@@ -111,6 +111,14 @@ export class GDF {
 
   // Does this application use sqlite3?
   get sqlite3() {
+    if (this.prisma) {
+      try {
+        const schema = fs.readFileSync(path.join(this._appdir, 'prisma/schema.prisma'), 'utf-8')
+        if (/^\s*provider\s*=\s*"sqlite"/m.test(schema)) return true
+      } catch {
+      }
+    }
+
     return !!this.#pj.dependencies?.sqlite3 ||
       !!this.#pj.dependencies?.['better-sqlite3'] ||
       this.litefs
