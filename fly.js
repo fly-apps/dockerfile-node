@@ -21,12 +21,12 @@ GDF.extend(class extends GDF {
     // set secrets for remix apps
     if (this.remix) this.flyRemixSecrets(this.flyApp)
 
-    // set secrets for adonisjs apps
+    // set secrets for AdonisJS apps
     if (this.adonisjs) this.flyAdonisJsSecrets(this.flyApp)
 
     // set up for deploy
     if (fs.existsSync('.github/workflows/deploy.yml')) {
-      this.flyGithubPrep()
+      this.flyGitHubPrep()
     }
   }
 
@@ -153,73 +153,54 @@ GDF.extend(class extends GDF {
     )
   }
 
+  // set various secrets
+  flySecrets({ app, requiredSecrets, shouldSet = () => true }) {
+    let secrets = this.flySecrets
+
+    if (app !== this.flyApp) {
+      // get a list of secrets for selected app
+      try {
+        secrets = JSON.parse(
+          execSync(`${this.flyctl} secrets list --app ${app} --json`, { encoding: 'utf8' })
+        ).map(secret => secret.Name)
+      } catch {
+        return // likely got an error like "Could not find App"
+      }
+    }
+
+    for (const name of requiredSecrets) {
+      if (secrets.includes(name)) continue
+      if (!shouldSet(name)) continue
+
+      const value = crypto.randomBytes(32).toString('hex')
+
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl secrets set ${name}`)
+      execSync(
+        `${this.flyctl} secrets set ${name}=${value} --app ${app}`,
+        { stdio: 'inherit' }
+      )
+    }
+  }
+
   // set various secrets for Remix (and Epic Stack) applications
   flyRemixSecrets(app) {
-    let secrets = this.flySecrets
-
-    if (app !== this.flyApp) {
-      // get a list of secrets for selected app
-      try {
-        secrets = JSON.parse(
-          execSync(`${this.flyctl} secrets list --app ${app} --json`, { encoding: 'utf8' })
-        ).map(secret => secret.Name)
-      } catch {
-        return // likely got an error like "Could not find App"
-      }
-    }
-
-    const required = [
-      'SESSION_SECRET',
-      'INTERNAL_COMMAND_TOKEN'
-    ]
-
-    for (const name of required) {
-      if (secrets.includes(name)) return
-      if (name !== 'SESSION_SECRET' && !this.epicStack) continue
-
-      const value = crypto.randomBytes(32).toString('hex')
-
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl secrets set ${name}`)
-      execSync(
-        `${this.flyctl} secrets set ${name}=${value} --app ${app}`,
-        { stdio: 'inherit' }
-      )
-    }
+    this.flySecrets({
+      app,
+      requiredSecrets: ['SESSION_SECRET', 'INTERNAL_COMMAND_TOKEN'],
+      shouldSet: (name) => name === 'SESSION_SECRET' || this.epicStack
+    })
   }
 
+  // set various secrets for AdonisJS applications
   flyAdonisJsSecrets(app) {
-    let secrets = this.flySecrets
-
-    if (app !== this.flyApp) {
-      // get a list of secrets for selected app
-      try {
-        secrets = JSON.parse(
-          execSync(`${this.flyctl} secrets list --app ${app} --json`, { encoding: 'utf8' })
-        ).map(secret => secret.Name)
-      } catch {
-        return // likely got an error like "Could not find App"
-      }
-    }
-
-    const required = [
-      'APP_KEY'
-    ]
-
-    for (const name of required) {
-      if (secrets.includes(name)) return
-
-      const value = crypto.randomBytes(32).toString('hex')
-
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl secrets set ${name}`)
-      execSync(
-        `${this.flyctl} secrets set ${name}=${value} --app ${app}`,
-        { stdio: 'inherit' }
-      )
-    }
+    this.flySecrets({
+      app,
+      requiredSecrets: ['APP_KEY']
+    })
   }
 
-  // prep for deployment via github actions, inclusing settting up a staging app
-  flyGithubPrep() {
+  // prep for deployment via GitHub actions, including setting up a staging app
+  flyGitHubPrep() {
     const deploy = fs.readFileSync('.github/workflows/deploy.yml', 'utf-8')
 
     if (!fs.existsSync('.git')) {
