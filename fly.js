@@ -154,7 +154,7 @@ GDF.extend(class extends GDF {
   }
 
   // set various secrets
-  flySecrets({ app, requiredSecrets, shouldSet = () => true }) {
+  flySetSecrets({ app, requiredSecrets, shouldSet = () => true }) {
     let secrets = this.flySecrets
 
     if (app !== this.flyApp) {
@@ -169,7 +169,7 @@ GDF.extend(class extends GDF {
     }
 
     for (const name of requiredSecrets) {
-      if (secrets.includes(name)) continue
+      if (!secrets || secrets.includes(name)) continue
       if (!shouldSet(name)) continue
 
       const value = crypto.randomBytes(32).toString('hex')
@@ -184,7 +184,7 @@ GDF.extend(class extends GDF {
 
   // set various secrets for Remix (and Epic Stack) applications
   flyRemixSecrets(app) {
-    this.flySecrets({
+    this.flySetSecrets({
       app,
       requiredSecrets: ['SESSION_SECRET', 'INTERNAL_COMMAND_TOKEN'],
       shouldSet: (name) => name === 'SESSION_SECRET' || this.epicStack
@@ -193,7 +193,7 @@ GDF.extend(class extends GDF {
 
   // set various secrets for AdonisJS applications
   flyAdonisJsSecrets(app) {
-    this.flySecrets({
+    this.flySetSecrets({
       app,
       requiredSecrets: ['APP_KEY']
     })
