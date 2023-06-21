@@ -136,6 +136,7 @@ export class GDF {
 
     if (this.litefs) packages.push('ca-certificates', 'fuse3')
     if (this.remix && this.sqlite3) packages.push('sqlite3')
+    if (this.prisma) packages.push('openssl')
 
     return packages.sort()
   }
