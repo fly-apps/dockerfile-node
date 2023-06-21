@@ -43,7 +43,7 @@ FROM base
 
 # Install packages needed for deployment
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y sqlite3 && \
+    apt-get install --no-install-recommends -y openssl sqlite3 && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built application
