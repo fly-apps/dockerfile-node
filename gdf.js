@@ -148,6 +148,17 @@ export class GDF {
     return process.version.match(/\d+\.\d+\.\d+/)?.[0] || ltsVersion
   }
 
+  // what bun version should be used?
+  get bunVersion() {
+    if (this.#packager !== 'bun') return
+
+    try {
+      return execSync('bun --version', { encoding: 'utf8' })
+        .match(/\d+\.\d+\.\d+/)?.[0]
+    } catch {
+    }
+  }
+
   // classic version of yarn (installed by default)
   yarnClassic = '1.22.19'
 
@@ -194,7 +205,8 @@ export class GDF {
     const files = [
       'package-lock.json', '.npmrc',
       'pnpm-lock.yaml',
-      'yarn.lock', '.yarnrc'
+      'yarn.lock', '.yarnrc',
+      'bun.lockb'
     ]
 
     for (const file of files) {
@@ -212,10 +224,12 @@ export class GDF {
 
     const packageFiles = this.packageFiles
 
-    if (packageFiles.includes('yarn.lock')) {
-      this.#packager = 'yarn'
+    if (packageFiles.includes('bun.lockb')) {
+      this.#packager = 'bun'
     } else if (packageFiles.includes('pnpm-lock.yaml')) {
       this.#packager = 'pnpm'
+    } else if (packageFiles.includes('yarn.lock')) {
+      this.#packager = 'yarn'
     } else {
       this.#packager = 'npm'
     }
@@ -251,7 +265,7 @@ export class GDF {
         install += ' --production=false'
       } else if (this.pnpm) {
         install += ' --prod=false'
-      } else {
+      } else if (!this.bunVersion) {
         install += ' --include=dev'
       }
     }
@@ -285,6 +299,8 @@ export class GDF {
       }
     } else if (this.pnpm) {
       prune = 'pnpm prune --prod'
+    } else if (this.bunVersion) {
+      prune = 'rm -rf node_modules && \\\n    bun install --production'
     } else {
       prune = 'npm prune --omit=dev'
 
@@ -328,6 +344,7 @@ export class GDF {
   get runtime() {
     let runtime = 'Node.js'
 
+    if (this.bunVersion) runtime = 'Bun'
     if (this.remix) runtime = 'Remix'
     if (this.nextjs) runtime = 'Next.js'
     if (this.nuxtjs) runtime = 'Nuxt'

@@ -1,8 +1,14 @@
 # syntax = docker/dockerfile:1
 
+<% if (packager == "bun") { -%>
+# Adjust BUN_VERSION as desired
+ARG BUN_VERSION=<%= bunVersion %>
+FROM oven/bun:${BUN_VERSION} as base
+<% } else { -%>
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=<%= distroless ? parseInt(nodeVersion) : nodeVersion %>
 FROM node:${NODE_VERSION}-slim as <% if (distroless) { -%>build<% } else { %>base<% } %>
+<% } -%>
 
 <% if (!distroless) { -%>
 LABEL fly_launch_runtime="<%= runtime %>"
@@ -59,7 +65,7 @@ RUN <%= packager %> run build
 <% } -%>
 <% if (devDependencies && !nestjs && !adonisjs) { -%>
 # Remove development dependencies
-RUN <%= packagerPrune %>
+RUN <%- packagerPrune %>
 
 <% } -%>
 
