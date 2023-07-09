@@ -330,7 +330,7 @@ export class GDF {
 
     if (this.remix) runtime = 'Remix'
     if (this.nextjs) runtime = 'Next.js'
-    if (this.nuxtjs) runtime = 'Nuxt.js'
+    if (this.nuxtjs) runtime = 'Nuxt'
     if (this.nestjs) runtime = 'NestJS'
     if (this.gatsby) runtime = 'Gatsby'
     if (this.adonisjs) runtime = 'AdonisJS'

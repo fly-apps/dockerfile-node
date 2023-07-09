@@ -4,9 +4,9 @@
 ARG NODE_VERSION=xxx
 FROM node:${NODE_VERSION}-slim as base
 
-LABEL fly_launch_runtime="Nuxt.js"
+LABEL fly_launch_runtime="Nuxt"
 
-# Nuxt.js app lives here
+# Nuxt app lives here
 WORKDIR /app
 
 # Set production environment
