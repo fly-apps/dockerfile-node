@@ -17,16 +17,13 @@ npx --yes @flydotio/dockerfile@latest
 Or install it with your favorite package manager:
 
 ```
+bun add -d @flydotio/dockerfile
 npm install @flydotio/dockerfile --save-dev
 pnpm add -D @flydotio/dockerfile
 yarn add @flydotio/dockerfile --dev
 ```
 
-Once installed, you can run and re-run using:
-
-```
-npx dockerfile
-```
+Once installed, you can run and re-run using `npx dockerfile` for Node.js applications or `bunx dockerfile` for Bun applications.
 
 Options are saved between runs into `package.json`. To invert a boolean options, add or remove a no- prefix from the option name.
 
