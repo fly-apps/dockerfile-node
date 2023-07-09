@@ -13,6 +13,9 @@ jobs:
         with:
           node-version: 18
           cache: "npm"
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: npm ci
       - run: npm run eslint
