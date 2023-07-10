@@ -386,14 +386,14 @@ export class GDF {
       return start
     } else if (this.#pj.scripts?.start) {
       return [this.packager, 'run', 'start']
-    } else if (this.#pj.type == "module" && this.#pj.module) {
-      return [this.packager=="bun" ? "bun" : "node", this.#pj.module]
+    } else if (this.#pj.type === 'module' && this.#pj.module) {
+      return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.module]
     } else if (this.#pj.main) {
-      return [this.packager=="bun" ? "bun" : "node", this.#pj.main]
-    } else if (this.packager=="bun") {
-      return ["bun", "index.ts"]
+      return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.main]
+    } else if (this.packager === 'bun') {
+      return ['bun', 'index.ts']
     } else {
-      return ["node", "index.js"]
+      return ['node', 'index.js']
     }
   }
 
@@ -518,20 +518,20 @@ export class GDF {
         if (this.#answer !== 'a') {
           console.log(`${chalk.bold.red('conflict'.padStart(11))}  ${name}`)
 
-          if (typeof Bun == "undefined") {
-	    prompt = readline.createInterface({
-	      input: process.stdin,
-	      output: process.stdout
-	    })
+          if (typeof Bun === 'undefined') {
+            prompt = readline.createInterface({
+              input: process.stdin,
+              output: process.stdout
+            })
 
-	    // support node 16 which doesn't have a promisfied readline interface
-	    question = query => {
-	      return new Promise(resolve => {
-		prompt.question(query, resolve)
-	      })
-	    }
+            // support node 16 which doesn't have a promisfied readline interface
+            question = query => {
+              return new Promise(resolve => {
+                prompt.question(query, resolve)
+              })
+            }
           } else {
-	    question = query => global.prompt(query) || ''
+            question = query => global.prompt(query) || ''
           }
         }
 
@@ -570,7 +570,7 @@ export class GDF {
           }
         }
       } finally {
-        if (prompt && typeof Bun == "undefined") prompt.close()
+        if (prompt && typeof Bun === 'undefined') prompt.close()
       }
     } else {
       console.log(`${chalk.bold.green('create'.padStart(11, ' '))}  ${name}`)
