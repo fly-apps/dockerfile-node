@@ -11,6 +11,7 @@ import * as ShellQuote from 'shell-quote'
 
 // defaults for all the flags that will be saved
 export const defaults = {
+  dev: false,
   distroless: false,
   ignoreScripts: false,
   legacyPeerDeps: false,
@@ -259,14 +260,20 @@ export class GDF {
       install += ' --frozen-lockfile'
     }
 
-    // optionally include dev dependencies
-    if (this.devDependencies) {
-      if (this.yarn) {
-        install += ' --production=false'
-      } else if (this.pnpm) {
-        install += ' --prod=false'
-      } else if (!this.bunVersion) {
-        install += ' --include=dev'
+    // optionally include dev dependencies if a build is defined
+    if (this.build || this.dev) {
+      if (this.devDependencies) {
+        if (this.yarn) {
+          install += ' --production=false'
+        } else if (this.pnpm) {
+          install += ' --prod=false'
+        } else if (!this.bunVersion) {
+          install += ' --include=dev'
+        }
+      }
+    } else {
+      if (this.bunVersion) {
+        install += ' --production'
       }
     }
 
@@ -333,6 +340,17 @@ export class GDF {
   // Are there any development dependencies?
   get devDependencies() {
     return !!this.#pj.devDependencies
+  }
+
+  // Include devDependencies?
+  get dev() {
+    if (!this.devDependencies) return false
+
+    // frameworks that include migration dependencies in devDependencies
+    if (this.nestjs) return true
+    if (this.adonisjs) return true
+
+    return this.options.dev
   }
 
   // Is there a build script?

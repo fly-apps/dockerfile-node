@@ -62,11 +62,11 @@ COPY<% if (options.link) { %> --link<% } %> . .
 # Build application
 RUN <%= packager %> run build
 
-<% } -%>
-<% if (devDependencies && !nestjs && !adonisjs) { -%>
+<% if (devDependencies && !options.dev && !nestjs && !adonisjs) { -%>
 # Remove development dependencies
 RUN <%- packagerPrune %>
 
+<% } -%>
 <% } -%>
 
 # Final stage for app image

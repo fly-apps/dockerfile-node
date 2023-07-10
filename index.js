@@ -20,6 +20,10 @@ try {
 const options = yargs((hideBin(process.argv)))
   .usage('$0 [args]')
   .epilog('Options are saved between runs into package.json. more info:\n https://github.com/fly-apps/dockerfile-node#readme')
+  .option('dev', {
+    describe: 'install devDependencies in production',
+    type: 'boolean'
+  })
   .option('distroless', {
     describe: 'use base image from gcr.io/distroless',
     type: 'boolean'

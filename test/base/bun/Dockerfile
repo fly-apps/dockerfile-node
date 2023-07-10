@@ -22,14 +22,10 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link bun.lockb package.json ./
-RUN bun install
+RUN bun install --production
 
 # Copy application code
 COPY --link . .
-
-# Remove development dependencies
-RUN rm -rf node_modules && \
-    bun install --production
 
 
 # Final stage for app image

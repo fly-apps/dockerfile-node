@@ -22,13 +22,10 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link package-lock.json package.json ./
-RUN npm ci --include=dev --ignore-scripts
+RUN npm ci --ignore-scripts
 
 # Copy application code
 COPY --link . .
-
-# Remove development dependencies
-RUN npm prune --omit=dev
 
 
 # Final stage for app image
