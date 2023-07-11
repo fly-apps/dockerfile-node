@@ -273,7 +273,7 @@ export class GDF {
       }
     } else {
       if (this.bunVersion) {
-        install += ' --production'
+        install += ' --ci'
       }
     }
 
@@ -307,7 +307,7 @@ export class GDF {
     } else if (this.pnpm) {
       prune = 'pnpm prune --prod'
     } else if (this.bunVersion) {
-      prune = 'rm -rf node_modules && \\\n    bun install --production'
+      prune = 'rm -rf node_modules && \\\n    bun install --ci'
     } else {
       prune = 'npm prune --omit=dev'
 
