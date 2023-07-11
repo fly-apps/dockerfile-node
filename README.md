@@ -29,6 +29,7 @@ Options are saved between runs into `package.json`. To invert a boolean options,
 
 ### Options:
 
+* `--dev` - include `devDependencies` in the production image.
 * `--distroless` - use [distroless](https://github.com/GoogleContainerTools/distroless) base image to reduce image size
 * `--ignore-scripts` - do not execute any scripts defined in the project `package.json` and its dependencies.
 * `--force` - overwrite existing files
