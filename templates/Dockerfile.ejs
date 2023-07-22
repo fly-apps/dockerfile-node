@@ -31,6 +31,7 @@ RUN npm install -g yarn@$YARN_VERSION --force
 <% } -%>
 <% } else if (pnpm) { -%>
 
+# Install pnpm
 ARG PNPM_VERSION=<%= pnpmVersion %>
 RUN npm install -g pnpm@$PNPM_VERSION
 <% } %>

@@ -12,6 +12,7 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV=production
 
+# Install pnpm
 ARG PNPM_VERSION=xxx
 RUN npm install -g pnpm@$PNPM_VERSION
 
