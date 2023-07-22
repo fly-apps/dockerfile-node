@@ -65,6 +65,12 @@ To assis with this process, outputs of tests can be captured automatically.  Thi
 npm run test:capture
 ```
 
+To run a single test (or tests maching a pattern), run mocha directly with the `grep` option.
+
+```
+npx mocha --grep swap
+```
+
 Additionally, each the outputs in each test directory can be directly tested to ensure that they can be successfully built by running docker buildx directory passing in the necessary build arguments.  For example:
 
 ```
