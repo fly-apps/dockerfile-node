@@ -47,8 +47,9 @@ In addition to creating Dockerfiles and associated artifacts, `dockerfile-node` 
 If, and only if, `flyctl` is installed, part of the path, and there exists a valid `fly.toml` file in the current directory, dockerfile-node will:
 
  * configure and create volume(s) for sqlite3
+ * set swapfile size if that option is selected
  * attach consul for litefs
- * set secrets for remix apps
+ * set secrets for remix and adonis apps
  * initialize git
  * define a staging app if one is mentioned in `.github/workflows/deploy.yml`
 

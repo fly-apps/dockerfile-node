@@ -1,0 +1,6 @@
+
+[mounts]
+  source = "data"
+  destination="/data"
+
+swap_size_mb = 512

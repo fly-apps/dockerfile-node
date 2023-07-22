@@ -417,7 +417,7 @@ export class GDF {
 
   // Does this Dockerfile need an entrypoint script?
   get entrypoint() {
-    return this.prisma || this.options.swap || this.adonisjs
+    return this.prisma || (this.options.swap && !this.flySetup()) || this.adonisjs
   }
 
   // determine if the entrypoint needs to be adjusted to run on Linux

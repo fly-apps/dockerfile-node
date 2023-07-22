@@ -15,6 +15,9 @@ GDF.extend(class extends GDF {
     // create volume for sqlite3
     if (this.sqlite3) this.flyMakeVolume()
 
+    // setup swap
+    if (this.options.swap != null) this.flySetSwap()
+
     // attach consul for litefs
     if (this.litefs) this.flyAttachConsul(this.flyApp)
 
@@ -33,6 +36,8 @@ GDF.extend(class extends GDF {
   // Verify that fly.toml exists, flyctl is in the path, extract appname
   // and secrets, and save information into this object.
   flySetup() {
+    if ('flyctl' in this) return this.flyctl != null
+
     this.flyTomlFile = path.join(this._appdir, 'fly.toml')
 
     // ensure fly.toml exists
@@ -151,6 +156,43 @@ GDF.extend(class extends GDF {
       `${this.flyctl} consul attach --app ${app}`,
       { stdio: 'inherit' }
     )
+  }
+
+  // add volume to fly.toml and create it if app exists
+  flySetSwap() {
+    let size = 0
+
+    const suffixes = {
+      kib: 1024,
+      k: 1024,
+      kb: 1000,
+      mib: 1048576,
+      m: 1048576,
+      mb: 100000,
+      gib: 1073741824,
+      g: 1073741824,
+      gb: 100000000
+    }
+
+    const pattern = new RegExp(`^(\\d+)(${Object.keys(suffixes).join('|')})?$`, 'im')
+
+    const match = this.options.swap.match(pattern)
+
+    if (match) {
+      size = Math.round((parseInt(match[1]) * (suffixes[match[2].toLowerCase()] || 1)) / 1048576)
+    }
+
+    // add (or replace or remove) swap value
+    if (this.flyToml.includes('swap_size_mb')) {
+      this.flyToml = this.flyToml.replace(
+        /^(swap_size_mb\s*=\s*)(.*)(\n|$)/m,
+        size ? `$1${size}\n` : ''
+      )
+    } else if (size > 0) {
+      this.flyToml += `\nswap_size_mb = ${size}\n`
+    }
+
+    fs.writeFileSync(this.flyTomlFile, this.flyToml)
   }
 
   // set various secrets

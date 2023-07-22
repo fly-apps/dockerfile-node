@@ -3,12 +3,12 @@
 
 <% if (typeModule) { -%>
 import { spawn } from 'node:child_process'
-<% if (options.swap) { -%>
+<% if (options.swap  && !flySetup()) { -%>
 import { writeFileSync } from 'node:fs'
 <% } -%>
 <% } else { -%>
 const { spawn } = require('node:child_process')
-<% if (options.swap) { -%>
+<% if (options.swap && !flySetup()) { -%>
 const { writeFileSync } = require('node:fs')
 <% } -%>
 <% } -%>
@@ -31,7 +31,7 @@ if (process.env.DATABASE_URL) {
 
 <% } -%>
 ;(async() => {
-<% if (options.swap) { -%>
+<% if (options.swap && !flySetup()) { -%>
 <%= tab(1) %>// allocate swap space
 <%= tab(1) %>await exec('fallocate -l <%= options.swap %> /swapfile')
 <%= tab(1) %>await exec('chmod 0600 /swapfile')
