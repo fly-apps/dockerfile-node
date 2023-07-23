@@ -63,6 +63,75 @@ const options = yargs((hideBin(process.argv)))
     describe: 'make Dockerfile work for Windows users that may have set `git config --global core.autocrlf true`',
     type: 'boolean'
   })
+
+  .option('add-base', {
+    describe: 'additional packages to install for both build and deploy',
+    type: 'array'
+  })
+  .option('add-build', {
+    describe: 'additional packages to install for use during build',
+    type: 'array'
+  })
+  .option('add-deploy', {
+    alias: 'add',
+    describe: 'additional packages to install for for deployment',
+    type: 'array'
+  })
+  .option('remove-base', {
+    describe: 'remove from list of base packages',
+    type: 'array'
+  })
+  .option('remove-build', {
+    describe: 'remove from list of build packages',
+    type: 'array'
+  })
+  .option('remove-deploy', {
+    alias: 'remove',
+    describe: 'remove from list of deploy packages',
+    type: 'array'
+  })
+
+  .option('env-base', {
+    describe: 'additional environment variables for both build and deploy',
+    type: 'array'
+  })
+  .option('env-build', {
+    describe: 'additional environment variables for use during build',
+    type: 'array'
+  })
+  .option('env-deploy', {
+    alias: 'env',
+    describe: 'additional environment variables to set for deployment',
+    type: 'array'
+  })
+
+  .option('arg-base', {
+    alias: 'arg',
+    describe: 'additional build arguments for both build and deploy',
+    type: 'array'
+  })
+  .option('arg-build', {
+    describe: 'additional build arguments for use during build',
+    type: 'array'
+  })
+  .option('arg-deploy', {
+    describe: 'additional build arguments to set for deployment',
+    type: 'array'
+  })
+
+  .option('instructions-base', {
+    describe: 'additional instructions to add to the base stage',
+    type: 'string'
+  })
+  .option('instructions-build', {
+    describe: 'additional instructions to add to the build stage',
+    type: 'string'
+  })
+  .option('instructions-deploy', {
+    alias: 'instructions',
+    describe: 'additional instructions to add to the deploy stage',
+    type: 'string'
+  })
   .parse()
 
 // parse and update package.json for default options
@@ -82,6 +151,119 @@ if (pj) {
   }
 
   Object.assign(defaults, pj.dockerfile)
+
+  const df = pj.dockerfile
+
+  df.packages ||= {}
+  df.envs ||= {}
+  df.args ||= {}
+  df.instructions ||= {}
+
+  options.packages = { base: [], build: [], deploy: [], ...df.packages }
+  options.vars = { base: {}, build: {}, deploy: {}, ...df.envs }
+  options.args = { base: {}, build: {}, deploy: {}, ...df.args }
+  options.instructions = { base: null, build: null, deploy: null, ...df.instructions }
+
+  for (const stage of ['base', 'build', 'deploy']) {
+    // packages
+    for (const pkg of options[`add-${stage}`] || []) {
+      if (!options.packages[stage].includes(pkg)) {
+        options.packages[stage].push(pkg)
+        save = true
+      }
+    }
+
+    for (const pkg of options[`remove-${stage}`] || []) {
+      if (options.packages[stage].includes(pkg)) {
+        const index = options.packages[stage].indexOf(pkg)
+        options.packages[stage].splice(index, 1)
+        save = true
+      }
+    }
+
+    if (options.packages[stage].length === 0) {
+      delete df.packages[stage]
+    } else {
+      df.packages[stage] = options.packages[stage]
+    }
+
+    // environment variables
+    for (const env of options[`env-${stage}`] || []) {
+      const match = env.match(/^(\w+):?(.*)/)
+      const vars = options.vars[stage]
+      if (vars[match[1]]) {
+        if (match[2] === '') {
+          delete vars[match[1]]
+          save = true
+        } else if (vars[match[1]] !== match[2]) {
+          vars[match[1]] = match[2]
+          save = true
+        }
+      } else if (match[2] !== '') {
+        vars[match[1]] = match[2]
+        save = true
+      }
+    }
+
+    if (Object.keys(options.vars[stage]).length === 0) {
+      delete df.envs[stage]
+    } else {
+      df.envs[stage] = options.vars[stage]
+    }
+
+    // build arguments
+    for (const arg of options[`arg-${stage}`] || []) {
+      const match = arg.match(/^(\w+):?(.*)/)
+      const args = options.args[stage]
+      if (args[match[1]]) {
+        if (match[2] === '') {
+          delete args[match[1]]
+          save = true
+        } else if (args[match[1]] !== match[2]) {
+          args[match[1]] = match[2]
+          save = true
+        }
+      } else if (match[2] !== '') {
+        args[match[1]] = match[2]
+        save = true
+      }
+    }
+
+    if (Object.keys(options.args[stage]).length === 0) {
+      delete df.args[stage]
+    } else {
+      df.args[stage] = options.vars[stage]
+    }
+
+    // instructions
+    const instructions = options[`instructions-${stage}`]
+    if (instructions !== undefined) {
+      if (options.instructions[stage]) {
+        if (instructions === '') {
+          delete options.instructions[stage]
+          save = true
+        } else if (options.instructions[stage] !== instructions) {
+          options.instructions[stage] = instructions
+          save = true
+        }
+      } else if (instructions !== '') {
+        options.instructions[stage] = instructions
+        save = true
+      }
+    }
+
+    if (options.instructions[stage]) {
+      df.instructions[stage] = options.instructions[stage]
+    } else {
+      delete df.instructions[stage]
+    }
+  }
+
+  // remove empty collections
+  if (Object.keys(df.packages).length === 0) delete df.packages
+  if (Object.keys(df.envs).length === 0) delete df.envs
+  if (Object.keys(df.args).length === 0) delete df.args
+  if (Object.keys(df.instructions).length === 0) delete df.instructions
 
   if (save) {
     if (Object.keys(pj.dockerfile).length === 0) delete pj.dockerfile
