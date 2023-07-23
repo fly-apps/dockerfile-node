@@ -12,7 +12,7 @@ ENV NODE_ENV=production
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential 
+    apt-get install -y build-essential pkg-config python-is-python3
 
 # Install node modules
 COPY --link package-lock.json package.json ./

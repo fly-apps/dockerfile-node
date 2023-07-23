@@ -14,6 +14,13 @@ FROM node:${NODE_VERSION}-slim as <% if (distroless) { -%>build<% } else { %>bas
 LABEL fly_launch_runtime="<%= runtime %>"
 
 <% } -%>
+<% if (basePackages.length > 0) { -%>
+# Install packages needed for both build and deployment
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y <%= basePackages.join(' ')%> && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+<% } -%>
 # <%= runtime %> app lives here
 WORKDIR /app
 
@@ -47,8 +54,7 @@ FROM base as build
 <% } -%>
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y <%= python %> pkg-config build-essential <%
-    if (prisma) { %>openssl <% } %>
+    apt-get install -y <%= buildPackages.join(' ') %>
 
 # Install node modules
 COPY<% if (options.link) { %> --link<% } %> <%= packageFiles.join(' ') %> ./

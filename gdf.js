@@ -136,9 +136,31 @@ export class GDF {
       !!this.#pj.dependencies?.['litefs-js']
   }
 
-  // packages needed for deployment
+  // Packages needed for base stage
+  get basePackages() {
+    const packages = [...this.options.packages.base]
+
+    packages.sort()
+
+    return packages
+  }
+
+  // Packages needed for build stage
+  get buildPackages() {
+    const packages = ['pkg-config', 'build-essential', this.python]
+
+    if (this.prisma) packages.push('openssl')
+
+    packages.push(...this.options.packages.build)
+
+    packages.sort()
+
+    return packages
+  }
+
+  // packages needed for deploy stage
   get deployPackages() {
-    const packages = []
+    const packages = [...this.options.packages.deploy]
 
     if (this.litefs) packages.push('ca-certificates', 'fuse3')
     if (this.remix && this.sqlite3) packages.push('sqlite3')
