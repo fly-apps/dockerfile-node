@@ -485,16 +485,16 @@ export class GDF {
     if (options.force) this.#answer = 'a'
 
     // read instructions
-    for (const stage of ["base", "build", "deploy"]) {
+    for (const stage of ['base', 'build', 'deploy']) {
       if (options.instructions?.[stage]) {
         try {
           options.instructions[stage] = fs.readFileSync(
             path.join(this._appdir, options.instructions[stage]),
-            "utf-8"
+            'utf-8'
           ).trimEnd()
-        } catch(error) {
+        } catch (error) {
           console.error(error)
-          options.instructions[stage] = ""
+          options.instructions[stage] = ''
         }
       }
     }
