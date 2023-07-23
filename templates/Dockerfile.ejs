@@ -35,6 +35,10 @@ RUN npm install -g yarn@$YARN_VERSION --force
 ARG PNPM_VERSION=<%= pnpmVersion %>
 RUN npm install -g pnpm@$PNPM_VERSION
 <% } %>
+<% if (options.instructions.base) { -%>
+<%= options.instructions.base %>
+
+<% } -%>
 <% if (!distroless) { -%>
 
 # Throw-away build stage to reduce size of final image
@@ -68,6 +72,10 @@ RUN <%= packager %> run build
 RUN <%- packagerPrune %>
 
 <% } -%>
+<% } -%>
+<% if (options.instructions.build) { -%>
+<%= options.instructions.build %>
+
 <% } -%>
 
 # Final stage for app image
@@ -134,6 +142,10 @@ ENV DATABASE_URL="file:///<%= litefs ? 'litefs' : 'data' %>/sqlite.db"<% if (lit
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
 
 <% } -%>
+<% } -%>
+<% if (options.instructions.deploy) { -%>
+<%= options.instructions.deploy %>
+
 <% } -%>
 <% if (entrypoint) { -%>
 <% if (entrypointFixups.length) { -%>

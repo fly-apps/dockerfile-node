@@ -22,7 +22,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
       fs.cpSync(testdir, workdir, { recursive: true })
 
       const pj = fs.readFileSync(path.join(testdir, 'package.json'), 'utf-8')
-      const options = JSON.parse(pj).dockerfile || {}
+      const options = { ...defaults, ...(JSON.parse(pj).dockerfile || {}) }
       options.force = true
 
       it('should produce a dockerfile', async function() {

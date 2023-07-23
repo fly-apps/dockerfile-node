@@ -150,19 +150,19 @@ if (pj) {
     }
   }
 
-  Object.assign(defaults, pj.dockerfile)
-
   const df = pj.dockerfile
+
+  options.packages = { ...defaults.packages, ...df.packages }
+  options.vars = { ...defaults.vars, ...df.envs }
+  options.args = { ...defaults.args, ...df.args }
+  options.instructions = { base: null, build: null, deploy: null, ...df.instructions }
+
+  Object.assign(defaults, df)
 
   df.packages ||= {}
   df.envs ||= {}
   df.args ||= {}
   df.instructions ||= {}
-
-  options.packages = { base: [], build: [], deploy: [], ...df.packages }
-  options.vars = { base: {}, build: {}, deploy: {}, ...df.envs }
-  options.args = { base: {}, build: {}, deploy: {}, ...df.args }
-  options.instructions = { base: null, build: null, deploy: null, ...df.instructions }
 
   for (const stage of ['base', 'build', 'deploy']) {
     // packages

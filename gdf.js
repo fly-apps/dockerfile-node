@@ -19,7 +19,12 @@ export const defaults = {
   litefs: false,
   port: 0,
   swap: '',
-  windows: false
+  windows: false,
+
+  packages: { base: [], build: [], deploy: [] },
+  vars: { base: {}, build: {}, deploy: {} },
+  args: { base: {}, build: {}, deploy: {} },
+  instructions: { base: null, build: null, deploy: null }
 }
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
@@ -478,6 +483,21 @@ export class GDF {
     this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
 
     if (options.force) this.#answer = 'a'
+
+    // read instructions
+    for (const stage of ["base", "build", "deploy"]) {
+      if (options.instructions?.[stage]) {
+        try {
+          options.instructions[stage] = fs.readFileSync(
+            path.join(this._appdir, options.instructions[stage]),
+            "utf-8"
+          ).trimEnd()
+        } catch(error) {
+          console.error(error)
+          options.instructions[stage] = ""
+        }
+      }
+    }
 
     // select and render templates
     const templates = {
