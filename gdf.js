@@ -169,6 +169,66 @@ export class GDF {
     return packages.sort()
   }
 
+  sortEnv(env) {
+    if (Object.values(env).some(value => value.toString().includes("$"))) {
+      return Object.entries(env)
+        .map(([name, value]) => `${name}=${JSON.stringify(value)}`)
+        .join("\nENV ")
+    } else {
+      return Object.entries(env).sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([name, value]) => `${name}=${JSON.stringify(value)}`)
+        .join(" \\\n    ")
+    }
+  }
+
+  get baseEnv() {
+    let env = {
+      NODE_ENV: "production"
+    }
+
+    return this.sortEnv({ ...this.options.vars.base, ...env })
+  }
+
+  get buildEnv() {
+    let env = {}
+
+    return this.sortEnv({ ...this.options.vars.build, ...env })
+  }
+
+  get deployEnv() {
+    let env = {}
+
+    if (this.sqlite3) {
+      if (this.epicStack) {
+        env.DATABASE_FILENAME = "sqlite.db"
+        env.LITEFS_DIR = "/litefs"
+        env.DATABASE_PATH = "$LITEFS_DIR/$DATABASE_FILENAME"
+        env.DATABASE_URL = "file://$DATABASE_PATH"
+        env.CACHE_DATABASE_FILENAME = "cache.db"
+        env.CACHE_DATABASE_PATH = "$LITEFS_DIR/$CACHE_DATABASE_FILENAME"
+        env.PORT = this.port + 1
+      } else {
+        env.DATABASE_URL = `file:///${this.litefs ? 'litefs' : 'data'}/sqlite.db`
+        if (this.litefs) env.PORT = this.port + 1
+      }
+    }
+
+    if (this.nuxtjs) {
+      env.HOST = 0
+    }
+
+    if (this.adonisjs) {
+      env.HOST = "0.0.0.0"
+      env.PORT = "3000"
+      env.CACHE_VIEWS = "true"
+      env.SESSION_DRIVER = "cookie"
+      env.DRIVE_DISK = "local"
+      if (this.postgres) env.DB_CONNECTION = "pg"
+    }
+
+    return this.sortEnv({ ...this.options.vars.build, ...env })
+  }
+
   // what node version should be used?
   get nodeVersion() {
     const ltsVersion = '18.16.0'

@@ -10,7 +10,7 @@ LABEL fly_launch_runtime="AdonisJS"
 WORKDIR /app
 
 # Set production environment
-ENV NODE_ENV=production
+ENV NODE_ENV="production"
 
 
 # Throw-away build stage to reduce size of final image
@@ -42,10 +42,10 @@ ENTRYPOINT [ "/app/docker-entrypoint.js" ]
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-ENV HOST="0.0.0.0"
-ENV PORT="3000"
-ENV CACHE_VIEWS="true"
-ENV SESSION_DRIVER="cookie"
-ENV DRIVE_DISK="local"
-ENV DB_CONNECTION="pg"
+ENV CACHE_VIEWS="true" \
+    DB_CONNECTION="pg" \
+    DRIVE_DISK="local" \
+    HOST="0.0.0.0" \
+    PORT="3000" \
+    SESSION_DRIVER="cookie"
 CMD [ "node", "/app/build/server.js" ]

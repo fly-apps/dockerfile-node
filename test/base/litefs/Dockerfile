@@ -10,7 +10,7 @@ LABEL fly_launch_runtime="Node.js"
 WORKDIR /app
 
 # Set production environment
-ENV NODE_ENV=production
+ENV NODE_ENV="production"
 
 
 # Throw-away build stage to reduce size of final image
@@ -46,9 +46,8 @@ COPY --from=build /app /app
 # Setup sqlite3 on a separate volume
 RUN mkdir -p /data /litefs 
 VOLUME /data
-ENV DATABASE_URL="file:///litefs/sqlite.db" \
-    PORT=3001 
-
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
+ENV DATABASE_URL="file:///litefs/sqlite.db" \
+    PORT=3001
 CMD [ "npm", "run", "start" ]

@@ -8,7 +8,7 @@ FROM node:${NODE_VERSION}-slim as build
 WORKDIR /app
 
 # Set production environment
-ENV NODE_ENV=production
+ENV NODE_ENV="production"
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
@@ -31,7 +31,7 @@ LABEL fly_launch_runtime="Node.js"
 WORKDIR /app
 
 # Set production environment
-ENV NODE_ENV=production
+ENV NODE_ENV="production"
 
 # Copy built application
 COPY --from=build /app /app
