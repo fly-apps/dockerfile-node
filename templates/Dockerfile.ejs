@@ -134,12 +134,13 @@ VOLUME /app/tmp/uploads
 # Setup sqlite3 on a separate volume
 RUN mkdir -p /data<% if (litefs) { %> /litefs <% } %>
 VOLUME /data
+
 <% } -%>
 <% if (sqlite3) { -%>
 <% if (remix) { -%>
-
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
+
 <% } -%>
 <% } -%>
 <% if (options.instructions.deploy) { -%>
