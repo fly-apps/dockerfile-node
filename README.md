@@ -40,6 +40,17 @@ Options are saved between runs into `package.json`. To invert a boolean options,
 * `--swap=n` - allocate swap space.  See [falloc options](https://man7.org/linux/man-pages/man1/fallocate.1.html#OPTIONS) for suffixes
 * `--windows` - make Dockerfile work for Windows users that may have set `git config --global core.autocrlf true`.
 
+### Add a package/environment variable/build argument:
+
+Not all of your needs can be determined by scanning your application.  For example, I like to add [vim](https://www.vim.org/) and [procps](https://packages.debian.org/bullseye/procps).
+
+ * `--add package...` - add one or more debian packages
+ * `--arg=name:value` - add a [build argument](https://docs.docker.com/engine/reference/builder/#arg)
+ * `--env=name:value` - add an environment variable
+ * `--remove package...` - remove package from "to be added" list
+
+ Each of these can be tailored to a specific build phase by adding `-base`, `-build`, or `-deploy` after the flag name (e.g `--add-build freetds-dev --add-deploy freetds-bin`).  If no such suffix is found, the default for arg is `-base`, and the default for the rest is `-deploy`.  Removal of an arg or environment variable is done by leaving the value blank (e.g `--env-build=PORT:`).
+
 ## Platform specific processing
 
 In addition to creating Dockerfiles and associated artifacts, `dockerfile-node` can run platform specific processing.  At the present time the first and only platform taking advantage of this is naturally fly.io.
