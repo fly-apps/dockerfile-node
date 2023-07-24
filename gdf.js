@@ -186,13 +186,11 @@ export class GDF {
       NODE_ENV: 'production'
     }
 
-    return this.sortEnv({ ...this.options.vars.base, ...env })
+    return { ...this.options.vars.base, ...env }
   }
 
   get buildEnv() {
-    const env = {}
-
-    return this.sortEnv({ ...this.options.vars.build, ...env })
+    return { ...this.options.vars.build }
   }
 
   get deployEnv() {
@@ -226,7 +224,25 @@ export class GDF {
       if (this.postgres) env.DB_CONNECTION = 'pg'
     }
 
-    return this.sortEnv({ ...this.options.vars.build, ...env })
+    return { ...this.options.vars.build, ...env }
+  }
+
+  emitEnv(env) {
+    if (Object.values(env).some(value => value.toString().includes('$'))) {
+      return 'ENV ' + Object.entries(env)
+        .map(([name, value]) => `${name}=${JSON.stringify(value)}`)
+        .join('\nENV ')
+    } else {
+      return 'ENV ' + Object.entries(env).sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([name, value]) => `${name}=${JSON.stringify(value)}`)
+        .join(' \\\n    ')
+    }
+  }
+
+  emitArgs(args) {
+    return 'ARG ' + Object.entries(args)
+      .map(([name, value]) => `${name}=${JSON.stringify(value)}`)
+      .join(' \\\n    ')
   }
 
   // what node version should be used?

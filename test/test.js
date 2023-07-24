@@ -23,10 +23,11 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
 
       const pj = fs.readFileSync(path.join(testdir, 'package.json'), 'utf-8')
       const options = { ...defaults, ...(JSON.parse(pj).dockerfile || {}) }
+      if (options.envs) options.vars = options.envs
       options.force = true
 
       it('should produce a dockerfile', async function() {
-        await new GDF().run(workdir, { ...defaults, ...options })
+        await new GDF().run(workdir, options)
 
         const actualResults = fs.readFileSync(path.join(workdir, 'Dockerfile'), 'utf-8')
           .replaceAll(/^(ARG\s+\w+\s*=).*?(\s*\\?)$/gm, '$1xxx$2')
