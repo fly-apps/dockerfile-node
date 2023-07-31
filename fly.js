@@ -24,7 +24,7 @@ GDF.extend(class extends GDF {
     // set secrets, healthcheck for remix apps
     if (this.remix) {
       this.flyRemixSecrets(this.flyApp)
-      this.flyHealthCheck("/healthcheck")
+      this.flyHealthCheck('/healthcheck')
     }
 
     // set secrets for AdonisJS apps
@@ -231,10 +231,10 @@ GDF.extend(class extends GDF {
   flyHealthCheck(endpoint) {
     if (this.flyToml.match(/\[\[(http_)?services?.(http_)?checks\]\]/)) return
 
-    this.flyToml += '\n[[http_service.checks]]\n  grace_period = \"10s\"\n' +
-      '  interval = \"30s\"\n  method = \"GET\"\n  timeout = \"5s\"\n' +
+    this.flyToml += '\n[[http_service.checks]]\n  grace_period = "10s"\n' +
+      '  interval = "30s"\n  method = "GET"\n  timeout = "5s"\n' +
       `  path = ${JSON.stringify(endpoint)}\n`
-      
+
     fs.writeFileSync(this.flyTomlFile, this.flyToml)
   }
 
