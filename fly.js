@@ -25,6 +25,7 @@ GDF.extend(class extends GDF {
     if (this.remix) {
       this.flyRemixSecrets(this.flyApp)
       this.flyHealthCheck('/healthcheck')
+      if (this.postgres) this.flyRelease('npx prisma migrate deploy')
     }
 
     // set secrets for AdonisJS apps
@@ -225,6 +226,15 @@ GDF.extend(class extends GDF {
         { stdio: 'inherit' }
       )
     }
+  }
+
+  // add a deploy/release step
+  flyRelease(command) {
+    if (this.flyToml.includes('[deploy]')) return
+
+    this.flyToml += `\n[deploy]\n  release_command = ${JSON.stringify(command)}`
+
+    fs.writeFileSync(this.flyTomlFile, this.flyToml)
   }
 
   // set healthcheck endpoint

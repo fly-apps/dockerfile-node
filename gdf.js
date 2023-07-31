@@ -107,6 +107,14 @@ export class GDF {
 
   // Does this application use postgres?
   get postgres() {
+    if (this.prisma) {
+      try {
+        const schema = fs.readFileSync(path.join(this._appdir, 'prisma/schema.prisma'), 'utf-8')
+        if (/^\s*provider\s*=\s*"postgresql"/m.test(schema)) return true
+      } catch {
+      }
+    }
+
     return this.adonisjs && !!this.#pj.dependencies?.pg
   }
 
@@ -520,7 +528,9 @@ export class GDF {
 
   // Does this Dockerfile need an entrypoint script?
   get entrypoint() {
-    return this.prisma || (this.options.swap && !this.flySetup()) || this.adonisjs
+    return (this.prisma && this.sqlite3) ||
+      (this.options.swap && !this.flySetup()) ||
+      this.adonisjs
   }
 
   // determine if the entrypoint needs to be adjusted to run on Linux
