@@ -4,3 +4,11 @@
   destination="/data"
 
 swap_size_mb = 512
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/healthcheck"
+'

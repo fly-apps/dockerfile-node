@@ -21,8 +21,11 @@ GDF.extend(class extends GDF {
     // attach consul for litefs
     if (this.litefs) this.flyAttachConsul(this.flyApp)
 
-    // set secrets for remix apps
-    if (this.remix) this.flyRemixSecrets(this.flyApp)
+    // set secrets, healthcheck for remix apps
+    if (this.remix) {
+      this.flyRemixSecrets(this.flyApp)
+      this.flyHealthCheck("/healthcheck")
+    }
 
     // set secrets for AdonisJS apps
     if (this.adonisjs) this.flyAdonisJsSecrets(this.flyApp)
@@ -222,6 +225,17 @@ GDF.extend(class extends GDF {
         { stdio: 'inherit' }
       )
     }
+  }
+
+  // set healthcheck endpoint
+  flyHealthCheck(endpoint) {
+    if (this.flyToml.match(/\[\[(http_)?services?.http_checks\]\]/)) return
+
+    this.flyToml += '\n[[http_service.checks]]\n  grace_period = \"10s\"\n' +
+      '  interval = \"30s\"\n  method = \"GET\"\n  timeout = \"5s\"\n' +
+      `  path = ${JSON.stringify(endpoint)}\n'`
+      
+    fs.writeFileSync(this.flyTomlFile, this.flyToml)
   }
 
   // set various secrets for Remix (and Epic Stack) applications
