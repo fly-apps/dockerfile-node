@@ -11,4 +11,3 @@ swap_size_mb = 512
   method = "GET"
   timeout = "5s"
   path = "/healthcheck"
-'

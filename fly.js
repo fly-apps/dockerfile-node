@@ -229,11 +229,11 @@ GDF.extend(class extends GDF {
 
   // set healthcheck endpoint
   flyHealthCheck(endpoint) {
-    if (this.flyToml.match(/\[\[(http_)?services?.http_checks\]\]/)) return
+    if (this.flyToml.match(/\[\[(http_)?services?.(http_)?checks\]\]/)) return
 
     this.flyToml += '\n[[http_service.checks]]\n  grace_period = \"10s\"\n' +
       '  interval = \"30s\"\n  method = \"GET\"\n  timeout = \"5s\"\n' +
-      `  path = ${JSON.stringify(endpoint)}\n'`
+      `  path = ${JSON.stringify(endpoint)}\n`
       
     fs.writeFileSync(this.flyTomlFile, this.flyToml)
   }
