@@ -168,7 +168,7 @@ RUN <%- entrypointFixups.join(' && \\\n    ') %>
 <% } else { -%>
 # Entrypoint sets up the container.
 <% } -%>
-ENTRYPOINT [ <% if (litefs) { %>"litefs", "mount", "--", <% } %>"/app/<%= configDir %>docker-entrypoint.js" ]
+ENTRYPOINT <%- entrypoint %>
 
 <% } -%>
 <% if (Object.keys(options.args.deploy).length > 0) { -%>

@@ -20,6 +20,10 @@ try {
 const options = yargs((hideBin(process.argv)))
   .usage('$0 [args]')
   .epilog('Options are saved between runs into package.json. more info:\n https://github.com/fly-apps/dockerfile-node#readme')
+  .option('cmd', {
+    describe: 'CMD to be used in the Dockerfile',
+    type: 'string'
+  })
   .option('dev', {
     describe: 'install devDependencies in production',
     type: 'boolean'
@@ -27,6 +31,10 @@ const options = yargs((hideBin(process.argv)))
   .option('distroless', {
     describe: 'use base image from gcr.io/distroless',
     type: 'boolean'
+  })
+  .option('entrypoint', {
+    describe: 'ENTRYPOINT to be used in the Dockerfile',
+    type: 'string'
   })
   .option('force', {
     describe: 'force overwrite of existing files',

@@ -11,7 +11,9 @@ import * as ShellQuote from 'shell-quote'
 
 // defaults for all the flags that will be saved
 export const defaults = {
+  cmd: '',
   dev: false,
+  entrypoint: '',
   distroless: false,
   ignoreScripts: false,
   legacyPeerDeps: false,
@@ -492,6 +494,8 @@ export class GDF {
 
   // command to start the web server
   get startCommand() {
+    if (this.options.cmd) return JSON.stringify(this.options.cmd)
+
     if (this.options.distroless) {
       const start = this.#pj.scripts.start
       const parsed = ShellQuote.parse(start)
@@ -526,11 +530,18 @@ export class GDF {
     }
   }
 
-  // Does this Dockerfile need an entrypoint script?
+  // Entrypoint script
   get entrypoint() {
-    return (this.prisma && this.sqlite3) ||
+    if (this.options.entrypoint) return JSON.stringify(this.options.entrypoint)
+
+    if (!((this.prisma && this.sqlite3) ||
       (this.options.swap && !this.flySetup()) ||
-      this.adonisjs
+      this.adonisjs)) return null
+
+    const entrypoint = [`/app/${this.configDir}docker-entrypoint.js`]
+    if (this.litefs) entrypoint.unshift('litefs', 'mount', '--')
+
+    return JSON.stringify(entrypoint, null, 1).replace(/\n\s*/g, ' ')
   }
 
   // determine if the entrypoint needs to be adjusted to run on Linux
