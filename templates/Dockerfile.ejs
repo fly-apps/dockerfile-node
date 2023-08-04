@@ -53,7 +53,7 @@ ARG PNPM_VERSION=<%= pnpmVersion %>
 RUN npm install -g pnpm@$PNPM_VERSION
 <% } %>
 <% if (options.instructions.base) { -%>
-<%= options.instructions.base %>
+<%- options.instructions.base %>
 
 <% } -%>
 <% if (!distroless) { -%>
@@ -94,7 +94,7 @@ RUN <%- packagerPrune %>
 <% } -%>
 <% } -%>
 <% if (options.instructions.build) { -%>
-<%= options.instructions.build %>
+<%- options.instructions.build %>
 
 <% } -%>
 
@@ -154,7 +154,7 @@ RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-c
 <% } -%>
 <% } -%>
 <% if (options.instructions.deploy) { -%>
-<%= options.instructions.deploy %>
+<%- options.instructions.deploy %>
 
 <% } -%>
 <% if (entrypoint) { -%>
