@@ -57,6 +57,10 @@ const options = yargs((hideBin(process.argv)))
     describe: 'use COPY --link whenever possible',
     type: 'boolean'
   })
+  .option('nginx-root', {
+    describe: 'Root directory containing static files to be served by nginx',
+    type: 'string'
+  })
   .option('port', {
     describe: 'expose port',
     type: 'integer'

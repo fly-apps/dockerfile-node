@@ -19,6 +19,7 @@ export const defaults = {
   legacyPeerDeps: false,
   link: true,
   litefs: false,
+  nginxRoot: '',
   port: 0,
   swap: '',
   windows: false,
@@ -175,6 +176,7 @@ export class GDF {
     if (this.litefs) packages.push('ca-certificates', 'fuse3')
     if (this.remix && this.sqlite3) packages.push('sqlite3')
     if (this.prisma) packages.push('openssl')
+    if (this.options.nginxRoot) packages.push('nginx')
 
     return packages.sort()
   }
@@ -351,6 +353,21 @@ export class GDF {
     return this.#packager
   }
 
+  // install modules needed to run
+  installModules() {
+    const modules = []
+
+    if (this.options.nginxRoot && !this.#pj.dependencies?.foreman) {
+      modules.push('foreman')
+    }
+
+    if (modules.length === 0) return
+    const add = this.packager === 'npm' ? 'install' : 'add'
+    for (const module of modules) {
+      execSync(`${this.packager} ${add} ${module}`, { stdio: 'inherit' })
+    }
+  }
+
   // install all dependencies in package.json
   get packagerInstall() {
     let install = `${this.packager} install`
@@ -492,6 +509,10 @@ export class GDF {
     return this.runtime.split('/')[0].replaceAll('.', '').toLowerCase()
   }
 
+  get foreman() {
+    if (this.options.nginxRoot) return true
+  }
+
   // command to start the web server
   get startCommand() {
     if (this.options.cmd) return JSON.stringify(this.options.cmd)
@@ -601,6 +622,9 @@ export class GDF {
     this._appdir = appdir
     this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
 
+    // install modules needed to run
+    this.installModules()
+
     if (options.force) this.#answer = 'a'
 
     // read instructions
@@ -629,6 +653,10 @@ export class GDF {
 
     if (this.litefs) {
       templates['litefs.yml.ejs'] = `${this.configDir}litefs.yml`
+    }
+
+    if (this.options.nginxRoot) {
+      this.options.nginxRoot = path.join('/app', this.options.nginxRoot)
     }
 
     for (const [template, filename] of Object.entries(templates)) {

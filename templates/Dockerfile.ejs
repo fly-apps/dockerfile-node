@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1
 
-<% if (packager == "bun") { -%>
+<% if (packager === "bun") { -%>
 # Adjust BUN_VERSION as desired
 ARG BUN_VERSION=<%= bunVersion %>
 FROM oven/bun:${BUN_VERSION} as base
@@ -176,9 +176,48 @@ ENTRYPOINT <%- entrypoint %>
 <%- emitArgs(options.args.deploy) %>
             
 <% } -%>
+<% if (options.nginxRoot) { -%>
+# configure nginx
+RUN sed -i 's/access_log\s.*;/access_log stdout;/' /etc/nginx/nginx.conf && \
+    sed -i 's/error_log\s.*;/error_log stderr info;/' /etc/nginx/nginx.conf
+
+COPY <<-"EOF" /etc/nginx/sites-available/default
+server {
+  listen <%= port %> default_server;
+  listen [::]:<%= port %> default_server;
+  access_log stdout;
+
+  root <%= options.nginxRoot %>;
+
+  location / {
+    try_files $uri @backend;
+  }
+
+  location @backend {
+    proxy_pass http://localhost:<%= port + 1 %>;
+    proxy_set_header Host $http_host;
+  }
+}
+EOF
+
+<% } -%>
+<% if (foreman) { -%>
+# Build a Procfile for production use
+COPY <<-"EOF" /app/Procfile.prod
+<% if (options.nginxRoot) { -%>
+nginx: /usr/sbin/nginx -g "daemon off;"
+<% } -%>
+app: PORT=<%= port+1 %> <%- startCommand.join(" ") %>
+EOF
+
+<% } -%>
 # Start the server by default, this can be overwritten at runtime
 EXPOSE <%= port %>
 <% if (Object.keys(deployEnv).length > 0) { -%>
 <%- emitEnv(deployEnv) %>
 <% } -%>
+<% if (foreman) { -%>
+CMD [ "<%= packager === "bun" ? 'bunx' : 'npx' %>", "foreman", "start", "--procfile", "Procfile.prod" ]
+<% } else { -%>
 CMD <%- JSON.stringify(startCommand, null, 1).replaceAll(/\n\s*/g, " ") %>
+<% } -%>
