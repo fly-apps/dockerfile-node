@@ -54,5 +54,5 @@ ARG A3=xxx
             
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-ENV E2="V2"
+ENV E3="V3"
 CMD [ "npm", "run", "start" ]

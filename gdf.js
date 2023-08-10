@@ -236,7 +236,7 @@ export class GDF {
       if (this.postgres) env.DB_CONNECTION = 'pg'
     }
 
-    return { ...this.options.vars.build, ...env }
+    return { ...this.options.vars.deploy, ...env }
   }
 
   emitEnv(env) {
