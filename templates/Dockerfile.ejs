@@ -218,6 +218,8 @@ EXPOSE <%= port %>
 <% } -%>
 <% if (foreman) { -%>
 CMD [ "<%= packager === "bun" ? 'bunx' : 'npx' %>", "foreman", "start", "--procfile", "Procfile.prod" ]
-<% } else { -%>
+<% } else if (Array.isArray(startCommand)) { -%>
 CMD <%- JSON.stringify(startCommand, null, 1).replaceAll(/\n\s*/g, " ") %>
+<% } else { -%>
+CMD <%- startCommand %>
 <% } -%>

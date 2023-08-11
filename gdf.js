@@ -515,7 +515,7 @@ export class GDF {
 
   // command to start the web server
   get startCommand() {
-    if (this.options.cmd) return JSON.stringify(this.options.cmd)
+    if (this.options.cmd) return this.options.cmd
 
     if (this.options.distroless) {
       const start = this.#pj.scripts.start
