@@ -346,6 +346,10 @@ export class GDF {
       this.#packager = 'pnpm'
     } else if (packageFiles.includes('yarn.lock')) {
       this.#packager = 'yarn'
+    } else if (packageFiles.includes('package-lock.json')) {
+      this.#packager = 'npm'
+    } else if (typeof Bun !== 'undefined') {
+      this.#packager = 'bun'
     } else {
       this.#packager = 'npm'
     }
