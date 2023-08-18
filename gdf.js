@@ -177,6 +177,7 @@ export class GDF {
     if (this.remix && this.sqlite3) packages.push('sqlite3')
     if (this.prisma) packages.push('openssl')
     if (this.options.nginxRoot) packages.push('nginx')
+    if (this.#pj.dependencies?.['fluent-ffmpeg']) packages.push('ffmpeg')
 
     return packages.sort()
   }
