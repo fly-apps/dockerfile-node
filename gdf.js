@@ -147,6 +147,11 @@ export class GDF {
       !!this.#pj.dependencies?.['litefs-js']
   }
 
+  // Does this application use puppeteer?
+  get puppeteer() {
+    return !!this.#pj.dependencies?.puppeteer
+  }
+
   // Packages needed for base stage
   get basePackages() {
     const packages = [...this.options.packages.base]
@@ -178,6 +183,7 @@ export class GDF {
     if (this.prisma) packages.push('openssl')
     if (this.options.nginxRoot) packages.push('nginx')
     if (this.#pj.dependencies?.['fluent-ffmpeg']) packages.push('ffmpeg')
+    if (this.puppeteer) packages.push('chromium', 'chromium-sandbox')
 
     return packages.sort()
   }
@@ -236,6 +242,8 @@ export class GDF {
       env.DRIVE_DISK = 'local'
       if (this.postgres) env.DB_CONNECTION = 'pg'
     }
+
+    if (this.puppeteer) env.PUPPETEER_EXECUTABLE_PATH = '/usr/bin/chromium'
 
     return { ...this.options.vars.deploy, ...env }
   }
