@@ -1,13 +1,7 @@
 {
-	"include": [
-		"remix.env.d.ts",
-		"**/*.ts",
-		"**/*.tsx",
-		"./tests/setup/setup-test-env.ts"
-	],
+	"include": ["**/*.ts", "**/*.tsx"],
 	"compilerOptions": {
 		"lib": ["DOM", "DOM.Iterable", "ES2022"],
-		"types": [],
 		"isolatedModules": true,
 		"esModuleInterop": true,
 		"jsx": "react-jsx",
@@ -19,17 +13,15 @@
 		"noImplicitAny": true,
 		"allowJs": true,
 		"forceConsistentCasingInFileNames": true,
-		"baseUrl": ".",
 		"paths": {
-			"~/*": ["./app/*"],
-			"prisma/*": ["./prisma/*"],
-			"tests/*": ["./tests/*"]
+			"#*": ["./*"],
+			"@/icon-name": [
+				"./app/components/ui/icons/name.d.ts",
+				"./types/icon-name.d.ts"
+			]
 		},
 		"skipLibCheck": true,
 		"allowImportingTsExtensions": true,
-		"typeRoots": ["./types", "./node_modules/@types"],
-
-		// Remix takes care of building everything in `remix build`.
 		"noEmit": true
 	}
 }
