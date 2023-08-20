@@ -12,9 +12,6 @@ LABEL fly_launch_runtime="Node.js"
 # Node.js app lives here
 WORKDIR /app
 
-# Build arguments 
-ARG A2=xxx
-
 # Set production environment
 ENV E1="V1" \
     NODE_ENV="production"
@@ -22,6 +19,9 @@ ENV E1="V1" \
 
 # Throw-away build stage to reduce size of final image
 FROM base as build
+
+# Build arguments
+ARG A2=xxx
 
 ENV E2="V2"
 

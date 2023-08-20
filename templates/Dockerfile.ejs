@@ -29,11 +29,6 @@ RUN apt-get update -qq && \
 # <%= runtime %> app lives here
 WORKDIR /app
 
-<% if (Object.keys(options.args.build).length > 0) { -%>
-# Build arguments 
-<%- emitArgs(options.args.build) %>
-
-<% } -%>
 # Set production environment
 <%- emitEnv(baseEnv) %>
 <% if (yarn && yarnVersion != yarnClassic) { -%>
@@ -60,6 +55,11 @@ RUN npm install -g pnpm@$PNPM_VERSION
 
 # Throw-away build stage to reduce size of final image
 FROM base as build
+
+<% } -%>
+<% if (Object.keys(options.args.build).length > 0) { -%>
+# Build arguments
+<%- emitArgs(options.args.build) %>
 
 <% } -%>
 <% if (Object.keys(buildEnv).length > 0) { -%>
