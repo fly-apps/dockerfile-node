@@ -83,7 +83,7 @@ RUN npx prisma generate
 # Copy application code
 COPY<% if (options.link) { %> --link<% } %> . .
 
-<% if (build) { -%>
+<% if (build && options.build != "defer") { -%>
 # Build application
 RUN <%= packager %> run build
 

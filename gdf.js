@@ -11,6 +11,7 @@ import * as ShellQuote from 'shell-quote'
 
 // defaults for all the flags that will be saved
 export const defaults = {
+  build: '',
   cmd: '',
   dev: false,
   entrypoint: '',
@@ -404,7 +405,7 @@ export class GDF {
     }
 
     // optionally include dev dependencies if a build is defined
-    if (this.build || this.dev) {
+    if (this.build || this.dev || this.options.build === 'defer') {
       if (this.devDependencies) {
         if (this.yarn) {
           install += ' --production=false'
