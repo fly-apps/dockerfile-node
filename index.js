@@ -148,6 +148,16 @@ const options = yargs((hideBin(process.argv)))
     describe: 'additional instructions to add to the deploy stage',
     type: 'string'
   })
+
+  .option('mount-secret', {
+    describe: 'list of secrets to mount during the build step',
+    type: 'array'
+  })
+  .option('unmount-secret', {
+    describe: 'remove secret from the list to mount during the build step',
+    type: 'array'
+  })
+
   .parse()
 
 // parse and update package.json for default options
@@ -179,6 +189,7 @@ if (pj) {
   df.envs ||= {}
   df.args ||= {}
   df.instructions ||= {}
+  df.secrets ||= []
 
   for (const stage of ['base', 'build', 'deploy']) {
     // packages
@@ -275,11 +286,27 @@ if (pj) {
     }
   }
 
+  // mount/unmount secrets
+  for (const secret of options.mountSecret || []) {
+    if (!df.secrets.includes(secret)) {
+      save = true
+      df.secrets.push(secret)
+    }
+  }
+  for (const secret of options.unmountSecret || []) {
+    if (df.secrets.includes(secret)) {
+      save = true
+      df.secrets = df.secrets.filter(value => value !== secret)
+    }
+  }
+  options.secrets = df.secrets
+
   // remove empty collections
   if (Object.keys(df.packages).length === 0) delete df.packages
   if (Object.keys(df.envs).length === 0) delete df.envs
   if (Object.keys(df.args).length === 0) delete df.args
   if (Object.keys(df.instructions).length === 0) delete df.instructions
+  if (df.secrets.length === 0) delete df.secrets
 
   if (save) {
     if (Object.keys(pj.dockerfile).length === 0) delete pj.dockerfile

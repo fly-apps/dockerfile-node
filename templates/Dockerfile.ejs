@@ -85,7 +85,7 @@ COPY<% if (options.link) { %> --link<% } %> . .
 
 <% if (build && options.build != "defer") { -%>
 # Build application
-RUN <%= packager %> run build
+RUN <%- mountSecrets %><%= packager %> run build
 
 <% if (devDependencies && !options.dev && !nestjs && !adonisjs) { -%>
 # Remove development dependencies

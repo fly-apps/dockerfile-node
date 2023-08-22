@@ -28,7 +28,8 @@ export const defaults = {
   packages: { base: [], build: [], deploy: [] },
   vars: { base: {}, build: {}, deploy: {} },
   args: { base: {}, build: {}, deploy: {} },
-  instructions: { base: null, build: null, deploy: null }
+  instructions: { base: null, build: null, deploy: null },
+  secrets: []
 }
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
@@ -265,6 +266,24 @@ export class GDF {
     return 'ARG ' + Object.entries(args)
       .map(([name, value]) => `${name}=${JSON.stringify(value)}`)
       .join(' \\\n    ')
+  }
+
+  get mountSecrets() {
+    if (this.options.secrets.length === 0) return ''
+
+    const lines = []
+
+    for (const secret of this.options.secrets) {
+      lines.push(`--mount=type=secret,id=${secret}`)
+    }
+
+    for (const secret of this.options.secrets) {
+      lines.push(`${secret}="$(cat /run/secrets/${secret})"`)
+    }
+
+    lines.push('')
+
+    return lines.join(' \\\n    ')
   }
 
   // what node version should be used?
