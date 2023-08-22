@@ -55,6 +55,15 @@ Not all of your needs can be determined by scanning your application.  For examp
 
  Each of these can be tailored to a specific build phase by adding `-base`, `-build`, or `-deploy` after the flag name (e.g `--add-build freetds-dev --add-deploy freetds-bin`).  If no such suffix is found, the default for arg is `-base`, and the default for the rest is `-deploy`.  Removal of an arg or environment variable is done by leaving the value blank (e.g `--env-build=PORT:`).
 
+## Build secrets
+
+Techniques such as static site generation using databases may require access to secrets at build time.  To enable this you will need to _mount_ the secret:
+
+* `--mount-secret=name` - add _name_ to the list of secrets to mount when running the build script
+* `--unmount-secret-name` - remove _name_ from the list of secrets to mount when running the build script
+
+See [Secret to expose to the build](https://docs.docker.com/engine/reference/commandline/buildx_build/#secret) for examples on how to pass secrets to a docker build.
+
 ## Platform specific processing
 
 In addition to creating Dockerfiles and associated artifacts, `dockerfile-node` can run platform specific processing.  At the present time the first and only platform taking advantage of this is naturally fly.io.
