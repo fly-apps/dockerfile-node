@@ -64,6 +64,14 @@ Techniques such as static site generation using databases may require access to 
 
 See [Secret to expose to the build](https://docs.docker.com/engine/reference/commandline/buildx_build/#secret) for examples on how to pass secrets to a docker build.
 
+## Advanced customization
+
+There may be times where feature detection plus flags just aren't enough. As an example, you may wish to configure and run multiple processes.
+
+* `--instructions=path` - a dockerfile fragment to be inserted into the final document.
+
+Like with environment variables, packages, and build args, `--instructions` can be tailored to a specific build phase by adding `-base`, `-build`, or `-deploy` after the flag name, with the default being `-deploy`.
+
 ## Platform specific processing
 
 In addition to creating Dockerfiles and associated artifacts, `dockerfile-node` can run platform specific processing.  At the present time the first and only platform taking advantage of this is naturally fly.io.
