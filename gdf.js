@@ -13,6 +13,7 @@ import * as ShellQuote from 'shell-quote'
 export const defaults = {
   build: '',
   cmd: '',
+  deferBuild: false,
   dev: false,
   entrypoint: '',
   distroless: false,
@@ -424,7 +425,7 @@ export class GDF {
     }
 
     // optionally include dev dependencies if a build is defined
-    if (this.build || this.dev || this.options.build === 'defer') {
+    if (this.build || this.dev || this.options.deferBuild) {
       if (this.devDependencies) {
         if (this.yarn) {
           install += ' --production=false'
@@ -654,6 +655,12 @@ export class GDF {
     this.options = options
     this._appdir = appdir
     this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
+
+    // backwards compatibility with previous definition of --build=defer
+    if (options.build == "defer") {
+      options.deferBuild = true
+      options.build = ""
+    }
 
     // install modules needed to run
     this.installModules()

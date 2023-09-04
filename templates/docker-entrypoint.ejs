@@ -41,13 +41,13 @@ if (process.env.DATABASE_URL) {
 <%= tab(1) %>writeFileSync('/proc/sys/vm/overcommit_memory', '1')
 
 <% } -%>
-<% if (prisma || (build && options.build === "defer")) { -%>
+<% if (prisma || (build && options.deferBuild)) { -%>
 <%= tab(1) %>// If running the web server then migrate existing database
 <%= tab(1) %>if (process.argv.slice(2).join(' ') === '<%= packager %> run start'<% if (litefs) { %> && process.env.FLY_REGION === process.env.PRIMARY_REGION<% } %>) {
 <% if (prisma) { -%>
 <%= tab(2) %>await exec('npx prisma migrate deploy')
 <% } -%>
-<% if (build && options.build === "defer") { -%>
+<% if (build && options.deferBuild) { -%>
 <%= tab(2) %>await exec('npm run build')
 <% } -%>
 <%= tab(1) %>}

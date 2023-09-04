@@ -24,6 +24,6 @@
     "typescript": "^5.1.6"
   },
   "dockerfile": {
-    "build": "defer"
+    "deferBuild": true
   }
 }

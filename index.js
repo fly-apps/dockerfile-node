@@ -28,6 +28,10 @@ const options = yargs((hideBin(process.argv)))
     describe: 'CMD to be used in the Dockerfile',
     type: 'string'
   })
+  .option('defer-build', {
+    describe: 'if true, run build at deploy time',
+    type: 'boolean'
+  })
   .option('dev', {
     describe: 'install devDependencies in production',
     type: 'boolean'
