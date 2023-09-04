@@ -29,8 +29,9 @@ Options are saved between runs into `package.json`. To invert a boolean options,
 
 ### Options:
 
-* `--build=defer` - may be needed when your build step requires access to secrets that are not available at image build time. Results in larger images and slower deployments.
-* `--cmd` - CMD to use in Dockerfile
+* `--build=CMD` - command to be used to build your application.
+* `--cmd=CMD` - CMD to use in Dockerfile
+* `--defer-build` - may be needed when your build step requires access to secrets that are not available at image build time. Results in larger images and slower deployments.
 * `--dev` - include `devDependencies` in the production image.
 * `--distroless` - use [distroless](https://github.com/GoogleContainerTools/distroless) base image to reduce image size
 * `--entrypoint` - ENTRYPOINT to use in Dockerfile

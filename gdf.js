@@ -519,7 +519,8 @@ export class GDF {
 
   // Is there a build script?
   get build() {
-    return !!this.#pj.scripts?.build
+    if (this.options.build) return this.options.build
+    if (this.#pj.scripts?.build) return `${this.packager} run build`
   }
 
   // Descriptive form of detected runtime
@@ -657,9 +658,9 @@ export class GDF {
     this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
 
     // backwards compatibility with previous definition of --build=defer
-    if (options.build == "defer") {
+    if (options.build === 'defer') {
       options.deferBuild = true
-      options.build = ""
+      options.build = ''
     }
 
     // install modules needed to run
