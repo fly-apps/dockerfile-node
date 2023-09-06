@@ -28,6 +28,10 @@ const options = yargs((hideBin(process.argv)))
     describe: 'CMD to be used in the Dockerfile',
     type: 'string'
   })
+  .option('cache', {
+    describe: 'use build caching to speed up builds',
+    type: 'string'
+  })
   .option('defer-build', {
     describe: 'if true, run build at deploy time',
     type: 'boolean'

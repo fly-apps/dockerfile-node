@@ -12,6 +12,7 @@ import * as ShellQuote from 'shell-quote'
 // defaults for all the flags that will be saved
 export const defaults = {
   build: '',
+  cache: false,
   cmd: '',
   deferBuild: false,
   dev: false,
@@ -203,6 +204,30 @@ export class GDF {
     }
   }
 
+  get buildCache() {
+    if (!this.options.cache) return ''
+
+    let id = 'npm'
+    let target = '/app/.npm'
+
+    if (this.yarn) {
+      id = 'yarn'
+      if (this.yarnVersion.startsWith('1.')) {
+        target = '/usr/local/share/.cache/yarn/'
+      } else {
+        target = '/app/.yarn/berry/cache'
+      }
+    } else if (this.pnpm) {
+      id = 'pnpm'
+      target = '/pnpm/store'
+    } else if (this.bun) {
+      id = 'bun'
+      target = '/root/.bun'
+    }
+
+    return `--mount=type=cache,id=${id},target=${target} \\\n    `
+  }
+
   get baseEnv() {
     const env = {
       NODE_ENV: 'production'
@@ -212,7 +237,16 @@ export class GDF {
   }
 
   get buildEnv() {
-    return { ...this.options.vars.build }
+    let env = {}
+
+    if (this.options.cache && this.pnpm) {
+      env = {
+        PNPM_HOME: '/pnpm',
+        PATH: '$PNPM_HOME:$PATH'
+      }
+    }
+
+    return { ...this.options.vars.build, ...env }
   }
 
   get deployEnv() {

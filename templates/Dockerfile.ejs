@@ -72,7 +72,7 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY<% if (options.link) { %> --link<% } %> <%= packageFiles.join(' ') %> ./
-RUN <%= packagerInstall %>
+RUN <%- buildCache %><%= packagerInstall %>
 
 <% if (prisma) { -%>
 # Generate Prisma Client
@@ -89,7 +89,7 @@ RUN <%- mountSecrets %><%= build %>
 
 <% if (devDependencies && !options.dev && !nestjs && !adonisjs) { -%>
 # Remove development dependencies
-RUN <%- packagerPrune %>
+RUN <%- buildCache %><%- packagerPrune %>
 
 <% } -%>
 <% } -%>
