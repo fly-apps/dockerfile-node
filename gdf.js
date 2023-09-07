@@ -385,7 +385,7 @@ export class GDF {
     const files = [
       'package-lock.json', '.npmrc',
       'pnpm-lock.yaml',
-      'yarn.lock', '.yarnrc',
+      'yarn.lock', '.yarnrc', '.yarnrc.yml',
       'bun.lockb'
     ]
 

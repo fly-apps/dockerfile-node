@@ -22,7 +22,7 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link bun.lockb package.json ./
-RUN --mount=type=cache,id=npm,target=/app/.npm \
+RUN --mount=type=cache,id=bun,target=/root/.bun \
     bun install
 
 # Copy application code
@@ -32,7 +32,7 @@ COPY --link . .
 RUN bun run build
 
 # Remove development dependencies
-RUN --mount=type=cache,id=npm,target=/app/.npm \
+RUN --mount=type=cache,id=bun,target=/root/.bun \
     rm -rf node_modules && \
     bun install --ci
 
