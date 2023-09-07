@@ -535,7 +535,6 @@ export class GDF {
     return this.packager === 'bun'
   }
 
-
   // How to install python (switched from buster to bullseye)
   get python() {
     return parseInt(this.nodeVersion.split('.')[0]) > 16 ? 'python-is-python3' : 'python'
