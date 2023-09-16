@@ -77,7 +77,7 @@ RUN <%- buildCache %><%= packagerInstall %>
 <% if (prisma) { -%>
 # Generate Prisma Client
 COPY<% if (options.link) { %> --link<% } %> prisma .
-RUN npx prisma generate
+RUN <%= packager === "bun" ? 'bunx' : 'npx' %> prisma generate
 
 <% } -%>
 # Copy application code
