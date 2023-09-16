@@ -587,6 +587,10 @@ export class GDF {
     if (this.options.nginxRoot) return true
   }
 
+  get npx() {
+    return this.bun ? "bunx" : "npx"
+  }
+
   // command to start the web server
   get startCommand() {
     if (this.options.cmd) return this.options.cmd
@@ -602,7 +606,7 @@ export class GDF {
     }
 
     if (this.gatsby) {
-      return ['npx', 'gatsby', 'serve', '-H', '0.0.0.0']
+      return [this.npx, 'gatsby', 'serve', '-H', '0.0.0.0']
     } else if (this.runtime === 'Node.js' && this.#pj.scripts?.start?.includes('fastify')) {
       let start = this.#pj.scripts.start
       if (!start.includes('-a') && !start.includes('--address')) {
@@ -610,7 +614,7 @@ export class GDF {
       }
 
       start = start.split(' ')
-      start.unshift('npx')
+      start.unshift(this.npx)
       return start
     } else if (this.#pj.scripts?.start) {
       return [this.packager, 'run', 'start']

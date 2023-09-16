@@ -25,7 +25,7 @@ GDF.extend(class extends GDF {
     if (this.remix) {
       this.flyRemixSecrets(this.flyApp)
       this.flyHealthCheck('/healthcheck')
-      if (this.postgres) this.flyRelease('npx prisma migrate deploy')
+      if (this.postgres) this.flyRelease(`${this.npx} prisma migrate deploy`)
     }
 
     // set secrets for AdonisJS apps

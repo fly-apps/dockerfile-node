@@ -77,7 +77,7 @@ RUN <%- buildCache %><%= packagerInstall %>
 <% if (prisma) { -%>
 # Generate Prisma Client
 COPY<% if (options.link) { %> --link<% } %> prisma .
-RUN <%= packager === "bun" ? 'bunx' : 'npx' %> prisma generate
+RUN <%= npx %> prisma generate
 
 <% } -%>
 # Copy application code
@@ -217,7 +217,7 @@ EXPOSE <%= port %>
 <%- emitEnv(deployEnv) %>
 <% } -%>
 <% if (foreman) { -%>
-CMD [ "<%= packager === "bun" ? 'bunx' : 'npx' %>", "foreman", "start", "--procfile", "Procfile.prod" ]
+CMD [ "<%= npx %>", "foreman", "start", "--procfile", "Procfile.prod" ]
 <% } else if (Array.isArray(startCommand)) { -%>
 CMD <%- JSON.stringify(startCommand, null, 1).replaceAll(/\n\s*/g, " ") %>
 <% } else { -%>
