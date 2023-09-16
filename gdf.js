@@ -588,7 +588,7 @@ export class GDF {
   }
 
   get npx() {
-    return this.bun ? "bunx" : "npx"
+    return this.bun ? 'bunx' : 'npx'
   }
 
   // command to start the web server
