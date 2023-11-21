@@ -31,7 +31,7 @@ WORKDIR /app
 
 # Set production environment
 <%- emitEnv(baseEnv) %>
-<% if (yarn && yarnVersion != yarnClassic) { -%>
+<% if (yarn) { -%>
 ARG YARN_VERSION=<%= yarnVersion %>
 <% if(yarnVersion.startsWith('3.')) {-%>
 
