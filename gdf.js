@@ -570,6 +570,7 @@ export class GDF {
   get runtime() {
     let runtime = 'Node.js'
 
+    if (this.vite) runtime = 'Vite'
     if (this.bunVersion) runtime = 'Bun'
     if (this.remix) runtime = 'Remix'
     if (this.nextjs) runtime = 'Next.js'
@@ -577,7 +578,6 @@ export class GDF {
     if (this.nestjs) runtime = 'NestJS'
     if (this.gatsby) runtime = 'Gatsby'
     if (this.adonisjs) runtime = 'AdonisJS'
-    if (this.vite) runtime = 'Vite'
 
     if (this.prisma) runtime += '/Prisma'
 
@@ -689,7 +689,7 @@ export class GDF {
     let port = 3000
 
     if (this.gatsby) port = 8080
-    if (this.vite) port = 80
+    if (this.runtime === 'Vite') port = 80
 
     return port
   }
