@@ -344,7 +344,7 @@ export class GDF {
   }
 
   // classic version of yarn (installed by default)
-  yarnClassic = '1.22.19'
+  yarnClassic = '1.22.21'
 
   // What yarn version should be used?
   get yarnVersion() {
