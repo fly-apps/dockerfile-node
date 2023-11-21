@@ -66,6 +66,10 @@ export class GDF {
   // previous answer to conflict prompt
   #answer = ''
 
+  get vite() {
+    return !!(this.#pj.scripts?.dev === 'vite')
+  }
+
   // Does this application use remix.run?
   get remix() {
     return !!(this.#pj.dependencies?.remix ||
@@ -573,6 +577,7 @@ export class GDF {
     if (this.nestjs) runtime = 'NestJS'
     if (this.gatsby) runtime = 'Gatsby'
     if (this.adonisjs) runtime = 'AdonisJS'
+    if (this.vite) runtime = 'Vite'
 
     if (this.prisma) runtime += '/Prisma'
 
@@ -607,6 +612,8 @@ export class GDF {
 
     if (this.gatsby) {
       return [this.npx, 'gatsby', 'serve', '-H', '0.0.0.0']
+    } else if (this.vite) {
+      return ['/usr/sbin/nginx', '-g', 'daemon off;']
     } else if (this.runtime === 'Node.js' && this.#pj.scripts?.start?.includes('fastify')) {
       let start = this.#pj.scripts.start
       if (!start.includes('-a') && !start.includes('--address')) {
@@ -682,6 +689,7 @@ export class GDF {
     let port = 3000
 
     if (this.gatsby) port = 8080
+    if (this.vite) port = 80
 
     return port
   }
