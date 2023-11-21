@@ -109,6 +109,8 @@ WORKDIR /app
 
 # Set production environment
 <%- emitEnv(baseEnv) %>
+<% } else if (vite) { -%>
+FROM nginx
 <% } else { -%>
 FROM base
 <% } -%>
@@ -127,7 +129,11 @@ RUN apt-get update -qq && \
 
 <% } -%>
 # Copy built application
+<% if (vite) { -%>
+COPY --from=build /app/dist /usr/share/nginx/html
+<% } else { -%>
 COPY --from=build /app /app
+<% } -%>
 
 <% if (false && !options.root) /* needs more testing */ { -%>
 # Run as a non-root user for security
