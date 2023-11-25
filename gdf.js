@@ -157,7 +157,8 @@ export class GDF {
 
   // Does this application use puppeteer?
   get puppeteer() {
-    return !!this.#pj.dependencies?.puppeteer
+    return !!this.#pj.dependencies?.puppeteer ||
+      !!this.#pj.dependencies?.['puppeteer-core']
   }
 
   // Packages needed for base stage
@@ -379,7 +380,7 @@ export class GDF {
     if (this.entrypoint) return false
 
     const version = parseInt(this.nodeVersion)
-    return (version >= 16) && ((version & 1) === 0)
+    return (version >= 16)
   }
 
   // List of package files needed to install
