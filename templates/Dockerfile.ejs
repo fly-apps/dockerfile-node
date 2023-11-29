@@ -3,7 +3,7 @@
 <% if (packager === "bun") { -%>
 # Adjust BUN_VERSION as desired
 ARG BUN_VERSION=<%= bunVersion %>
-FROM oven/bun:${BUN_VERSION} as base
+FROM oven/bun:${BUN_VERSION}-slim as base
 <% } else { -%>
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=<%= distroless ? (parseInt(nodeVersion) & ~1) : nodeVersion %>
