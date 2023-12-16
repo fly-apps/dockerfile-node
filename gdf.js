@@ -223,7 +223,7 @@ export class GDF {
 
   // Packages needed for build stage
   get buildPackages() {
-    const packages = ['pkg-config', 'build-essential', this.python]
+    const packages = ['node-gyp', 'pkg-config', 'build-essential', this.python]
 
     if (this.prisma) packages.push('openssl')
 

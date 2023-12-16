@@ -27,7 +27,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN --mount=type=cache,id=cache,target=/var/cache/apt \
     --mount=type=cache,id=lib,target=/var/lib/apt \
     apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3
+    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
 COPY --link package.json pnpm-lock.yaml ./
