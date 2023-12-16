@@ -17,7 +17,9 @@ ENV NODE_ENV="production"
 FROM base as build
 
 # Install packages needed to build node modules
-RUN apt-get update -qq && \
+RUN --mount=type=cache,id=cache,target=/var/cache/apt \
+    --mount=type=cache,id=lib,target=/var/lib/apt \
+    apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3
 
 # Install node modules

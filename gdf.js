@@ -95,14 +95,20 @@ export class GDF {
   }
 
   get pkg_cache() {
+    let caches
+
     if (this.options.alpine) {
-      return { cache: '/var/cache/apk' }
+      caches = { cache: '/var/cache/apk' }
     } else {
-      return {
+      caches = {
         cache: '/var/cache/apt',
         lib: '/var/lib/apt'
       }
     }
+
+    return Object.entries(caches).map(([name, path]) =>
+      `--mount=type=cache,id=${name},target=${path} \\`
+    ).join('\n    ')
   }
 
   get pkg_cleanup() {

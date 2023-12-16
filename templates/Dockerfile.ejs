@@ -21,9 +21,10 @@ LABEL fly_launch_runtime="<%= runtime %>"
 <% } -%>
 <% if (basePackages.length > 0) { -%>
 # Install packages needed for both build and deployment
-RUN <%= pkg_update %> && \
-    <%= pkg_install %> <%= basePackages.join(' ')%> && \
-    rm -rf <%= pkg_cleanup %>
+RUN <% if (options.cache) { %><%= pkg_cache %>
+    <% } %><%= pkg_update %> && \
+    <%= pkg_install %> <%= basePackages.join(' ')%><% if (!options.cache) { %> && \
+    rm -rf <%= pkg_cleanup %><% } %>
 
 <% } -%>
 # <%= runtime %> app lives here
@@ -67,7 +68,8 @@ FROM base as build
 
 <% } -%>
 # Install packages needed to build node modules
-RUN <%= pkg_update %> && \
+RUN <% if (options.cache) { %><%= pkg_cache %>
+    <% } %><%= pkg_update %> && \
     <%= pkg_install %> <%= buildPackages.join(' ') %>
 
 # Install node modules
@@ -123,9 +125,10 @@ COPY --link <%= configDir %>litefs.yml /etc/litefs.yml
 <% } -%>
 <% if (deployPackages.length > 0) { -%>
 # Install packages needed for deployment
-RUN <%= pkg_update %> && \
-    <%= pkg_install %> <%= deployPackages.join(' ')%> && \
-    rm -rf <%= pkg_cleanup %>
+RUN <% if (options.cache) { %><%= pkg_cache %>
+    <% } %><%= pkg_update %> && \
+    <%= pkg_install %> <%= deployPackages.join(' ')%><% if (!options.cache) { %> && \
+    rm -rf <%= pkg_cleanup %><% } %>
 
 <% } -%>
 # Copy built application
