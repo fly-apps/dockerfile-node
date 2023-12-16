@@ -124,7 +124,7 @@ COPY --link <%= configDir %>litefs.yml /etc/litefs.yml
 <% if (deployPackages.length > 0) { -%>
 # Install packages needed for deployment
 RUN <%= pkg_update %> && \
-    a<%= pkg_install %> <%= deployPackages.join(' ')%> && \
+    <%= pkg_install %> <%= deployPackages.join(' ')%> && \
     rm -rf <%= pkg_cleanup %>
 
 <% } -%>
