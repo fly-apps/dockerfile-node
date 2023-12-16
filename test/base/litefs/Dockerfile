@@ -18,7 +18,7 @@ FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y build-essential pkg-config python-is-python3
+    apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3
 
 # Install node modules
 COPY --link package-lock.json package.json ./
@@ -37,7 +37,7 @@ COPY --link litefs.yml /etc/litefs.yml
 
 # Install packages needed for deployment
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y ca-certificates fuse3 && \
+    aapt-get install --no-install-recommends -y ca-certificates fuse3 && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built application

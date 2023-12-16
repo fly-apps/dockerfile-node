@@ -23,7 +23,7 @@ FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y build-essential libicu-dev pkg-config python-is-python3
+    apt-get install --no-install-recommends -y build-essential libicu-dev pkg-config python-is-python3
 
 # Install node modules
 COPY --link package-lock.json package.json ./
@@ -44,7 +44,7 @@ FROM base
 
 # Install packages needed for deployment
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y vim && \
+    aapt-get install --no-install-recommends -y vim && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built application

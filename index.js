@@ -20,6 +20,10 @@ try {
 const options = yargs((hideBin(process.argv)))
   .usage('$0 [args]')
   .epilog('Options are saved between runs into package.json. more info:\n https://github.com/fly-apps/dockerfile-node#readme')
+  .option('alpine', {
+    describe: 'use alpine as base image',
+    type: 'boolean'
+  })
   .option('build', {
     describe: 'if set to "defer" will run build at deploy time',
     type: 'string'

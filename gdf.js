@@ -11,6 +11,7 @@ import * as ShellQuote from 'shell-quote'
 
 // defaults for all the flags that will be saved
 export const defaults = {
+  alpine: false,
   build: '',
   cache: false,
   cmd: '',
@@ -32,6 +33,16 @@ export const defaults = {
   args: { base: {}, build: {}, deploy: {} },
   instructions: { base: null, build: null, deploy: null },
   secrets: []
+}
+
+const ALPINE_MAPPINGS = {
+  'build-essential': 'build-base',
+  'chromium-sandbox': 'chromium-chromedriver',
+  'node-gyp': 'gyp',
+  'pkg-config': 'pkgconfig',
+  python: 'python3',
+  'python-is-python3': 'python3',
+  sqlite3: 'sqlite'
 }
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
@@ -65,6 +76,38 @@ export class GDF {
 
   // previous answer to conflict prompt
   #answer = ''
+
+  get variant() {
+    return this.options.alpine ? 'alpine' : 'slim'
+  }
+
+  alpinize(packages) {
+    packages = packages.map(name => ALPINE_MAPPINGS[name] || name)
+    return [...new Set(packages)].sort()
+  }
+
+  get pkg_update() {
+    return this.options.alpine ? 'apk update' : 'apt-get update -qq'
+  }
+
+  get pkg_install() {
+    return this.options.alpine ? 'apk add' : 'apt-get install --no-install-recommends -y'
+  }
+
+  get pkg_cache() {
+    if (this.options.alpine) {
+      return { cache: '/var/cache/apk' }
+    } else {
+      return {
+        cache: '/var/cache/apt',
+        lib: '/var/lib/apt'
+      }
+    }
+  }
+
+  get pkg_cleanup() {
+    return this.options.alpine ? '/var/cache/apk/*' : '/var/lib/apt/lists /var/cache/apt/archives'
+  }
 
   get vite() {
     return !!(this.#pj.scripts?.dev === 'vite')
@@ -165,9 +208,11 @@ export class GDF {
   get basePackages() {
     const packages = [...this.options.packages.base]
 
-    packages.sort()
-
-    return packages
+    if (this.options.alpine) {
+      return this.alpinize(packages)
+    } else {
+      return packages.sort()
+    }
   }
 
   // Packages needed for build stage
@@ -178,9 +223,11 @@ export class GDF {
 
     packages.push(...this.options.packages.build)
 
-    packages.sort()
-
-    return packages
+    if (this.options.alpine) {
+      return this.alpinize(packages)
+    } else {
+      return packages.sort()
+    }
   }
 
   // packages needed for deploy stage
@@ -194,7 +241,11 @@ export class GDF {
     if (this.#pj.dependencies?.['fluent-ffmpeg']) packages.push('ffmpeg')
     if (this.puppeteer) packages.push('chromium', 'chromium-sandbox')
 
-    return packages.sort()
+    if (this.options.alpine) {
+      return this.alpinize(packages)
+    } else {
+      return packages.sort()
+    }
   }
 
   sortEnv(env) {

@@ -3,11 +3,11 @@
 <% if (packager === "bun") { -%>
 # Adjust BUN_VERSION as desired
 ARG BUN_VERSION=<%= bunVersion %>
-FROM oven/bun:${BUN_VERSION}-slim as base
+FROM oven/bun:${BUN_VERSION}-<%= variant %> as base
 <% } else { -%>
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=<%= distroless ? (parseInt(nodeVersion) & ~1) : nodeVersion %>
-FROM node:${NODE_VERSION}-slim as <% if (distroless) { -%>build<% } else { %>base<% } %>
+FROM node:${NODE_VERSION}-<%= variant %> as <% if (distroless) { -%>build<% } else { %>base<% } %>
 <% } -%>
 
 <% if (Object.keys(options.args.base).length > 0) { -%>
@@ -21,9 +21,9 @@ LABEL fly_launch_runtime="<%= runtime %>"
 <% } -%>
 <% if (basePackages.length > 0) { -%>
 # Install packages needed for both build and deployment
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y <%= basePackages.join(' ')%> && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+RUN <%= pkg_update %> && \
+    <%= pkg_install %> <%= basePackages.join(' ')%> && \
+    rm -rf <%= pkg_cleanup %>
 
 <% } -%>
 # <%= runtime %> app lives here
@@ -67,8 +67,8 @@ FROM base as build
 
 <% } -%>
 # Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install -y <%= buildPackages.join(' ') %>
+RUN <%= pkg_update %> && \
+    <%= pkg_install %> <%= buildPackages.join(' ') %>
 
 # Install node modules
 COPY<% if (options.link) { %> --link<% } %> <%= packageFiles.join(' ') %> ./
@@ -123,9 +123,9 @@ COPY --link <%= configDir %>litefs.yml /etc/litefs.yml
 <% } -%>
 <% if (deployPackages.length > 0) { -%>
 # Install packages needed for deployment
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y <%= deployPackages.join(' ')%> && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+RUN <%= pkg_update %> && \
+    a<%= pkg_install %> <%= deployPackages.join(' ')%> && \
+    rm -rf <%= pkg_cleanup %>
 
 <% } -%>
 # Copy built application
