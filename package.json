@@ -1,10 +1,10 @@
 {
   "name": "@flydotio/dockerfile",
-  "version": "0.4.11",
+  "version": "0.5.0",
   "description": "Dockerfile generator",
   "main": "./index.js",
   "bin": {
-    "dockerfile": "./index.js"
+    "dockerfile": "index.js"
   },
   "type": "module",
   "scripts": {
@@ -27,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/fly-apps/dockerfile-node"
+    "url": "git+https://github.com/fly-apps/dockerfile-node.git"
   },
   "publishConfig": {
     "access": "public"
