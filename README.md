@@ -29,6 +29,7 @@ Options are saved between runs into `package.json`. To invert a boolean options,
 
 ### Options:
 
+* `--alpine` - use [alpine](https://www.alpinelinux.org/) as base image
 * `--build=CMD` - command to be used to build your application.
 * `--cache` - use build caching to speed up builds
 * `--cmd=CMD` - CMD to use in Dockerfile
