@@ -111,7 +111,7 @@ WORKDIR /app
 
 # Set production environment
 <%- emitEnv(baseEnv) %>
-<% } else if (vite) { -%>
+<% } else if (vite || astro) { -%>
 FROM nginx
 <% } else { -%>
 FROM base
@@ -132,7 +132,7 @@ RUN <% if (options.cache) { %><%= pkg_cache %>
 
 <% } -%>
 # Copy built application
-<% if (vite) { -%>
+<% if (vite || astro) { -%>
 COPY --from=build /app/dist /usr/share/nginx/html
 <% } else { -%>
 COPY --from=build /app /app

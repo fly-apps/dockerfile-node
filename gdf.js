@@ -115,6 +115,10 @@ export class GDF {
     return this.options.alpine ? '/var/cache/apk/*' : '/var/lib/apt/lists /var/cache/apt/archives'
   }
 
+  get astro() {
+    return !!(this.#pj.dependencies?.astro)
+  }
+
   get vite() {
     return !!(this.#pj.scripts?.dev === 'vite')
   }
@@ -628,6 +632,7 @@ export class GDF {
   get runtime() {
     let runtime = 'Node.js'
 
+    if (this.astro) runtime = 'Astro'
     if (this.vite) runtime = 'Vite'
     if (this.bunVersion) runtime = 'Bun'
     if (this.remix) runtime = 'Remix'
@@ -670,7 +675,7 @@ export class GDF {
 
     if (this.gatsby) {
       return [this.npx, 'gatsby', 'serve', '-H', '0.0.0.0']
-    } else if (this.vite) {
+    } else if (this.vite || this.astro) {
       return ['/usr/sbin/nginx', '-g', 'daemon off;']
     } else if (this.runtime === 'Node.js' && this.#pj.scripts?.start?.includes('fastify')) {
       let start = this.#pj.scripts.start
@@ -747,7 +752,7 @@ export class GDF {
     let port = 3000
 
     if (this.gatsby) port = 8080
-    if (this.runtime === 'Vite') port = 80
+    if (this.runtime === 'Vite' || this.astro) port = 80
 
     return port
   }
