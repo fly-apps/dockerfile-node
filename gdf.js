@@ -119,6 +119,15 @@ export class GDF {
     return !!(this.#pj.dependencies?.astro)
   }
 
+  get astroSSR() {
+    return !!(this.#pj.dependencies?.astro) &&
+           !!(this.#pj.dependencies?.['@astrojs/node'])
+  }
+
+  get astroStatic() {
+    return this.astro && !this.astroSSR
+  }
+
   get vite() {
     return !!(this.#pj.scripts?.dev === 'vite')
   }
@@ -675,8 +684,10 @@ export class GDF {
 
     if (this.gatsby) {
       return [this.npx, 'gatsby', 'serve', '-H', '0.0.0.0']
-    } else if (this.vite || this.astro) {
+    } else if (this.vite || this.astroStatic) {
       return ['/usr/sbin/nginx', '-g', 'daemon off;']
+    } else if (this.astroSSR) {
+      return ['node', './dist/server/entry.mjs']
     } else if (this.runtime === 'Node.js' && this.#pj.scripts?.start?.includes('fastify')) {
       let start = this.#pj.scripts.start
       if (!start.includes('-a') && !start.includes('--address')) {
@@ -752,7 +763,8 @@ export class GDF {
     let port = 3000
 
     if (this.gatsby) port = 8080
-    if (this.runtime === 'Vite' || this.astro) port = 80
+    if (this.runtime === 'Vite' || this.astroStatic) port = 80
+    if (this.astroSSR) port = 4321
 
     return port
   }

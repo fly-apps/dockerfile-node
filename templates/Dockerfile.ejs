@@ -111,7 +111,7 @@ WORKDIR /app
 
 # Set production environment
 <%- emitEnv(baseEnv) %>
-<% } else if (vite || astro) { -%>
+<% } else if (vite || astroStatic) { -%>
 FROM nginx
 <% } else { -%>
 FROM base
@@ -132,8 +132,14 @@ RUN <% if (options.cache) { %><%= pkg_cache %>
 
 <% } -%>
 # Copy built application
-<% if (vite || astro) { -%>
+<% if (vite || astroStatic) { -%>
 COPY --from=build /app/dist /usr/share/nginx/html
+<% } else if (astroSSR) { -%>
+COPY --from=build /app/node_modules /app/node_modules
+COPY --from=build /app/dist /app/dist
+
+ENV PORT=4321
+ENV HOST=0.0.0.0
 <% } else { -%>
 COPY --from=build /app /app
 <% } -%>
