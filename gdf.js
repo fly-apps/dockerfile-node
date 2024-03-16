@@ -238,6 +238,13 @@ export class GDF {
   get buildPackages() {
     const packages = ['node-gyp', 'pkg-config', 'build-essential', this.python]
 
+    // https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies
+    if (Object.values(this.#pj.dependencies || {}).some(value => /^git(\=|:|hub:)|^\w+\//.test(value))) {
+      packages.push('git')
+    } else if (((this.build || this.dev || this.options.deferBuild) && Object.values(this.#pj.devDependencies || {}).some(value => /^git(\=|:|hub:)|^\w+\//.test(value)))) {
+      packages.push('git')
+    }
+
     if (this.prisma) packages.push('openssl')
 
     packages.push(...this.options.packages.build)
