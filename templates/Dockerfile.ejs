@@ -72,6 +72,12 @@ RUN <% if (options.cache) { %><%= pkg_cache %>
     <% } %><%= pkg_update %> && \
     <%= pkg_install %> <%= buildPackages.join(' ') %>
 
+<% if (bunNode) { -%>
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_<%= nodeVersion.split('.')[0] %>.x | bash - && \
+    apt-get install -y nodejs
+
+<% } -%>
 # Install node modules
 COPY<% if (options.link) { %> --link<% } %> <%= packageFiles.join(' ') %> ./
 RUN <%- buildCache %><%= packagerInstall %>

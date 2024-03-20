@@ -236,7 +236,13 @@ export class GDF {
 
   // Packages needed for build stage
   get buildPackages() {
-    const packages = ['node-gyp', 'pkg-config', 'build-essential', this.python]
+    const packages = ['pkg-config', 'build-essential', this.python]
+
+    if (!this.bun) {
+      packages.push('node-gyp')
+    } else if (this.bunNode) {
+      packages.push('ca-certificates', 'curl')
+    }
 
     // https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies
     if (Object.values(this.#pj.dependencies || {}).some(value => /^git(\+|:|hub:)|^\w+\//.test(value))) {
@@ -254,6 +260,21 @@ export class GDF {
     } else {
       return packages.sort()
     }
+  }
+
+  // Does the build script require node?
+  // This is just an approximation, but too many build scripts actually require node.
+  get bunNode() {
+    if (!this.bun) return false
+
+    const build = this.#pj.scripts?.build
+
+    if (build && fs.existsSync(`node_modules/.bin/${build.split(' ')[0]}`)) {
+      const script = fs.readFileSync(`node_modules/.bin/${build.split(' ')[0]}`, 'utf-8')
+      return /^#!.*node/.test(script)
+    }
+
+    return false
   }
 
   // packages needed for deploy stage
@@ -405,7 +426,7 @@ export class GDF {
 
   // what node version should be used?
   get nodeVersion() {
-    const ltsVersion = '18.16.0'
+    const ltsVersion = '20.11.1'
 
     return process.version.match(/\d+\.\d+\.\d+/)?.[0] || ltsVersion
   }
