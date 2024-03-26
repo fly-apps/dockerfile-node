@@ -708,9 +708,9 @@ export class GDF {
 
     if (this.adonisjs) {
       return ['node', '/app/build/server.js']
-    }
-
-    if (this.gatsby) {
+    } else if (this.nuxtjs) {
+      return ['node', '.output/server/index.mjs']
+    } else if (this.gatsby) {
       return [this.npx, 'gatsby', 'serve', '-H', '0.0.0.0']
     } else if (this.vite || this.astroStatic) {
       return ['/usr/sbin/nginx', '-g', 'daemon off;']
