@@ -128,6 +128,10 @@ export class GDF {
     return this.astro && !this.astroSSR
   }
 
+  get svelte() {
+    return !!(this.#pj.devDependencies?.['@sveltejs/kit'])
+  }
+
   get vite() {
     return !!(this.#pj.scripts?.dev === 'vite')
   }
@@ -240,8 +244,6 @@ export class GDF {
 
     if (!this.bun) {
       packages.push('node-gyp')
-    } else if (this.bunNode) {
-      packages.push('ca-certificates', 'curl')
     }
 
     // https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies
@@ -269,8 +271,8 @@ export class GDF {
 
     const build = this.#pj.scripts?.build
 
-    if (build && fs.existsSync(`node_modules/.bin/${build.split(' ')[0]}`)) {
-      const script = fs.readFileSync(`node_modules/.bin/${build.split(' ')[0]}`, 'utf-8')
+    if (build && fs.existsSync(path.join(this._appdir, `node_modules/.bin/${build.split(' ')[0]}`))) {
+      const script = fs.readFileSync(path.join(this._appdir, `node_modules/.bin/${build.split(' ')[0]}`), 'utf-8')
       return /^#!.*node/.test(script)
     }
 
@@ -662,7 +664,13 @@ export class GDF {
   // Is there a build script?
   get build() {
     if (this.options.build) return this.options.build
-    if (this.#pj.scripts?.build) return `${this.packager} run build`
+    if (this.#pj.scripts?.build) {
+      if (this.packager === 'bun' && this.bunNode) {
+        return 'bun --bun run build'
+      } else {
+        return `${this.packager} run build`
+      }
+    }
   }
 
   // Descriptive form of detected runtime
@@ -731,6 +739,8 @@ export class GDF {
       return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.module]
     } else if (this.#pj.main) {
       return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.main]
+    } else if (this.svelte) {
+      return ['bun', './build/index.js']
     } else if (this.packager === 'bun') {
       return ['bun', 'index.ts']
     } else {
