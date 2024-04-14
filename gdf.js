@@ -12,6 +12,7 @@ import * as ShellQuote from 'shell-quote'
 // defaults for all the flags that will be saved
 export const defaults = {
   alpine: false,
+  bun: false,
   build: '',
   cache: false,
   cmd: '',
@@ -637,7 +638,7 @@ export class GDF {
 
   // Is the packager bun?
   get bun() {
-    return this.packager === 'bun'
+    return this.options.bun || this.packager === 'bun'
   }
 
   // How to install python (switched from buster to bullseye)
@@ -740,7 +741,7 @@ export class GDF {
     } else if (this.#pj.main) {
       return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.main]
     } else if (this.svelte) {
-      return ['bun', './build/index.js']
+      return [this.bun ? 'bun' : 'node', './build/index.js']
     } else if (this.packager === 'bun') {
       return ['bun', 'index.ts']
     } else {
