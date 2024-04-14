@@ -72,12 +72,6 @@ RUN <% if (options.cache) { %><%= pkg_cache %>
     <% } %><%= pkg_update %> && \
     <%= pkg_install %> <%= buildPackages.join(' ') %>
 
-<% if (bunNode) { -%>
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_<%= nodeVersion.split('.')[0] %>.x | bash - && \
-    apt-get install -y nodejs
-
-<% } -%>
 # Install node modules
 COPY<% if (options.link) { %> --link<% } %> <%= packageFiles.join(' ') %> ./
 RUN <%- buildCache %><%= packagerInstall %>
@@ -146,6 +140,8 @@ COPY --from=build /app/dist /app/dist
 
 ENV PORT=4321
 ENV HOST=0.0.0.0
+<% } else if (svelte) { -%>
+COPY --from=build /app/build /app/build
 <% } else { -%>
 COPY --from=build /app /app
 <% } -%>
