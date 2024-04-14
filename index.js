@@ -28,6 +28,10 @@ const options = yargs((hideBin(process.argv)))
     describe: 'if set to "defer" will run build at deploy time',
     type: 'string'
   })
+  .option('bun', {
+    describe: 'use bun instead of node',
+    type: 'boolean'
+  })
   .option('cmd', {
     describe: 'CMD to be used in the Dockerfile',
     type: 'string'
