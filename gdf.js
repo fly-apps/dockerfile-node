@@ -686,6 +686,7 @@ export class GDF {
     if (this.nuxtjs) runtime = 'Nuxt'
     if (this.nestjs) runtime = 'NestJS'
     if (this.gatsby) runtime = 'Gatsby'
+    if (this.svelte) runtime = 'SvelteKit'
     if (this.adonisjs) runtime = 'AdonisJS'
 
     if (this.prisma) runtime += '/Prisma'
