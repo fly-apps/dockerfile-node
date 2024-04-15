@@ -4,9 +4,9 @@
 ARG BUN_VERSION=xxx
 FROM oven/bun:${BUN_VERSION}-slim as base
 
-LABEL fly_launch_runtime="Bun"
+LABEL fly_launch_runtime="SvelteKit"
 
-# Bun app lives here
+# SvelteKit app lives here
 WORKDIR /app
 
 # Set production environment
