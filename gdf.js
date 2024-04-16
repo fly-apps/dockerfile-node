@@ -160,12 +160,12 @@ export class GDF {
   }
 
   get standaloneNextjs() {
-    if (!this.nextjs) return false;
+    if (!this.nextjs) return false
 
-    if (fs.existsSync(path.join(this._appdir, `next.config.mjs`))) {
-      const config = fs.readFileSync(path.join(this._appdir, `next.config.mjs`), 'utf-8')
+    if (fs.existsSync(path.join(this._appdir, 'next.config.mjs'))) {
+      const config = fs.readFileSync(path.join(this._appdir, 'next.config.mjs'), 'utf-8')
       return /output\s*:\s*(["'`])standalone\1/.test(config)
-    } else return false;
+    } else return false
   }
 
   // Does this application use nuxt.js?
