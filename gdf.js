@@ -166,8 +166,8 @@ export class GDF {
       const config = fs.readFileSync(path.join(this._appdir, 'next.config.mjs'), 'utf-8')
       return /output\s*:\s*(["'`])standalone\1/.test(config)
     } else if (fs.existsSync(path.join(this._appdir, 'next.config.js'))) {
-        const config = fs.readFileSync(path.join(this._appdir, 'next.config.js'), 'utf-8')
-        return /output\s*:\s*(["'`])standalone\1/.test(config)
+      const config = fs.readFileSync(path.join(this._appdir, 'next.config.js'), 'utf-8')
+      return /output\s*:\s*(["'`])standalone\1/.test(config)
     } else return false
   }
 
