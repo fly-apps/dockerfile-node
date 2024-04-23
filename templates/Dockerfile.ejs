@@ -142,6 +142,10 @@ ENV PORT=4321
 ENV HOST=0.0.0.0
 <% } else if (svelte) { -%>
 COPY --from=build /app/build /app/build
+<% } else if (standaloneNextjs) { -%>
+COPY --from=build /app/.next/standalone /app
+COPY --from=build /app/.next/static /app/.next/static
+COPY --from=build /app/public /app/public
 <% } else { -%>
 COPY --from=build /app /app
 <% } -%>
@@ -235,6 +239,8 @@ EXPOSE <%= port %>
 <% } -%>
 <% if (foreman) { -%>
 CMD [ "<%= npx %>", "foreman", "start", "--procfile", "Procfile.prod" ]
+<% } else if (standaloneNextjs) { -%>
+CMD [ "node", "server.js" ]
 <% } else if (Array.isArray(startCommand)) { -%>
 CMD <%- JSON.stringify(startCommand, null, 1).replaceAll(/\n\s*/g, " ") %>
 <% } else { -%>
