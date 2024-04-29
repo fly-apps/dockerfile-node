@@ -1,6 +1,6 @@
 {
   "name": "@flydotio/dockerfile",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Dockerfile generator",
   "main": "./index.js",
   "bin": {
