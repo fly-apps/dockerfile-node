@@ -30,7 +30,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
         await new GDF().run(workdir, options)
 
         let argmask = /^(ARG\s+\w+\s*=).*?(\s*\\?)$/gm
-        if (entry.name == 'version') argmask = /()xxx()/g
+        if (entry.name === 'version') argmask = /()xxx()/g
 
         const actualResults = fs.readFileSync(path.join(workdir, 'Dockerfile'), 'utf-8')
           .replaceAll(argmask, '$1xxx$2')

@@ -447,15 +447,15 @@ export class GDF {
 
     if (this.#pj.engines?.node) {
       // determine minimal version from package.json
-      let { node } = this.#pj.engines
-      let minversion = node.match(/\d+(\.\d+(\.\d+)?)?/)?.[0].split('.')
-      if (node.includes('>') && !node.includes("=")) {
+      const { node } = this.#pj.engines
+      const minversion = node.match(/\d+(\.\d+(\.\d+)?)?/)?.[0].split('.')
+      if (node.includes('>') && !node.includes('=')) {
         minversion.push(parseInt(minversion.pop()) + 1)
       }
 
       // ensure version is at least the minimum
       version = version.split('.')
-      for (const i=0; i<version.length; i++) {
+      for (let i = 0; i < version.length; i++) {
         if (minversion[i] > version[i]) {
           version = minversion
           break
