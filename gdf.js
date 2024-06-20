@@ -122,7 +122,7 @@ export class GDF {
 
   get astroSSR() {
     return !!(this.#pj.dependencies?.astro) &&
-           !!(this.#pj.dependencies?.['@astrojs/node'])
+      !!(this.#pj.dependencies?.['@astrojs/node'])
   }
 
   get astroStatic() {
@@ -441,9 +441,33 @@ export class GDF {
 
   // what node version should be used?
   get nodeVersion() {
-    const ltsVersion = '20.11.1'
+    const ltsVersion = '20.15.0'
 
-    return process.version.match(/\d+\.\d+\.\d+/)?.[0] || ltsVersion
+    let version = process.version.match(/\d+\.\d+\.\d+/)?.[0] || ltsVersion
+
+    if (this.#pj.engines?.node) {
+      // determine minimal version from package.json
+      let { node } = this.#pj.engines
+      let minversion = node.match(/\d+(\.\d+(\.\d+)?)?/)?.[0].split('.')
+      if (node.includes('>') && !node.includes("=")) {
+        minversion.push(parseInt(minversion.pop()) + 1)
+      }
+
+      // ensure version is at least the minimum
+      version = version.split('.')
+      for (const i=0; i<version.length; i++) {
+        if (minversion[i] > version[i]) {
+          version = minversion
+          break
+        } else if (minversion[i] < version[i]) {
+          break
+        }
+      }
+
+      version = version.join('.')
+    }
+
+    return version
   }
 
   // what bun version should be used?

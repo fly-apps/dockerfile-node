@@ -29,15 +29,18 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
       it('should produce a dockerfile', async function() {
         await new GDF().run(workdir, options)
 
+        let argmask = /^(ARG\s+\w+\s*=).*?(\s*\\?)$/gm
+        if (entry.name == 'version') argmask = /()xxx()/g
+
         const actualResults = fs.readFileSync(path.join(workdir, 'Dockerfile'), 'utf-8')
-          .replaceAll(/^(ARG\s+\w+\s*=).*?(\s*\\?)$/gm, '$1xxx$2')
+          .replaceAll(argmask, '$1xxx$2')
 
         if (process.env.TEST_CAPTURE) {
           fs.writeFileSync(path.join(testdir, 'Dockerfile'), actualResults)
         }
 
         const expectedResults = fs.readFileSync(path.join(testdir, 'Dockerfile'), 'utf-8')
-          .replaceAll(/^(ARG\s+\w+\s*=).*?(\s*\\?)$/gm, '$1xxx$2')
+          .replaceAll(argmask, '$1xxx$2')
 
         expect(expectedResults).to.equal(actualResults)
       })
