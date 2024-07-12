@@ -72,10 +72,22 @@ RUN <% if (options.cache) { %><%= pkg_cache %>
     <% } %><%= pkg_update %> && \
     <%= pkg_install %> <%= buildPackages.join(' ') %>
 
+<% if (meteor) { -%>
+# Copy the .meteor/release file to the container
+COPY .meteor/release /home/meteor/.meteor/release
+
+ENV METEOR_ALLOW_SUPERUSER=1
+
+# Extract the Meteor release version and install Meteor
+RUN RELEASE=$(awk -F'@' '{print $2}' /home/meteor/.meteor/release) && curl https://install.meteor.com/\?release\=$RELEASE | sh
+<% } -%>
 # Install node modules
 COPY<% if (options.link) { %> --link<% } %> <%= packageFiles.join(' ') %> ./
 RUN <%- buildCache %><%= packagerInstall %>
 
+<% if (meteor) { -%>
+RUN meteor npm install
+<% } -%>
 <% if (prisma) { -%>
 # Generate Prisma Client
 COPY<% if (options.link) { %> --link<% } %> prisma .
@@ -84,6 +96,14 @@ RUN <%= npx %> prisma generate
 <% } -%>
 # Copy application code
 COPY<% if (options.link) { %> --link<% } %> . .
+<% if (meteor) { -%>
+RUN meteor build --server-only --directory bundle
+
+# https://github.com/meteor/meteor/issues/12932
+RUN chmod 777 bundle/bundle/programs/server/npm-shrinkwrap.json
+
+RUN cd bundle/bundle/programs/server && meteor npm install
+<% } -%>
 
 <% if (build && !options.deferBuild) { -%>
 # Build application
@@ -144,6 +164,8 @@ ENV HOST=0.0.0.0
 COPY --from=build /app/build /app/build
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/package.json /app
+<% } else if (meteor) { -%>
+COPY --from=build /app/bundle/bundle /app
 <% } else if (standaloneNextjs) { -%>
 COPY --from=build /app/.next/standalone /app
 COPY --from=build /app/.next/static /app/.next/static

@@ -18,25 +18,22 @@ FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python3 python3-pip g++ make curl
+    apt-get install --no-install-recommends -y build-essential curl g++ make node-gyp pkg-config python-is-python3 python3-pip
 
-# # Copy the .meteor/release file to the container
+# Copy the .meteor/release file to the container
 COPY .meteor/release /home/meteor/.meteor/release
 
 ENV METEOR_ALLOW_SUPERUSER=1
 
-# # Extract the Meteor release version and install Meteor
-# ARG RELEASE
+# Extract the Meteor release version and install Meteor
 RUN RELEASE=$(awk -F'@' '{print $2}' /home/meteor/.meteor/release) && curl https://install.meteor.com/\?release\=$RELEASE | sh
-
 # Install node modules
 COPY --link package-lock.json package.json ./
+RUN npm ci
 
 RUN meteor npm install
-
 # Copy application code
 COPY --link . .
-
 RUN meteor build --server-only --directory bundle
 
 # https://github.com/meteor/meteor/issues/12932
@@ -49,7 +46,7 @@ RUN cd bundle/bundle/programs/server && meteor npm install
 FROM base
 
 # Copy built application
-COPY --from=build /app/bundle/bundle .
+COPY --from=build /app/bundle/bundle /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
