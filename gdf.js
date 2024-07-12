@@ -263,6 +263,10 @@ export class GDF {
       packages.push('node-gyp')
     }
 
+    if (this.meteor) {
+      packages.push('python3-pip', 'g++', 'make', 'curl')
+    }
+
     // https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies
     if (Object.values(this.#pj.dependencies || {}).some(value => /^git(\+|:|hub:)|^\w+\//.test(value))) {
       packages.push('git')
