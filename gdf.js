@@ -154,6 +154,10 @@ export class GDF {
       this.#pj.devDependencies?.prisma)
   }
 
+  get meteor() {
+    return !!this.#pj.dependencies?.['meteor-node-stubs']
+  }
+
   // Does this application use next.js?
   get nextjs() {
     return !!this.#pj.dependencies?.next
@@ -718,6 +722,7 @@ export class GDF {
     if (this.vite) runtime = 'Vite'
     if (this.bunVersion) runtime = 'Bun'
     if (this.remix) runtime = 'Remix'
+    if (this.meteor) runtime = 'Meteor'
     if (this.nextjs) runtime = 'Next.js'
     if (this.nuxtjs) runtime = 'Nuxt'
     if (this.nestjs) runtime = 'NestJS'
@@ -756,6 +761,8 @@ export class GDF {
       return ['node', '/app/build/server.js']
     } else if (this.nuxtjs) {
       return ['node', '.output/server/index.mjs']
+    } else if (this.meteor) {
+      return ['node', 'main.js']
     } else if (this.gatsby) {
       return [this.npx, 'gatsby', 'serve', '-H', '0.0.0.0']
     } else if (this.vite || this.astroStatic) {
