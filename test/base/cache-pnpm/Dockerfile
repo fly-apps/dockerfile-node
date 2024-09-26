@@ -30,12 +30,12 @@ RUN --mount=type=cache,id=cache,target=/var/cache/apt \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
-COPY --link package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --prod=false
 
 # Copy application code
-COPY --link . .
+COPY . .
 
 # Build application
 RUN pnpm run build

@@ -22,7 +22,7 @@ export const defaults = {
   distroless: false,
   ignoreScripts: false,
   legacyPeerDeps: false,
-  link: true,
+  link: false,
   litefs: false,
   nginxRoot: '',
   port: 0,

@@ -21,11 +21,11 @@ RUN apk update && \
     apk add build-base gyp pkgconfig python3
 
 # Install node modules
-COPY --link package-lock.json package.json ./
+COPY package-lock.json package.json ./
 RUN npm ci
 
 # Copy application code
-COPY --link . .
+COPY . .
 
 
 # Final stage for app image

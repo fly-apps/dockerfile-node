@@ -25,12 +25,12 @@ RUN --mount=type=cache,id=cache,target=/var/cache/apt \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
-COPY --link package.json yarn.lock ./
+COPY package.json yarn.lock ./
 RUN --mount=type=cache,id=yarn,target=/usr/local/share/.cache/yarn/ \
     yarn install --frozen-lockfile --production=false
 
 # Copy application code
-COPY --link . .
+COPY . .
 
 # Build application
 RUN yarn run build

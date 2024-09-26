@@ -23,12 +23,12 @@ RUN --mount=type=cache,id=cache,target=/var/cache/apt \
     apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3
 
 # Install node modules
-COPY --link bun.lockb package.json ./
+COPY bun.lockb package.json ./
 RUN --mount=type=cache,id=bun,target=/root/.bun \
     bun install
 
 # Copy application code
-COPY --link . .
+COPY . .
 
 # Build application
 RUN bun run build

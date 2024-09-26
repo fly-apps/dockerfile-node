@@ -28,12 +28,12 @@ ENV METEOR_ALLOW_SUPERUSER=1
 # Extract the Meteor release version and install Meteor
 RUN RELEASE=$(awk -F'@' '{print $2}' /home/meteor/.meteor/release) && curl https://install.meteor.com/\?release\=$RELEASE | sh
 # Install node modules
-COPY --link package-lock.json package.json ./
+COPY package-lock.json package.json ./
 RUN npm ci
 
 RUN meteor npm install
 # Copy application code
-COPY --link . .
+COPY . .
 RUN meteor build --server-only --directory bundle
 
 # https://github.com/meteor/meteor/issues/12932
