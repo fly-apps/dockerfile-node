@@ -21,15 +21,15 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp openssl pkg-config python-is-python3
 
 # Install node modules
-COPY --link package-lock.json package.json ./
+COPY package-lock.json package.json ./
 RUN npm ci
 
 # Generate Prisma Client
-COPY --link prisma .
+COPY prisma .
 RUN npx prisma generate
 
 # Copy application code
-COPY --link . .
+COPY . .
 
 
 # Final stage for app image

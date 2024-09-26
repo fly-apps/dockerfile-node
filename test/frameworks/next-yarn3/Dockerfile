@@ -26,11 +26,11 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
-COPY --link package.json yarn.lock ./
+COPY package.json yarn.lock ./
 RUN yarn install --immutable
 
 # Copy application code
-COPY --link . .
+COPY . .
 
 # Build application
 RUN yarn run build

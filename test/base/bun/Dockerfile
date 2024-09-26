@@ -21,11 +21,11 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3
 
 # Install node modules
-COPY --link bun.lockb package.json ./
+COPY bun.lockb package.json ./
 RUN bun install --ci
 
 # Copy application code
-COPY --link . .
+COPY . .
 
 
 # Final stage for app image
