@@ -34,9 +34,15 @@ WORKDIR /app
 <%- emitEnv(baseEnv) %>
 <% if (yarn) { -%>
 ARG YARN_VERSION=<%= yarnVersion %>
-<% if(yarnVersion.startsWith('3.')) {-%>
+<% if (yarnVersion.startsWith('3.')) {-%>
 
 # Install Yarn 3
+RUN corepack enable && \
+    yarn set version ${YARN_VERSION}
+
+<% } else if (yarnVersion.startsWith('4.')) {-%>
+
+# Install Yarn 4
 RUN corepack enable && \
     yarn set version ${YARN_VERSION}
 <% } else { -%>

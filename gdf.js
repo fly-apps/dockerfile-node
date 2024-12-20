@@ -163,6 +163,16 @@ export class GDF {
     return !!this.#pj.dependencies?.next
   }
 
+  // Experimental nextjs generation?
+  get nextjsGeneration() {
+    if (!this.nextjs) return false
+    if (!this.#pj.scripts.build === 'next build') return false
+    if (!this.#pj.dependencies.next) return false
+    const version = this.#pj.dependencies.next.match(/\d[.\d]*/)
+    if (!version || version[0] < '14.2') return false
+    return true
+  }
+
   get standaloneNextjs() {
     if (!this.nextjs) return false
 
@@ -710,7 +720,9 @@ export class GDF {
   get build() {
     if (this.options.build) return this.options.build
     if (this.#pj.scripts?.build) {
-      if (this.packager === 'bun' && this.bunNode) {
+      if (this.nextjsGeneration) {
+        return `${this.npx} next build --experimental-build-mode compile`
+      } else if (this.packager === 'bun' && this.bunNode) {
         return 'bun --bun run build'
       } else {
         return `${this.packager} run build`

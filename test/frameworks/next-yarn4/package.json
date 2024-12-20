@@ -1,6 +1,6 @@
 {
-  "name": "yarn3",
-  "packageManager": "yarn@3.5.1",
+  "name": "yarn4",
+  "packageManager": "yarn@4.5.3",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
