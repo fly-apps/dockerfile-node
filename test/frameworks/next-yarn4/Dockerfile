@@ -13,7 +13,7 @@ WORKDIR /app
 ENV NODE_ENV="production"
 ARG YARN_VERSION=xxx
 
-# Install Yarn 3
+# Install Yarn 4
 RUN corepack enable && \
     yarn set version ${YARN_VERSION}
 
