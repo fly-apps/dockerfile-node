@@ -41,7 +41,7 @@ jobs:
       - run: docker buildx build . --build-arg NODE_VERSION=22 --build-arg YARN_VERSION=1.22.21
         working-directory: test/frameworks/${{ matrix.framework }}
 
-  # test yarn3 framework can actually build
+  # test yarn4 framework can actually build
   test-frameworks-yarn4:
     runs-on: ubuntu-latest
     strategy:
