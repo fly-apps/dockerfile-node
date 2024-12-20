@@ -104,7 +104,10 @@ GDF.extend(class extends GDF {
   flyMakeVolume() {
     // add a [mounts] section if one is not already present
     if (!this.flyToml.includes('[mounts]')) {
-      this.flyToml += '\n[mounts]\n  source = "data"\n  destination="/data"\n'
+      this.flyToml += '\n[mounts]\n  source = "data"\n  destination="/data"\n' +
+        '  auto_extend_size_threshold = 80\n' +
+        '  auto_extend_size_increment = "1GB"\n' +
+        '  auto_extend_size_limit = "10GB"\n'
       fs.writeFileSync(this.flyTomlFile, this.flyToml)
     }
 
