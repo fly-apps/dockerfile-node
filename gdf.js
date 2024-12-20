@@ -167,7 +167,9 @@ export class GDF {
   get nextjsGeneration() {
     if (!this.nextjs) return false
     if (!this.#pj.scripts.build === 'next build') return false
-    if (!this.#pj.dependencies.next || this.#pj.dependencies.next < "14.2") return false
+    if (!this.#pj.dependencies.next) return false
+    const version = this.#pj.dependencies.next.match(/\d[.\d]*/)
+    if (!version || version[0] < '14.2') return false
     return true
   }
 

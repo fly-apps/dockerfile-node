@@ -28,7 +28,7 @@ RUN npm ci
 COPY . .
 
 # Build application
-RUN npx next build --experimental-build-mode compile
+RUN npm run build
 
 
 # Final stage for app image

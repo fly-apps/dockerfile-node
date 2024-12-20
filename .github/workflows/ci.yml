@@ -11,7 +11,7 @@ jobs:
           version: latest
       - uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 24
           cache: "npm"
       - uses: oven-sh/setup-bun@v1
         with:
@@ -38,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v2
-      - run: docker buildx build . --build-arg NODE_VERSION=20 --build-arg YARN_VERSION=1.22.21
+      - run: docker buildx build . --build-arg NODE_VERSION=24 --build-arg YARN_VERSION=1.22.21
         working-directory: test/frameworks/${{ matrix.framework }}
 
   # test yarn3 framework can actually build
@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v2
-      - run: docker buildx build . --build-arg NODE_VERSION=18 --build-arg YARN_VERSION=3.5.1
+      - run: docker buildx build . --build-arg NODE_VERSION=22 --build-arg YARN_VERSION=3.5.1
         working-directory: test/frameworks/${{ matrix.framework }}
 
   # test alpine can actually build
@@ -64,5 +64,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v2
-      - run: docker buildx build . --build-arg NODE_VERSION=20 --build-arg YARN_VERSION=1.22.21
+      - run: docker buildx build . --build-arg NODE_VERSION=24 --build-arg YARN_VERSION=1.22.21
         working-directory: test/base/${{ matrix.base }}
