@@ -2,7 +2,7 @@
 
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=xxx
-FROM node:${NODE_VERSION}-slim as build
+FROM node:${NODE_VERSION}-slim AS build
 
 # Node.js app lives here
 WORKDIR /app
