@@ -47,6 +47,9 @@ if (process.env.DATABASE_URL) {
 <% if (prisma) { -%>
 <%= tab(2) %>await exec('<%= npx %> prisma migrate deploy')
 <% } -%>
+<% if (nextjsGeneration) { -%>
+<%= tab(2) %>await exec('<%= npx %> next build --experimental-build-mode generate')
+<% } -%>
 <% if (build && options.deferBuild) { -%>
 <%= tab(2) %>await exec('<%= packager %> run build')
 <% } -%>

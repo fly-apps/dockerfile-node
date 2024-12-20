@@ -30,7 +30,7 @@ RUN yarn install --frozen-lockfile
 COPY . .
 
 # Build application
-RUN yarn run build
+RUN npx next build --experimental-build-mode compile
 
 
 # Final stage for app image

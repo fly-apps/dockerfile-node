@@ -32,7 +32,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build application
-RUN pnpm run build
+RUN npx next build --experimental-build-mode compile
 
 
 # Final stage for app image
