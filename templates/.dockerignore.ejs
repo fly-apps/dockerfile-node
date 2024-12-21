@@ -10,7 +10,11 @@ fly.toml
 /build
 /public/build
 <% } -%>
-
 <% if (meteor) { -%>
+
 /.meteor/local
+<% } -%>
+<% if (prismaFile) { -%>
+
+<%= prismaFile %>
 <% } -%>

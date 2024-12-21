@@ -154,6 +154,18 @@ export class GDF {
       this.#pj.devDependencies?.prisma)
   }
 
+  get prismaFile() {
+    const schema = path.join(this._appdir, 'prisma/schema.prisma')
+    if (!fs.existsSync(schema)) return null
+
+    const schemaContent = fs.readFileSync(schema, 'utf-8')
+    const urlMatch = schemaContent.match(/url\s*=\s*"(.*?)"/)
+    if (!urlMatch) return null
+    const url = urlMatch[1]
+    if (url.startsWith('file:.')) return url.slice(5)
+    if (url.startsWith('file:')) return URL.parse(url).pathname
+  }
+
   get meteor() {
     return !!this.#pj.dependencies?.['meteor-node-stubs']
   }
