@@ -115,7 +115,7 @@ RUN cd bundle/bundle/programs/server && meteor npm install
 # Build application
 RUN <%- mountSecrets %><%= build %>
 
-<% if (devDependencies && !options.dev && !nestjs && !adonisjs) { -%>
+<% if (devDependencies && !options.dev && !nestjs && !adonisjs && !prismaSeed) { -%>
 # Remove development dependencies
 RUN <%- buildCache %><%- packagerPrune %>
 
