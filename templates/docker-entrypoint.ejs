@@ -54,7 +54,13 @@ if (process.env.DATABASE_URL) {
 <%= tab(2) %>const target = '/data/' + path.basename(source)
 <%= tab(2) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
 <% } -%>
+<% if (prismaFile && prismaSeed && sqlite3) { -%>
+<%= tab(2) %>const newDb = !fs.existsSync(target)
+<% } -%>
 <%= tab(2) %>await exec('<%= npx %> prisma migrate deploy')
+<% if (prismaFile && prismaSeed && sqlite3) { -%>
+<%= tab(2) %>if (newDb) await exec('npx prisma db seed')
+<% } -%>
 <% } -%>
 <% if (nextjsGeneration) { -%>
 <%= tab(2) %>await exec('<%= npx %> next build --experimental-build-mode generate')

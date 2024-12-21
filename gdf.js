@@ -166,6 +166,10 @@ export class GDF {
     if (url.startsWith('file:')) return URL.parse(url).pathname
   }
 
+  get prismaSeed() {
+    return this.prisma && this.#pj.prisma?.seed
+  }
+
   get meteor() {
     return !!this.#pj.dependencies?.['meteor-node-stubs']
   }
@@ -950,6 +954,13 @@ export class GDF {
           path.join(appdir, '.gitignore'),
           path.join(appdir, '.dockerignore')
         )
+
+        if (this.prismaFile) {
+          const fileContent = fs.readFileSync('.dockerignore', 'utf-8')
+          if (!fileContent.includes(this.prismaFile)) {
+            fs.appendFileSync('.dockerignore', `\n\n# sqlite3 database\n${this.prismaFile}\n`)
+          }
+        }
       } catch {
         await this.#writeTemplateFile('.dockerignore.ejs', '.dockerignore')
       }
