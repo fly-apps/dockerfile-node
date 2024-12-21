@@ -50,9 +50,9 @@ if (process.env.DATABASE_URL) {
 <%= tab(1) %>if (process.argv.slice(2).join(' ') === '<%= packager %> run start'<% if (litefs) { %> && process.env.FLY_REGION === process.env.PRIMARY_REGION<% } %>) {
 <% if (prisma) { -%>
 <% if (prismaFile) { -%>
-<%= tab(2) %>const source = path.resolve(<%- JSON.stringify(prismaFile) %>)
-<%= tab(2) %>const target = "/data/" + path.basename(source)
-<%= tab(2) %>if (!fs.existsSync(source) && fs.existsSync("/data")) fs.symlinkSync(target, source)
+<%= tab(2) %>const source = path.resolve('<%- prismaFile %>')
+<%= tab(2) %>const target = '/data/' + path.basename(source)
+<%= tab(2) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
 <% } -%>
 <%= tab(2) %>await exec('<%= npx %> prisma migrate deploy')
 <% } -%>

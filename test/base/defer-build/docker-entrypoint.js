@@ -9,9 +9,9 @@ const env = { ...process.env }
 ;(async() => {
   // If running the web server then migrate existing database
   if (process.argv.slice(2).join(' ') === 'npm run start') {
-    const source = path.resolve("./dev.db")
-    const target = "/data/" + path.basename(source)
-    if (!fs.existsSync(source) && fs.existsSync("/data")) fs.symlinkSync(target, source)
+    const source = path.resolve('./dev.db')
+    const target = '/data/' + path.basename(source)
+    if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
     await exec('npx prisma migrate deploy')
     await exec('npm run build')
   }
