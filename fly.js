@@ -35,6 +35,11 @@ GDF.extend(class extends GDF {
     if (fs.existsSync('.github/workflows/deploy.yml')) {
       this.flyGitHubPrep()
     }
+
+    // ensure that there is at least one migration present - sqlite3 file
+    if (this.prismaSeed && !fs.existsSync(path.join(this._appdir, 'prisma/migrations')) && this.prismaFile && !fs.existsSync(path.join(this._appdir, 'prisma', this.prismaFile)) && fs.existsSync(path.join(this._appdir, 'node_modules'))) {
+      execSync(`${this.npx} prisma migrate dev --name init`, { stdio: 'inherit' })
+    }
   }
 
   // Verify that fly.toml exists, flyctl is in the path, extract appname
