@@ -2,19 +2,23 @@
 <% tab = n => (usingTabs ? "\t" : "  ").repeat(n) -%>
 
 <% if (typeModule) { -%>
-import { spawn } from 'node:child_process'
+import { spawn<% if (prismaFile && prismaSeed && sqlite3) { -%>, exec<% } %> } from 'node:child_process'
 <% if (options.swap  && !flySetup()) { -%>
 import { writeFileSync } from 'node:fs'
 <% } -%>
+<% if (prismaFile) { -%>
+import path = from 'node:path'
+import fs from 'node:fs'
+<% } -%>
 <% } else { -%>
-const { spawn } = require('node:child_process')
+const { spawn<% if (prismaFile && prismaSeed && sqlite3) { -%>, exec<% } %> } = require('node:child_process')
 <% if (options.swap && !flySetup()) { -%>
 const { writeFileSync } = require('node:fs')
-<% } -%>
 <% } -%>
 <% if (prismaFile) { -%>
 const path = require('node:path')
 const fs = require('node:fs')
+<% } -%>
 <% } -%>
 
 const env = { ...process.env }
