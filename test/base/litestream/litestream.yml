@@ -1,0 +1,13 @@
+# This is the configuration file for litestream.
+#
+# For more details, see: https://litestream.io/reference/config/
+#
+dbs:
+  - path: /data/dev.db
+    replicas:
+      - type: s3
+        endpoint: $AWS_ENDPOINT_URL_S3
+        bucket: $BUCKET_NAME
+        path: litestream/dev.db
+        access-key-id: $AWS_ACCESS_KEY_ID
+        secret-access-key: $AWS_SECRET_ACCESS_KEY
