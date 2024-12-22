@@ -16,5 +16,6 @@ fly.toml
 <% } -%>
 <% if (prismaFile) { -%>
 
-<%= prismaFile %>
+<%= path.join(prismaFile) %>
+<%= path.join("prisma", prismaFile) %>
 <% } -%>

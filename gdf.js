@@ -958,7 +958,7 @@ export class GDF {
         if (this.prismaFile) {
           const fileContent = fs.readFileSync('.dockerignore', 'utf-8')
           if (!fileContent.includes(this.prismaFile)) {
-            fs.appendFileSync('.dockerignore', `\n\n# sqlite3 database\n${this.prismaFile}\n`)
+            fs.appendFileSync('.dockerignore', `\n\n# sqlite3 database\n${path.join(this.prismaFile)}\n${path.join('prisma', this.prismaFile)}\n`)
           }
         }
       } catch {
