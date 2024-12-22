@@ -76,7 +76,15 @@ if (process.env.DATABASE_URL) {
 
 <% } -%>
 <%= tab(1) %>// launch application
+<% if (nextjsGeneration) { -%>
+<%= tab(1) %>if (process.env.BUCKET_NAME) {
+<%= tab(2) %>await exec(`litestream replicate -config litestream.yml -exec ${JSON.stringify(process.argv.slice(2).join(' '))}`)
+<%= tab(1) %>} else {
+<%= tab(2) %>await exec(process.argv.slice(2).join(' '))
+<%= tab(1) %>}
+<% } else { -%>
 <%= tab(1) %>await exec(process.argv.slice(2).join(' '))
+<% } -%>
 })()
 
 <%= tab(0) %>function exec(command) {

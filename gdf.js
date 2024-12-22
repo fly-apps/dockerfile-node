@@ -24,6 +24,7 @@ export const defaults = {
   legacyPeerDeps: false,
   link: false,
   litefs: false,
+  litestream: false,
   nginxRoot: '',
   port: 0,
   swap: '',
@@ -264,6 +265,10 @@ export class GDF {
       !!this.#pj.dependencies?.['litefs-js']
   }
 
+  get litestream() {
+    return this.options.litestream
+  }
+
   // Does this application use puppeteer?
   get puppeteer() {
     return !!this.#pj.dependencies?.puppeteer ||
@@ -331,6 +336,7 @@ export class GDF {
     const packages = [...this.options.packages.deploy]
 
     if (this.litefs) packages.push('ca-certificates', 'fuse3')
+    if (this.litestream) packages.push('ca-certificates', 'wget')
     if (this.remix && this.sqlite3) packages.push('sqlite3')
     if (this.prisma) packages.push('openssl')
     if (this.options.nginxRoot) packages.push('nginx')
@@ -935,6 +941,11 @@ export class GDF {
 
     if (this.litefs) {
       templates['litefs.yml.ejs'] = `${this.configDir}litefs.yml`
+    }
+
+    if (this.litestream && this.prismaFile) {
+      templates['litestream.yml.ejs'] = `${this.configDir}litestream.yml`
+      this.path = path
     }
 
     if (this.options.nginxRoot) {

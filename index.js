@@ -73,6 +73,10 @@ const options = yargs((hideBin(process.argv)))
     describe: 'configure and enable litefs',
     type: 'boolean'
   })
+  .option('litestream', {
+    describe: 'configure and enable litestream',
+    type: 'boolean'
+  })
   .option('link', {
     describe: 'use COPY --link whenever possible',
     type: 'boolean'

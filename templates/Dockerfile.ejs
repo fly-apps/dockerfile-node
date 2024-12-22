@@ -157,6 +157,12 @@ RUN <% if (options.cache) { %><%= pkg_cache %>
     rm -rf <%= pkg_cleanup %><% } %>
 
 <% } -%>
+<% if (litestream) { -%>
+RUN wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.deb && \
+    dpkg -i litestream-v0.3.13-linux-amd64.deb && \
+    rm litestream-v0.3.13-linux-amd64.deb
+
+<% } -%>
 # Copy built application
 <% if (vite || astroStatic) { -%>
 COPY --from=build /app/dist /usr/share/nginx/html

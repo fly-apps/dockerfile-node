@@ -1,0 +1,23 @@
+{
+  "name": "express",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@prisma/client": "5.22.0",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "prisma": "5.22.0",
+    "ts-node": "10.9.2",
+    "typescript": "5.7.2"
+  },
+  "dockerfile": {
+    "litestream": true
+  }
+}

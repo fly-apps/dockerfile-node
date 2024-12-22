@@ -42,6 +42,7 @@ Options are saved between runs into `package.json`. To invert a boolean options,
 * `--force` - overwrite existing files
 * `--legacy-peer-deps` - [ignore peer dependencies](https://docs.npmjs.com/cli/v7/using-npm/config#legacy-peer-deps).
 * `--litefs` - configure and enable [litefs](https://fly.io/docs/litefs/).
+* `--litestream` - configure and enable [litestream](https://litestream.io/).
 * `--nginxRoot=DIR` - serve static files from given directory via [nginx](https://www.nginx.com/).
 * `--link` - Add [--link](https://docs.docker.com/engine/reference/builder/#copy---link) to COPY statements.  Some tools, including [buildah](https://www.redhat.com/en/topics/containers/what-is-buildah)) or [Buildkit](https://docs.docker.com/build/buildkit/) don't properly support this feature.
 * `--port=n` - expose port (default may vary based on framework, but otherwise is `3000`)
