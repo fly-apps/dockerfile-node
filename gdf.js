@@ -960,15 +960,20 @@ export class GDF {
 
     // ensure that there is a dockerignore file
     if (!fs.existsSync(path.join(appdir, '.dockerignore'))) {
+      const files = this.packageFiles
+
+      const dockerignore = fs.readFileSync(path.join(appdir, '.gitignore'), 'utf-8').split('\n').map(line => {
+        if (line.startsWith('#')) return line
+        if (line.trim() === '') return line
+        if (fs.globSync(line).some(file => files.includes(file))) return '# ' + line
+        return line
+      }).join('\n')
+
       try {
-        fs.copyFileSync(
-          path.join(appdir, '.gitignore'),
-          path.join(appdir, '.dockerignore')
-        )
+        fs.writeFileSync(path.join(appdir, '.dockerignore'), dockerignore)
 
         if (this.prismaFile) {
-          const fileContent = fs.readFileSync('.dockerignore', 'utf-8')
-          if (!fileContent.includes(this.prismaFile)) {
+          if (!dockerignore.includes(this.prismaFile)) {
             fs.appendFileSync('.dockerignore', `\n\n# sqlite3 database\n${path.join(this.prismaFile)}\n${path.join('prisma', this.prismaFile)}\n`)
           }
         }
