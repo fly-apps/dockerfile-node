@@ -202,6 +202,12 @@ export class GDF {
     } else return false
   }
 
+  // Does this application use trpc?
+  get trpc() {
+    return !!this.#pj.dependencies?.['@trpc/server'] &&
+      !!this.#pj.dependencies?.['@trpc/client']
+  }
+
   // Does this application use nuxt.js?
   get nuxtjs() {
     return !!this.#pj.dependencies?.nuxt
