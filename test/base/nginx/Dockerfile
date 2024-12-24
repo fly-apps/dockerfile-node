@@ -65,7 +65,7 @@ EOF
 # Build a Procfile for production use
 COPY <<-"EOF" /app/Procfile.prod
 nginx: /usr/sbin/nginx -g "daemon off;"
-app: PORT=3001 npm run start
+app: PORT=3001 npx foreman start --procfile Procfile.prod
 EOF
 
 # Start the server by default, this can be overwritten at runtime

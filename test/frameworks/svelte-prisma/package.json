@@ -1,0 +1,41 @@
+{
+  "name": "sveltekit",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "github:fly-apps/dockerfile-node",
+    "@sveltejs/adapter-auto": "3.3.1",
+    "@sveltejs/kit": "2.11.1",
+    "@sveltejs/package": "2.3.7",
+    "@typescript-eslint/eslint-plugin": "8.18.1",
+    "@typescript-eslint/parser": "8.18.1",
+    "eslint": "8.57.1",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-svelte": "2.46.1",
+    "prettier": "3.4.2",
+    "prettier-plugin-svelte": "3.3.2",
+    "prisma": "5.22.0",
+    "svelte": "5.15.0",
+    "svelte-check": "4.1.1",
+    "svelte-preprocess": "6.0.3",
+    "tslib": "2.8.1",
+    "tsx": "4.19.2",
+    "typescript": "5.7.2",
+    "vite": "6.0.5"
+  },
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "5.22.0",
+    "@sveltejs/adapter-node": "^5.2.11"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}
