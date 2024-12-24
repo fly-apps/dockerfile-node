@@ -4,9 +4,9 @@
 ARG NODE_VERSION=xxx
 FROM node:${NODE_VERSION}-slim AS base
 
-LABEL fly_launch_runtime="SvelteKit/Prisma"
+LABEL fly_launch_runtime="Nuxt/Prisma"
 
-# SvelteKit/Prisma app lives here
+# Nuxt/Prisma app lives here
 WORKDIR /app
 
 # Set production environment
@@ -40,8 +40,12 @@ FROM base
 
 # Install packages needed for deployment
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y openssl && \
+    apt-get install --no-install-recommends -y ca-certificates openssl wget && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+RUN wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.deb && \
+    dpkg -i litestream-v0.3.13-linux-amd64.deb && \
+    rm litestream-v0.3.13-linux-amd64.deb
 
 # Copy built application
 COPY --from=build /app /app
@@ -55,4 +59,5 @@ ENTRYPOINT [ "/app/docker-entrypoint.js" ]
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD [ "node", "./build/index.js" ]
+ENV HOST=0
+CMD [ "node", ".output/server/index.mjs" ]

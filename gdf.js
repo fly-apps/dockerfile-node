@@ -425,7 +425,7 @@ export class GDF {
         env.CACHE_DATABASE_FILENAME = 'cache.db'
         env.CACHE_DATABASE_PATH = '$LITEFS_DIR/$CACHE_DATABASE_FILENAME'
         env.PORT = this.port + 1
-      } else {
+      } else if (!this.prismaFile) {
         env.DATABASE_URL = `file:///${this.litefs ? 'litefs' : 'data'}/sqlite.db`
         if (this.litefs) env.PORT = this.port + 1
       }

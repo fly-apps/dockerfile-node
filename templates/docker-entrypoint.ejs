@@ -56,7 +56,7 @@ if (process.env.DATABASE_URL) {
     %>'<% if (litefs) { %> && process.env.FLY_REGION === process.env.PRIMARY_REGION<% } %>) {
 <% if (prisma) { -%>
 <% if (prismaFile) { -%>
-<%= tab(2) %>const source = path.resolve('<%- prismaFile %>')
+<%= tab(2) %>const source = path.resolve(<% if (nuxtjs) { %>'./.output/server', <% } %>'<%- prismaFile %>')
 <%= tab(2) %>const target = '/data/' + path.basename(source)
 <%= tab(2) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
 <% } -%>
