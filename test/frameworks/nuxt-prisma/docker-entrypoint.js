@@ -14,13 +14,21 @@ const env = { ...process.env }
     if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
     source = path.resolve('./.output/server', './dev.db')
     if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
-    const newDb = !fs.existsSync(target)
+    let newDb = !fs.existsSync(target)
+    if (newDb && process.env.BUCKET_NAME) {
+      await exec(`litestream restore -config litestream.yml -if-replica-exists ${target}`)
+      newDb = !fs.existsSync(target)
+    }
     await exec('npx prisma migrate deploy')
     if (newDb) await exec('npx prisma db seed')
   }
 
   // launch application
-  await exec(process.argv.slice(2).join(' '))
+  if (process.env.BUCKET_NAME) {
+    await exec(`litestream replicate -config litestream.yml -exec ${JSON.stringify(process.argv.slice(2).join(' '))}`)
+  } else {
+    await exec(process.argv.slice(2).join(' '))
+  }
 })()
 
 function exec(command) {
