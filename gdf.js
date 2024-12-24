@@ -617,6 +617,10 @@ export class GDF {
       modules.push('foreman')
     }
 
+    if (this.svelte && !this.#pj.dependencies?.['@sveltejs/adapter-node']) {
+      modules.push('@sveltejs/adapter-node')
+    }
+
     if (modules.length === 0) return
     const add = this.packager === 'npm' ? 'install' : 'add'
     for (const module of modules) {
@@ -795,6 +799,12 @@ export class GDF {
   get startCommand() {
     if (this.options.cmd) return this.options.cmd
 
+    if (this.foreman) {
+      return [this.npx, 'foreman', 'start', '--procfile', 'Procfile.prod']
+    } else if (this.standaloneNextjs) {
+      return ['node', 'server.js']
+    }
+
     if (this.options.distroless) {
       const start = this.#pj.scripts.start
       const parsed = ShellQuote.parse(start)
@@ -968,14 +978,14 @@ export class GDF {
     if (!fs.existsSync(path.join(appdir, '.dockerignore'))) {
       const files = this.packageFiles
 
-      const dockerignore = fs.readFileSync(path.join(appdir, '.gitignore'), 'utf-8').split('\n').map(line => {
-        if (line.startsWith('#')) return line
-        if (line.trim() === '') return line
-        if (fs.globSync(line).some(file => files.includes(file))) return '# ' + line
-        return line
-      }).join('\n')
-
       try {
+        const dockerignore = fs.readFileSync(path.join(appdir, '.gitignore'), 'utf-8').split('\n').map(line => {
+          if (line.startsWith('#')) return line
+          if (line.trim() === '') return line
+          if (fs.globSync(line).some(file => files.includes(file))) return '# ' + line
+          return line
+        }).join('\n')
+
         fs.writeFileSync(path.join(appdir, '.dockerignore'), dockerignore)
 
         if (this.prismaFile) {
@@ -985,6 +995,15 @@ export class GDF {
         }
       } catch {
         await this.#writeTemplateFile('.dockerignore.ejs', '.dockerignore')
+      }
+    }
+
+    // ensure the correct svelte adapter is selected
+    if (this.svelte && fs.existsSync(path.join(appdir, 'svelte.config.js'))) {
+      let config = fs.readFileSync(path.join(appdir, 'svelte.config.js'), 'utf-8')
+      if (config.includes('@sveltejs/adapter-') && !config.includes('@sveltejs/adapter-node')) {
+        config = config.replace(/@@sveltejs\/adapter-[-\w]+/, '@sveltejs/adapter-node')
+        fs.writeFileSync(path.join(appdir, 'svelte.config.js'), 'utf-8')
       }
     }
 

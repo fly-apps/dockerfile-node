@@ -7,7 +7,7 @@ import { spawn } from 'node:child_process'
 import { writeFileSync } from 'node:fs'
 <% } -%>
 <% if (prismaFile) { -%>
-import path = from 'node:path'
+import path from 'node:path'
 import fs from 'node:fs'
 <% } -%>
 <% } else { -%>
@@ -51,7 +51,9 @@ if (process.env.DATABASE_URL) {
 <% } -%>
 <% if (prisma || (build && options.deferBuild)) { -%>
 <%= tab(1) %>// If running the web server then migrate existing database
-<%= tab(1) %>if (process.argv.slice(2).join(' ') === '<%= packager %> run start'<% if (litefs) { %> && process.env.FLY_REGION === process.env.PRIMARY_REGION<% } %>) {
+<%= tab(1) %>if (process.argv.slice(2).join(' ') === '<%-
+    Array.isArray(startCommand) ? startCommand.join(" ") : startCommand
+    %>'<% if (litefs) { %> && process.env.FLY_REGION === process.env.PRIMARY_REGION<% } %>) {
 <% if (prisma) { -%>
 <% if (prismaFile) { -%>
 <%= tab(2) %>const source = path.resolve('<%- prismaFile %>')
