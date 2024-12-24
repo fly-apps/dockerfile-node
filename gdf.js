@@ -1003,7 +1003,7 @@ export class GDF {
       let config = fs.readFileSync(path.join(appdir, 'svelte.config.js'), 'utf-8')
       if (config.includes('@sveltejs/adapter-') && !config.includes('@sveltejs/adapter-node')) {
         config = config.replace(/@@sveltejs\/adapter-[-\w]+/, '@sveltejs/adapter-node')
-        fs.writeFileSync(path.join(appdir, 'svelte.config.js'), 'utf-8')
+        fs.writeFileSync(path.join(appdir, 'svelte.config.js'), config)
       }
     }
 
