@@ -9,6 +9,8 @@ import { writeFileSync } from 'node:fs'
 <% if (prismaFile) { -%>
 import path from 'node:path'
 import fs from 'node:fs'
+<% } else if (prismaEnv && sqlite3) { -%>
+import fs from 'node:fs'
 <% } -%>
 <% } else { -%>
 const { spawn } = require('node:child_process')
