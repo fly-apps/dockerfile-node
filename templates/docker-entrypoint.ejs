@@ -18,6 +18,8 @@ const { writeFileSync } = require('node:fs')
 <% if (prismaFile) { -%>
 const path = require('node:path')
 const fs = require('node:fs')
+<% } else if (prismaEnv && sqlite3) { -%>
+const fs = require('node:fs')
 <% } -%>
 <% } -%>
 
@@ -63,7 +65,7 @@ if (process.env.DATABASE_URL) {
 <%= tab(2) %>source = path.resolve('./.output/server', '<%- prismaFile %>')
 <%= tab(2) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
 <% } -%>
-<% } else if (prismaSeed && sqlite3) { -%>
+<% } else if (prismaSeed && sqlite3 && prismaEnv) { -%>
 <%= tab(2) %>const url = new URL(process.env.<%= prismaEnv %>)
 <%= tab(2) %>const target = url.protocol === 'file:' && url.pathname
 <%= tab(2) %>const newDb = target && !fs.existsSync(target)
