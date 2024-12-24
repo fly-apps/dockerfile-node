@@ -167,6 +167,15 @@ export class GDF {
     if (url.startsWith('file:')) return URL.parse(url).pathname
   }
 
+  get prismaEnv() {
+    const schema = path.join(this._appdir, 'prisma/schema.prisma')
+    if (!fs.existsSync(schema)) return null
+
+    const schemaContent = fs.readFileSync(schema, 'utf-8')
+    const urlMatch = schemaContent.match(/url\s*=\s*env\("(.*?)"\)/)
+    if (urlMatch) return urlMatch[1]
+  }
+
   get prismaSeed() {
     return this.prisma && this.#pj.prisma?.seed
   }
