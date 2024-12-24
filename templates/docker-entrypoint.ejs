@@ -56,9 +56,13 @@ if (process.env.DATABASE_URL) {
     %>'<% if (litefs) { %> && process.env.FLY_REGION === process.env.PRIMARY_REGION<% } %>) {
 <% if (prisma) { -%>
 <% if (prismaFile) { -%>
-<%= tab(2) %>const source = path.resolve(<% if (nuxtjs) { %>'./.output/server', <% } %>'<%- prismaFile %>')
+<%= tab(2) %><%= nuxtjs ? 'let' : 'const' %> source = path.resolve('<%- prismaFile %>')
 <%= tab(2) %>const target = '/data/' + path.basename(source)
 <%= tab(2) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
+<% if (nuxtjs) { -%>
+<%= tab(2) %>source = path.resolve('./.output/server', '<%- prismaFile %>')
+<%= tab(2) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
+<% } -%>
 <% } -%>
 <% if (prismaFile && prismaSeed && sqlite3) { -%>
 <%= tab(2) %>const newDb = !fs.existsSync(target)
