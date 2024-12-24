@@ -803,6 +803,8 @@ export class GDF {
       return [this.npx, 'foreman', 'start', '--procfile', 'Procfile.prod']
     } else if (this.standaloneNextjs) {
       return ['node', 'server.js']
+    } else if (this.remix && this.#pj.scripts?.start === 'remix-serve build') {
+      return [this.npx, 'remix-serve', './build/index.js']
     }
 
     if (this.options.distroless) {
