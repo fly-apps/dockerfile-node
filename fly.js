@@ -25,8 +25,9 @@ GDF.extend(class extends GDF {
     if (this.remix) {
       this.flyRemixSecrets(this.flyApp)
       this.flyHealthCheck('/healthcheck')
-      if (this.postgres) this.flyRelease(`${this.npx} prisma migrate deploy`)
     }
+
+    if (this.prisma && this.postgres) this.flyRelease(`${this.npx} prisma migrate deploy`)
 
     // set secrets for AdonisJS apps
     if (this.adonisjs) this.flyAdonisJsSecrets(this.flyApp)
@@ -240,7 +241,11 @@ GDF.extend(class extends GDF {
   flyRelease(command) {
     if (this.flyToml.includes('[deploy]')) return
 
-    this.flyToml += `\n[deploy]\n  release_command = ${JSON.stringify(command)}`
+    this.flyToml += `\n[deploy]\n  release_command = ${JSON.stringify(command)}\n`
+
+    if (this.prismaSeed) {
+      this.flyToml += '  seed_command = "npx prisma db seed"\n'
+    }
 
     fs.writeFileSync(this.flyTomlFile, this.flyToml)
   }

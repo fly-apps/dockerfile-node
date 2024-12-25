@@ -10,3 +10,4 @@ swap_size_mb = 512
 
 [deploy]
   release_command = "npx prisma migrate deploy"
+  seed_command = "npx prisma db seed"
