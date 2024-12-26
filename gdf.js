@@ -864,6 +864,7 @@ export class GDF {
 
     if (!((this.prisma && this.sqlite3) ||
       (this.options.swap && !this.flySetup()) ||
+      this.nextjsGeneration ||
       this.adonisjs)) return null
 
     const entrypoint = [`/app/${this.configDir}docker-entrypoint.js`]
