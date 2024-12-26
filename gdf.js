@@ -995,6 +995,7 @@ export class GDF {
           if (line.startsWith('#')) return line
           if (line.trim() === '') return line
           if (fs.globSync(line).some(file => files.includes(file))) return '# ' + line
+          if (this.prisma && line.startsWith('prisma/migrations')) return '# ' + line
           return line
         }).join('\n')
 
