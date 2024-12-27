@@ -37,9 +37,14 @@ GDF.extend(class extends GDF {
       this.flyGitHubPrep()
     }
 
-    // ensure that there is at least one migration present - sqlite3 file
-    if (this.prismaSeed && !fs.existsSync(path.join(this._appdir, 'prisma/migrations')) && this.prismaFile && !fs.existsSync(path.join(this._appdir, 'prisma', this.prismaFile)) && fs.existsSync(path.join(this._appdir, 'node_modules'))) {
-      execSync(`${this.npx} prisma migrate dev --name init`, { stdio: 'inherit' })
+    // ensure that there is at least one migration present
+    if (this.prismaSeed && !fs.existsSync(path.join(this._appdir, 'prisma/migrations'))) {
+      if (this.prismaFile && !fs.existsSync(path.join(this._appdir, 'prisma', this.prismaFile)) && fs.existsSync(path.join(this._appdir, 'node_modules'))) {
+        execSync(`${this.npx} prisma migrate dev --name init`, { stdio: 'inherit' })
+      } else {
+        console.error('No migrations found. Please run `npx prisma migrate dev` to create an initial migration.')
+        this.setExit(42)
+      }
     }
   }
 

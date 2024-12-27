@@ -79,6 +79,9 @@ export class GDF {
   // previous answer to conflict prompt
   #answer = ''
 
+  // exit code
+  #exitCode = 0
+
   get variant() {
     return this.options.alpine ? 'alpine' : 'slim'
   }
@@ -1024,6 +1027,12 @@ export class GDF {
     for (const runner of GDF.runners) {
       runner.apply(this)
     }
+
+    process.exit(this.#exitCode)
+  }
+
+  setExit(code) {
+    this.#exitCode = code
   }
 
   // write template file, prompting when there is a conflict
