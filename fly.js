@@ -38,9 +38,9 @@ GDF.extend(class extends GDF {
     }
 
     // ensure that there is at least one migration present
-    if (this.prismaSeed && !fs.existsSync(path.join(this._appdir, 'prisma/migrations'))) {
+    if (!fs.existsSync(path.join(this._appdir, 'prisma/migrations'))) {
       if (this.prismaFile && !fs.existsSync(path.join(this._appdir, 'prisma', this.prismaFile)) && fs.existsSync(path.join(this._appdir, 'node_modules'))) {
-        execSync(`${this.npx} prisma migrate dev --name init`, { stdio: 'inherit' })
+        execSync(`${this.npx} prisma migrate dev --name init --create-only`, { stdio: 'inherit' })
       } else {
         console.error(chalk.bold.red('\nNo migrations found. Please run `npx prisma migrate dev` to create an initial migration.'))
         this.setExit(42)
