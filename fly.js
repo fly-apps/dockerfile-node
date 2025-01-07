@@ -37,8 +37,8 @@ GDF.extend(class extends GDF {
       this.flyGitHubPrep()
     }
 
-    // ensure that there is at least one migration present
-    if (!fs.existsSync(path.join(this._appdir, 'prisma/migrations'))) {
+    // prisma: ensure that there is at least one migration present
+    if (this.prisma && !fs.existsSync(path.join(this._appdir, 'prisma/migrations'))) {
       if (this.prismaFile && !fs.existsSync(path.join(this._appdir, 'prisma', this.prismaFile)) && fs.existsSync(path.join(this._appdir, 'node_modules'))) {
         execSync(`${this.npx} prisma migrate dev --name init --create-only`, { stdio: 'inherit' })
       } else {
