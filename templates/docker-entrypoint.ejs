@@ -42,76 +42,96 @@ if (process.env.DATABASE_URL) {
 }
 
 <% } -%>
+<% n = typeModule ? 0 : 1 -%>
+<% if (!typeModule) { -%>
 ;(async() => {
+<% } -%>
 <% if (options.swap && !flySetup()) { -%>
-<%= tab(1) %>// allocate swap space
-<%= tab(1) %>await exec('fallocate -l <%= options.swap %> /swapfile')
-<%= tab(1) %>await exec('chmod 0600 /swapfile')
-<%= tab(1) %>await exec('mkswap /swapfile')
-<%= tab(1) %>writeFileSync('/proc/sys/vm/swappiness', '10')
-<%= tab(1) %>await exec('swapon /swapfile')
-<%= tab(1) %>writeFileSync('/proc/sys/vm/overcommit_memory', '1')
+<%= tab(n) %>// allocate swap space
+<%= tab(n) %>await exec('fallocate -l <%= options.swap %> /swapfile')
+<%= tab(n) %>await exec('chmod 0600 /swapfile')
+<%= tab(n) %>await exec('mkswap /swapfile')
+<%= tab(n) %>writeFileSync('/proc/sys/vm/swappiness', '10')
+<%= tab(n) %>await exec('swapon /swapfile')
+<%= tab(n) %>writeFileSync('/proc/sys/vm/overcommit_memory', '1')
 
 <% } -%>
 <% if (prisma || (build && options.deferBuild) || nextjsGeneration) { -%>
+<% if (setupScriptType == 'docker') { -%>
 <% if (prisma && sqlite3) { -%>
-<%= tab(1) %>// If running the web server then migrate existing database
+<%= tab(n) %>// If running the web server then migrate existing database
 <% } else { -%>
-<%= tab(1) %>// If running the web server then prerender pages
+<%= tab(n) %>// If running the web server then prerender pages
 <% } -%>
-<%= tab(1) %>if (process.argv.slice(2).join(' ') === '<%-
+<%= tab(n) %>if (process.argv.slice(2).join(' ') === '<%-
     Array.isArray(startCommand) ? startCommand.join(" ") : startCommand
     %>'<% if (litefs) { %> && process.env.FLY_REGION === process.env.PRIMARY_REGION<% } %>) {
+<% n++ -%>
+<% } -%>
 <% if (prisma) { -%>
 <% if (prismaFile) { -%>
-<%= tab(2) %><%= nuxtjs ? 'let' : 'const' %> source = path.resolve('<%- prismaFile %>')
-<%= tab(2) %>const target = '/data/' + path.basename(source)
-<%= tab(2) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
+<%= tab(n) %>// place Sqlite3 database on volume
+<%= tab(n) %><%= nuxtjs ? 'let' : 'const' %> source = path.resolve('<%- prismaFile %>')
+<%= tab(n) %>const target = '/data/' + path.basename(source)
+<%= tab(n) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
 <% if (nuxtjs) { -%>
-<%= tab(2) %>source = path.resolve('./.output/server', '<%- prismaFile %>')
-<%= tab(2) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
+<%= tab(n) %>source = path.resolve('./.output/server', '<%- prismaFile %>')
+<%= tab(n) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
 <% } -%>
 <% } else if (prismaSeed && sqlite3 && prismaEnv) { -%>
-<%= tab(2) %>const url = new URL(process.env.<%= prismaEnv %>)
-<%= tab(2) %>const target = url.protocol === 'file:' && url.pathname
-<%= tab(2) %><%= litestream ? 'let' : 'const' %> newDb = target && !fs.existsSync(target)
+<%= tab(n) %>const url = new URL(process.env.<%= prismaEnv %>)
+<%= tab(n) %>const target = url.protocol === 'file:' && url.pathname
+<% if (litestream && sqlite3 && (prismaFile || prismaEnv)) { -%>
+
+<%= tab(n) %>// restore database if not present and replica exists
 <% } -%>
-<% if (prismaFile && prismaSeed && sqlite3) { -%>
-<%= tab(2) %><%= litestream ? 'let' : 'const' %> newDb = !fs.existsSync(target)
 <% } -%>
-<% if (litestream && prismaSeed && sqlite3 && (prismaFile || prismaEnv)) { -%>
-<%= tab(2) %>if (newDb && process.env.BUCKET_NAME) {
-<%= tab(3) %>await exec(`litestream restore -config litestream.yml -if-replica-exists ${target}`)
-<%= tab(3) %>newDb = !fs.existsSync(target)
-<%= tab(2) %>}
+<% if (sqlite3 && (prismaSeed || litestream) && (prismaFile || prismaEnv)) { -%>
+<%= tab(n) %><%= litestream ? 'let' : 'const' %> newDb = <%- !prismaFile ? 'target && ' : '' %>!fs.existsSync(target)
 <% } -%>
-<% if (sqlite3) { -%>
-<%= tab(2) %>await exec('<%= npx %> prisma migrate deploy')
+<% if (litestream && sqlite3 && (prismaFile || prismaEnv)) { -%>
+<%= tab(n) %>if (newDb && process.env.BUCKET_NAME) {
+<%= tab(n+1) %>await exec(`litestream restore -config litestream.yml -if-replica-exists ${target}`)
+<% if (prismaSeed && sqlite3 && (prismaFile || prismaEnv)) { -%>
+<%= tab(n+1) %>newDb = !fs.existsSync(target)
+<% } -%>
+<%= tab(n) %>}
+<% } -%>
+<% if (sqlite3 && !shopify) { -%>
+<% if (prismaFile) { -%>
+
+<%= tab(n) %>// prepare database
+<% } -%>
+<%= tab(n) %>await exec('<%= npx %> prisma migrate deploy')
 <% } -%>
 <% if (prismaSeed && sqlite3 && (prismaFile || prismaEnv)) { -%>
-<%= tab(2) %>if (newDb) await exec('npx prisma db seed')
+<%= tab(n) %>if (newDb) await exec('npx prisma db seed')
 <% } -%>
 <% } -%>
 <% if (nextjsGeneration) { -%>
-<%= tab(2) %>await exec('<%= npx %> next build --experimental-build-mode generate')
+<%= tab(n) %>await exec('<%= npx %> next build --experimental-build-mode generate')
 <% } -%>
 <% if (build && options.deferBuild) { -%>
-<%= tab(2) %>await exec('<%= packager %> run build')
+<%= tab(n) %>await exec('<%= packager %> run build')
 <% } -%>
-<%= tab(1) %>}
+<% if (setupScriptType == 'docker') { -%>
+<%= tab(--n) %>}
+<% } -%>
 
 <% } -%>
-<%= tab(1) %>// launch application
+<%= tab(n) %>// launch application
 <% if (litestream) { -%>
-<%= tab(1) %>if (process.env.BUCKET_NAME) {
-<%= tab(2) %>await exec(`litestream replicate -config litestream.yml -exec ${JSON.stringify(process.argv.slice(2).join(' '))}`)
-<%= tab(1) %>} else {
-<%= tab(2) %>await exec(process.argv.slice(2).join(' '))
-<%= tab(1) %>}
+<%= tab(n) %>if (process.env.BUCKET_NAME) {
+<%= tab(n+1) %>await exec(`litestream replicate -config litestream.yml -exec ${JSON.stringify(process.argv.slice(2).join(' '))}`)
+<%= tab(n) %>} else {
+<%= tab(n+1) %>await exec(process.argv.slice(2).join(' '))
+<%= tab(n) %>}
 <% } else { -%>
-<%= tab(1) %>await exec(process.argv.slice(2).join(' '))
+<%= tab(n) %>await exec(process.argv.slice(2).join(' '))
 <% } -%>
+<% if (!typeModule) { -%>
 })()
+<% } -%>
 
 <%= tab(0) %>function exec(command) {
 <%= tab(1) %>const child = spawn(command, { shell: true, stdio: 'inherit', env })

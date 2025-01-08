@@ -82,6 +82,9 @@ export class GDF {
   // exit code
   #exitCode = 0
 
+  // dockerfile exists at the time of invocation
+  #dockerfileExists = false
+
   get variant() {
     return this.options.alpine ? 'alpine' : 'slim'
   }
@@ -145,6 +148,11 @@ export class GDF {
   get remix() {
     return !!(this.#pj.dependencies?.remix ||
       this.#pj.dependencies?.['@remix-run/node'])
+  }
+
+  // Does this application use shopify?
+  get shopify() {
+    return fs.existsSync(path.join(this._appdir, 'shopify.app.toml'))
   }
 
   // Is this an EpicStack application?
@@ -934,6 +942,7 @@ export class GDF {
     this.options = options
     this._appdir = appdir
     this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
+    this.#dockerfileExists = fs.existsSync(path.join(appdir, 'Dockerfile'))
 
     // backwards compatibility with previous definition of --build=defer
     if (options.build === 'defer') {
@@ -967,7 +976,11 @@ export class GDF {
     }
 
     if (this.entrypoint) {
-      templates['docker-entrypoint.ejs'] = `${this.configDir}docker-entrypoint.js`
+      if (!this.#dockerfileExists) {
+        templates['docker-entrypoint.ejs'] = `${this.configDir}docker-entrypoint.js`
+      } else if (this.options.skip && fs.existsSync(path.join(appdir, 'fly.toml'))) {
+        templates['docker-entrypoint.ejs'] = `${this.configDir}dbsetup.js`
+      }
     }
 
     if (this.litefs) {
@@ -1028,7 +1041,11 @@ export class GDF {
       runner.apply(this)
     }
 
-    process.exit(this.#exitCode)
+    if (this.#exitCode) process.exit(this.#exitCode)
+  }
+
+  get setupScriptType() {
+    return (this.options.skip && this.#dockerfileExists) ? 'dbsetup' : 'docker'
   }
 
   setExit(code) {
@@ -1046,6 +1063,9 @@ export class GDF {
       if (current === proposed) {
         console.log(`${chalk.bold.blue('identical'.padStart(11))}  ${name}`)
         return dest
+      } else if (this.options.skip) {
+        console.log(`${chalk.bold.yellow('skip'.padStart(11))}  ${name}`)
+        return current
       }
 
       let prompt

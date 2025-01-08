@@ -9,9 +9,12 @@ const env = { ...process.env }
 ;(async() => {
   // If running the web server then migrate existing database
   if (process.argv.slice(2).join(' ') === 'npm run start') {
+    // place Sqlite3 database on volume
     const source = path.resolve('./dev.db')
     const target = '/data/' + path.basename(source)
     if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
+
+    // prepare database
     await exec('npx prisma migrate deploy')
     await exec('npm run build')
   }

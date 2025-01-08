@@ -15,6 +15,10 @@ GDF.extend(class extends GDF {
     // create volume for sqlite3
     if (this.sqlite3) this.flyMakeVolume()
 
+    if (this.setupScriptType === 'dbsetup') {
+      this.flySetCmd()
+    }
+
     // setup swap
     if (this.options.swap != null) this.flySetSwap()
 
@@ -22,7 +26,10 @@ GDF.extend(class extends GDF {
     if (this.litefs) this.flyAttachConsul(this.flyApp)
 
     // set secrets, healthcheck for remix apps
-    if (this.remix) {
+    if (this.shopify) {
+      this.flyShopifyEnv(this.flyApp)
+      this.flyShopifyConfig(this.flyApp)
+    } else if (this.remix) {
       this.flyRemixSecrets(this.flyApp)
       this.flyHealthCheck('/healthcheck')
     }
@@ -62,7 +69,7 @@ GDF.extend(class extends GDF {
     this.flyToml = fs.readFileSync(this.flyTomlFile, 'utf-8')
 
     // parse app name from fly.toml
-    this.flyApp = this.flyToml.match(/^app\s*=\s*"?([-\w]+)"?/m)?.[1]
+    this.flyApp = this.flyToml.match(/^app\s*=\s*["']?([-\w]+)["']?/m)?.[1]
 
     // see if flyctl is in the path
     const paths = (process.env.PATH || '')
@@ -157,6 +164,27 @@ GDF.extend(class extends GDF {
         )
       }
     }
+  }
+
+  // override command in fly.toml to include dbsetup.js
+  flySetCmd() {
+    if (this.flyToml.includes('[processes]')) return
+
+    let cmd = this.startCommand
+
+    const dockerfile = fs.readFileSync('Dockerfile', 'utf8')
+
+    const match = dockerfile.match(/^\s*CMD\s+(\[.*\]|".*")/mi)
+    if (match) {
+      try {
+        cmd = JSON.parse(match[1])
+      } catch { }
+    }
+
+    if (Array.isArray(cmd)) cmd = cmd.join(' ')
+    cmd = `${this.bun ? 'bun' : 'node'} ./dbsetup.js ${cmd}`
+    this.flyToml += `\n[processes]\n  app = ${JSON.stringify(cmd)}\n`
+    fs.writeFileSync(this.flyTomlFile, this.flyToml)
   }
 
   // add volume to fly.toml and create it if app exists
@@ -281,6 +309,42 @@ GDF.extend(class extends GDF {
       app,
       requiredSecrets: ['APP_KEY']
     })
+  }
+
+  // set environment and secrets for Shopify apps
+  flyShopifyEnv(app) {
+    const env = {
+      PORT: 3000,
+      SHOPIFY_APP_URL: `https://${app}.fly.dev`
+    }
+
+    try {
+      const stdout = execSync('shopify app env show', { encoding: 'utf8' })
+      for (const match of stdout.matchAll(/^\s*(\w+)=(.*)/mg)) {
+        if (match[1] === 'SHOPIFY_API_SECRET') {
+          console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl secrets set SHOPIFY_API_SECRET`)
+          execSync(`${this.flyctl} secrets set SHOPIFY_API_SECRET=${match[2]} --app ${app}`, { stdio: 'inherit' })
+        } else {
+          env[match[1]] = match[2]
+        }
+      }
+    } catch { }
+
+    if (this.flyToml.includes('[env]')) return
+    this.flyToml += '\n[env]\n' + Object.entries(env).map(([key, value]) => `  ${key} = ${JSON.stringify(value)}`).join('\n') + '\n'
+    fs.writeFileSync(this.flyTomlFile, this.flyToml)
+  }
+
+  // update config for Shopify apps
+  flyShopifyConfig(app) {
+    const original = fs.readFileSync('shopify.app.toml', 'utf-8')
+    const config = original.replaceAll(/"https:\/\/[-\w.]+/g, `"https://${app}.fly.dev`)
+    if (original !== config) {
+      console.log(`${chalk.bold.green('update'.padStart(11, ' '))}  shopify.app.toml`)
+      fs.writeFileSync('shopify.app.toml', config)
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app deploy`)
+      execSync('shopify app deploy', { stdio: 'inherit' })
+    }
   }
 
   // prep for deployment via GitHub actions, including setting up a staging app

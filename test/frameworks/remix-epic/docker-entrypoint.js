@@ -4,15 +4,13 @@ import { spawn } from 'node:child_process'
 
 const env = { ...process.env }
 
-;(async() => {
-  // If running the web server then migrate existing database
-  if (process.argv.slice(2).join(' ') === 'npm run start' && process.env.FLY_REGION === process.env.PRIMARY_REGION) {
-    await exec('npx prisma migrate deploy')
-  }
+// If running the web server then migrate existing database
+if (process.argv.slice(2).join(' ') === 'npm run start' && process.env.FLY_REGION === process.env.PRIMARY_REGION) {
+  await exec('npx prisma migrate deploy')
+}
 
-  // launch application
-  await exec(process.argv.slice(2).join(' '))
-})()
+// launch application
+await exec(process.argv.slice(2).join(' '))
 
 function exec(command) {
   const child = spawn(command, { shell: true, stdio: 'inherit', env })
