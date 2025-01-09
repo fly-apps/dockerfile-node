@@ -338,4 +338,6 @@ if (pj) {
   }
 }
 
+if (options.force) options.skip = false
+
 new GDF().run(process.cwd(), { ...defaults, ...options })
