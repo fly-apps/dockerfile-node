@@ -313,7 +313,7 @@ GDF.extend(class extends GDF {
 
   // set environment and secrets for Shopify apps
   flyShopifyEnv(app) {
-    let toml = ""
+    let toml = ''
     if (fs.existsSync('shopify.app.toml')) {
       toml = fs.readFileSync('shopify.app.toml', 'utf-8')
     }
