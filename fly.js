@@ -319,8 +319,9 @@ GDF.extend(class extends GDF {
     }
 
     if (!toml.includes('client_id')) {
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app config create`)
-      execSync('shopify app config link', { encoding: 'utf8', stdio: 'inherit'})
+      this.setExit(42)
+      console.log(`${chalk.bold.red('shopify.app.toml')} is not complete; run ${chalk.bold.blue('shopify app config create')} first.`)
+      return
     }
 
     const env = {
