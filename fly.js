@@ -342,8 +342,8 @@ GDF.extend(class extends GDF {
     if (original !== config) {
       console.log(`${chalk.bold.green('update'.padStart(11, ' '))}  shopify.app.toml`)
       fs.writeFileSync('shopify.app.toml', config)
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app deploy`)
-      execSync('shopify app deploy', { stdio: 'inherit' })
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app deploy --force`)
+      execSync('shopify app deploy --force', { stdio: 'inherit' })
     }
   }
 
