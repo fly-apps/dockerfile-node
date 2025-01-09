@@ -320,7 +320,7 @@ GDF.extend(class extends GDF {
 
     if (!toml.includes('client_id')) {
       console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app config create`)
-      execSync('shopify app config link', { encoding: 'utf8' })
+      execSync('shopify app config link', { encoding: 'utf8', stdio: 'inherit'})
     }
 
     const env = {
