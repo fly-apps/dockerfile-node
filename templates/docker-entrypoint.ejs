@@ -97,7 +97,7 @@ if (process.env.DATABASE_URL) {
 <% } -%>
 <%= tab(n) %>}
 <% } -%>
-<% if (sqlite3 && !shopify) { -%>
+<% if (sqlite3 && setupScriptType == 'docker') { -%>
 <% if (prismaFile) { -%>
 
 <%= tab(n) %>// prepare database
