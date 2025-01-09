@@ -976,7 +976,7 @@ export class GDF {
     }
 
     if (this.entrypoint) {
-      if (!this.#dockerfileExists) {
+      if (!this.#dockerfileExists || this.options.force) {
         templates['docker-entrypoint.ejs'] = `${this.configDir}docker-entrypoint.js`
       } else if (this.options.skip && fs.existsSync(path.join(appdir, 'fly.toml'))) {
         templates['docker-entrypoint.ejs'] = `${this.configDir}dbsetup.js`
