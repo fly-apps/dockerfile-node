@@ -313,12 +313,23 @@ GDF.extend(class extends GDF {
 
   // set environment and secrets for Shopify apps
   flyShopifyEnv(app) {
+    let toml = ""
+    if (fs.existsSync('shopify.app.toml')) {
+      toml = fs.readFileSync('shopify.app.toml', 'utf-8')
+    }
+
+    if (!toml.includes('client_id')) {
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app config create`)
+      execSync('shopify app config link', { encoding: 'utf8' })
+    }
+
     const env = {
       PORT: 3000,
       SHOPIFY_APP_URL: `https://${app}.fly.dev`
     }
 
     try {
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app env show`)
       const stdout = execSync('shopify app env show', { encoding: 'utf8' })
       for (const match of stdout.matchAll(/^\s*(\w+)=(.*)/mg)) {
         if (match[1] === 'SHOPIFY_API_SECRET') {
