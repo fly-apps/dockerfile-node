@@ -63,7 +63,9 @@ if (process.env.DATABASE_URL) {
 <% } else { -%>
 <%= tab(n) %>// If running the web server then prerender pages
 <% } -%>
-<%= tab(n) %>if (process.argv.slice(2).join(' ') === '<%-
+<%= tab(n) %>if (process.argv.slice(-<%=
+    Array.isArray(startCommand) ? startCommand.length : startCommand.split(" ").length
+    %>).join(' ') === '<%-
     Array.isArray(startCommand) ? startCommand.join(" ") : startCommand
     %>'<% if (litefs) { %> && process.env.FLY_REGION === process.env.PRIMARY_REGION<% } %>) {
 <% n++ -%>
