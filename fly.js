@@ -350,7 +350,10 @@ GDF.extend(class extends GDF {
   // update config for Shopify apps
   flyShopifyConfig(app) {
     const original = fs.readFileSync('shopify.app.toml', 'utf-8')
-    const config = original.replaceAll(/"https:\/\/[-\w.]+/g, `"https://${app}.fly.dev`)
+    const url = `"https://${app}.fly.dev`
+    const config = original.replaceAll(/"https:\/\/[-\w.]+/g, url)
+      .replace(/(redirect_urls\s*=\s*\[).*?\]/s,
+        `$1\n  ${url}/auth/callback\n  ${url}/auth/shopify/callback\n  ${url}/api/auth/callback\n]`)
     if (original !== config) {
       console.log(`${chalk.bold.green('update'.padStart(11, ' '))}  shopify.app.toml`)
       fs.writeFileSync('shopify.app.toml', config)
