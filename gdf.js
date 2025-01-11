@@ -641,6 +641,10 @@ export class GDF {
       modules.push('@sveltejs/adapter-node')
     }
 
+    if (this.litestream && !this.#pj.dependencies?.['@flydotio/litestream']) {
+      modules.push('@flydotio/litestream')
+    }
+
     if (modules.length === 0) return
     const add = this.packager === 'npm' ? 'install' : 'add'
     for (const module of modules) {
@@ -978,7 +982,7 @@ export class GDF {
     if (this.entrypoint) {
       if (!this.#dockerfileExists || this.options.force) {
         templates['docker-entrypoint.ejs'] = `${this.configDir}docker-entrypoint.js`
-      } else if (this.options.skip && fs.existsSync(path.join(appdir, 'fly.toml'))) {
+      } else if (this.setupScriptType === 'dbsetup') {
         templates['docker-entrypoint.ejs'] = `${this.configDir}dbsetup.js`
       }
     }

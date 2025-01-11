@@ -124,7 +124,7 @@ if (process.env.DATABASE_URL) {
 <%= tab(n) %>// launch application
 <% if (litestream) { -%>
 <%= tab(n) %>if (process.env.BUCKET_NAME) {
-<%= tab(n+1) %>await exec(`litestream replicate -config litestream.yml -exec ${JSON.stringify(process.argv.slice(2).join(' '))}`)
+<%= tab(n+1) %>await exec(`<% if (setupScriptType == 'dbsetup') { %>npx <% } %>litestream replicate -config litestream.yml -exec ${JSON.stringify(process.argv.slice(2).join(' '))}`)
 <%= tab(n) %>} else {
 <%= tab(n+1) %>await exec(process.argv.slice(2).join(' '))
 <%= tab(n) %>}
