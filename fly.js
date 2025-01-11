@@ -15,7 +15,7 @@ GDF.extend(class extends GDF {
     // create volume for sqlite3
     if (this.sqlite3) this.flyMakeVolume()
 
-    if (this.setupScriptType === 'dbsetup') {
+    if (this.sqlite3 && this.setupScriptType === 'dbsetup') {
       this.flySetCmd()
     }
 
