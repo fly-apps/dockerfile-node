@@ -1003,7 +1003,7 @@ export class GDF {
     for (const [template, filename] of Object.entries(templates)) {
       await this.#writeTemplateFile(template, filename)
 
-      if (template === 'docker-entrypoint.ejs') fs.chmodSync(filename, 0o755)
+      if (template === 'docker-entrypoint.ejs') fs.chmodSync(path.join(this._appdir, filename), 0o755)
     }
 
     // ensure that there is a dockerignore file

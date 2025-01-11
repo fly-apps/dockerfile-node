@@ -19,7 +19,7 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "@flydotio/litestream": "^1.0.0",
+    "@flydotio/litestream": "^1.0.1",
     "@sveltejs/adapter-node": "^5.2.11",
     "chalk": "^5.3.0",
     "diff": "^5.2.0",
