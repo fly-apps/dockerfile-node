@@ -89,7 +89,7 @@ if (process.env.DATABASE_URL) {
 <% } -%>
 <% } -%>
 <% if (sqlite3 && (prismaSeed || litestream) && (prismaFile || prismaEnv)) { -%>
-<%= tab(n) %><%= litestream ? 'let' : 'const' %> newDb = <%- !prismaFile ? 'target && ' : '' %>!fs.existsSync(target)
+<%= tab(n) %><%= litestream && prismaSeed && sqlite3 ? 'let' : 'const' %> newDb = <%- !prismaFile ? 'target && ' : '' %>!fs.existsSync(target)
 <% } -%>
 <% if (litestream && sqlite3 && (prismaFile || prismaEnv)) { -%>
 <%= tab(n) %>if (newDb && process.env.BUCKET_NAME) {

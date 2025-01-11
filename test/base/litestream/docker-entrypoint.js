@@ -13,7 +13,7 @@ const env = { ...process.env }
     const source = path.resolve('./dev.db')
     const target = '/data/' + path.basename(source)
     if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
-    let newDb = !fs.existsSync(target)
+    const newDb = !fs.existsSync(target)
     if (newDb && process.env.BUCKET_NAME) {
       await exec(`litestream restore -config litestream.yml -if-replica-exists ${target}`)
     }
