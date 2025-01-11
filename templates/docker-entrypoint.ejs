@@ -99,7 +99,7 @@ if (process.env.DATABASE_URL) {
 <% } -%>
 <%= tab(n) %>}
 <% } -%>
-<% if (sqlite3 && setupScriptType == 'docker') { -%>
+<% if (sqlite3) { -%>
 <% if (prismaFile) { -%>
 
 <%= tab(n) %>// prepare database
