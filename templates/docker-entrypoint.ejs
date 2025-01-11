@@ -93,7 +93,7 @@ if (process.env.DATABASE_URL) {
 <% } -%>
 <% if (litestream && sqlite3 && (prismaFile || prismaEnv)) { -%>
 <%= tab(n) %>if (newDb && process.env.BUCKET_NAME) {
-<%= tab(n+1) %>await exec(`litestream restore -config litestream.yml -if-replica-exists ${target}`)
+<%= tab(n+1) %>await exec(`<% if (setupScriptType == 'dbsetup') { %>npx <% } %>litestream restore -config litestream.yml -if-replica-exists ${target}`)
 <% if (prismaSeed && sqlite3 && (prismaFile || prismaEnv)) { -%>
 <%= tab(n+1) %>newDb = !fs.existsSync(target)
 <% } -%>
