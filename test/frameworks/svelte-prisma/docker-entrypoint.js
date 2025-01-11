@@ -7,7 +7,7 @@ import fs from 'node:fs'
 const env = { ...process.env }
 
 // If running the web server then migrate existing database
-if (process.argv.slice(2).join(' ') === 'node ./build/index.js') {
+if (process.argv.slice(-2).join(' ') === 'node ./build/index.js') {
   // place Sqlite3 database on volume
   const source = path.resolve('./dev.db')
   const target = '/data/' + path.basename(source)

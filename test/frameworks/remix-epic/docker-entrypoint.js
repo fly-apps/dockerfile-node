@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process'
 const env = { ...process.env }
 
 // If running the web server then migrate existing database
-if (process.argv.slice(2).join(' ') === 'npm run start' && process.env.FLY_REGION === process.env.PRIMARY_REGION) {
+if (process.argv.slice(-3).join(' ') === 'npm run start' && process.env.FLY_REGION === process.env.PRIMARY_REGION) {
   await exec('npx prisma migrate deploy')
 }
 

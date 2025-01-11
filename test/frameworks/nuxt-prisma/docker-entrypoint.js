@@ -8,7 +8,7 @@ const env = { ...process.env }
 
 ;(async() => {
   // If running the web server then migrate existing database
-  if (process.argv.slice(2).join(' ') === 'node .output/server/index.mjs') {
+  if (process.argv.slice(-2).join(' ') === 'node .output/server/index.mjs') {
     // place Sqlite3 database on volume
     let source = path.resolve('./dev.db')
     const target = '/data/' + path.basename(source)
