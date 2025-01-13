@@ -6,20 +6,21 @@ import fs from 'node:fs'
 
 const env = { ...process.env }
 
-;(async() => {
-  // If running the web server then migrate existing database
-  if (process.argv.slice(2).join(' ') === 'node ./build/index.js') {
-    const source = path.resolve('./dev.db')
-    const target = '/data/' + path.basename(source)
-    if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
-    const newDb = !fs.existsSync(target)
-    await exec('npx prisma migrate deploy')
-    if (newDb) await exec('npx prisma db seed')
-  }
+// If running the web server then migrate existing database
+if (process.argv.slice(-2).join(' ') === 'node ./build/index.js') {
+  // place Sqlite3 database on volume
+  const source = path.resolve('./dev.db')
+  const target = '/data/' + path.basename(source)
+  if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
+  const newDb = !fs.existsSync(target)
 
-  // launch application
-  await exec(process.argv.slice(2).join(' '))
-})()
+  // prepare database
+  await exec('npx prisma migrate deploy')
+  if (newDb) await exec('npx prisma db seed')
+}
+
+// launch application
+await exec(process.argv.slice(2).join(' '))
 
 function exec(command) {
   const child = spawn(command, { shell: true, stdio: 'inherit', env })

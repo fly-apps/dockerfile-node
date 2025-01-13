@@ -89,6 +89,10 @@ const options = yargs((hideBin(process.argv)))
     describe: 'expose port',
     type: 'integer'
   })
+  .option('skip', {
+    describe: 'skip overwrite of existing files',
+    type: 'boolean'
+  })
   .option('swap', {
     alias: 's',
     describe: 'allocate swap space (eg. 1G, 1GiB, 1024M)',
@@ -333,5 +337,7 @@ if (pj) {
     fs.writeFileSync('package.json', JSON.stringify(pj, null, 2), 'utf-8')
   }
 }
+
+if (options.force) options.skip = false
 
 new GDF().run(process.cwd(), { ...defaults, ...options })

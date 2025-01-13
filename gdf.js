@@ -82,6 +82,9 @@ export class GDF {
   // exit code
   #exitCode = 0
 
+  // dockerfile exists at the time of invocation
+  #dockerfileExists = false
+
   get variant() {
     return this.options.alpine ? 'alpine' : 'slim'
   }
@@ -145,6 +148,11 @@ export class GDF {
   get remix() {
     return !!(this.#pj.dependencies?.remix ||
       this.#pj.dependencies?.['@remix-run/node'])
+  }
+
+  // Does this application use shopify?
+  get shopify() {
+    return fs.existsSync(path.join(this._appdir, 'shopify.app.toml'))
   }
 
   // Is this an EpicStack application?
@@ -633,6 +641,10 @@ export class GDF {
       modules.push('@sveltejs/adapter-node')
     }
 
+    if (this.litestream && !this.#pj.dependencies?.['@flydotio/litestream']) {
+      modules.push('@flydotio/litestream')
+    }
+
     if (modules.length === 0) return
     const add = this.packager === 'npm' ? 'install' : 'add'
     for (const module of modules) {
@@ -934,6 +946,7 @@ export class GDF {
     this.options = options
     this._appdir = appdir
     this.#pj = JSON.parse(fs.readFileSync(path.join(appdir, 'package.json'), 'utf-8'))
+    this.#dockerfileExists = fs.existsSync(path.join(appdir, 'Dockerfile'))
 
     // backwards compatibility with previous definition of --build=defer
     if (options.build === 'defer') {
@@ -967,7 +980,11 @@ export class GDF {
     }
 
     if (this.entrypoint) {
-      templates['docker-entrypoint.ejs'] = `${this.configDir}docker-entrypoint.js`
+      if (!this.#dockerfileExists || this.options.force) {
+        templates['docker-entrypoint.ejs'] = `${this.configDir}docker-entrypoint.js`
+      } else if (this.setupScriptType === 'dbsetup') {
+        templates['docker-entrypoint.ejs'] = `${this.configDir}dbsetup.js`
+      }
     }
 
     if (this.litefs) {
@@ -984,9 +1001,9 @@ export class GDF {
     }
 
     for (const [template, filename] of Object.entries(templates)) {
-      const dest = await this.#writeTemplateFile(template, filename)
+      await this.#writeTemplateFile(template, filename)
 
-      if (template === 'docker-entrypoint.ejs') fs.chmodSync(dest, 0o755)
+      if (template === 'docker-entrypoint.ejs') fs.chmodSync(path.join(this._appdir, filename), 0o755)
     }
 
     // ensure that there is a dockerignore file
@@ -1028,7 +1045,11 @@ export class GDF {
       runner.apply(this)
     }
 
-    process.exit(this.#exitCode)
+    if (this.#exitCode) process.exit(this.#exitCode)
+  }
+
+  get setupScriptType() {
+    return (this.options.skip && this.#dockerfileExists) ? 'dbsetup' : 'docker'
   }
 
   setExit(code) {
@@ -1046,6 +1067,9 @@ export class GDF {
       if (current === proposed) {
         console.log(`${chalk.bold.blue('identical'.padStart(11))}  ${name}`)
         return dest
+      } else if (this.options.skip) {
+        console.log(`${chalk.bold.yellow('skip'.padStart(11))}  ${name}`)
+        return current
       }
 
       let prompt

@@ -7,7 +7,7 @@ const env = { ...process.env }
 
 ;(async() => {
   // If running the web server then migrate existing database
-  if (process.argv.slice(2).join(' ') === 'npx remix-serve ./build/index.js') {
+  if (process.argv.slice(-3).join(' ') === 'npx remix-serve ./build/index.js') {
     const url = new URL(process.env.DATABASE_URL)
     const target = url.protocol === 'file:' && url.pathname
     const newDb = target && !fs.existsSync(target)
