@@ -594,7 +594,7 @@ export class GDF {
       'package-lock.json', '.npmrc',
       'pnpm-lock.yaml',
       'yarn.lock', '.yarnrc', '.yarnrc.yml',
-      'bun.lockb'
+      'bun.lockb', 'bun.lock'
     ]
 
     for (const file of files) {
@@ -612,7 +612,7 @@ export class GDF {
 
     const packageFiles = this.packageFiles
 
-    if (packageFiles.includes('bun.lockb')) {
+    if (packageFiles.includes('bun.lockb') || packageFiles.includes('bun.lock')) {
       this.#packager = 'bun'
     } else if (packageFiles.includes('pnpm-lock.yaml')) {
       this.#packager = 'pnpm'
