@@ -277,7 +277,7 @@ GDF.extend(class extends GDF {
     this.flyToml += `\n[deploy]\n  release_command = ${JSON.stringify(command)}\n`
 
     if (this.prismaSeed) {
-      this.flyToml += '  seed_command = "npx prisma db seed"\n'
+      this.flyToml += `  seed_command = ${JSON.stringify(this.prismaSeed)}\n`
     }
 
     fs.writeFileSync(this.flyTomlFile, this.flyToml)
