@@ -10,6 +10,8 @@ import '../fly.js'
 for (const group of fs.readdirSync('test', { withFileTypes: true })) {
   if (!group.isDirectory()) continue
 
+  process.env.NODE_ENV = 'test'
+
   for (const entry of fs.readdirSync(path.join('test', group.name), { withFileTypes: true })) {
     if (!fs.existsSync(path.join('test', group.name, entry.name, 'package.json'))) continue
 
