@@ -645,7 +645,7 @@ export class GDF {
       modules.push('@flydotio/litestream')
     }
 
-    if (modules.length === 0) return
+    if (modules.length === 0 || process.env.NODE_ENV === 'test') return
     const add = this.packager === 'npm' ? 'install' : 'add'
     for (const module of modules) {
       execSync(`${this.packager} ${add} ${module}`, { stdio: 'inherit' })
