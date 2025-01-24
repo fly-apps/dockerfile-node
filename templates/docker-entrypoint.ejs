@@ -107,7 +107,7 @@ if (process.env.DATABASE_URL) {
 <%= tab(n) %>await exec('<%= npx %> prisma migrate deploy')
 <% } -%>
 <% if (prismaSeed && sqlite3 && (prismaFile || prismaEnv)) { -%>
-<%= tab(n) %>if (newDb) await exec('npx prisma db seed')
+<%= tab(n) %>if (newDb) await exec(<%- JSON.stringify(prismaSeed) %>)
 <% } -%>
 <% } -%>
 <% if (nextjsGeneration) { -%>
