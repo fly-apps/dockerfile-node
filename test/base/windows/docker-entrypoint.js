@@ -12,7 +12,7 @@ const env = { ...process.env }
     const target = url.protocol === 'file:' && url.pathname
     const newDb = target && !fs.existsSync(target)
     await exec('npx prisma migrate deploy')
-    if (newDb) await exec('npx prisma db seed')
+    if (newDb) await exec('ts-node --require tsconfig-paths/register prisma/seed.ts')
   }
 
   // launch application

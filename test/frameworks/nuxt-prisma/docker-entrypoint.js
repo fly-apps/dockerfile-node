@@ -23,7 +23,7 @@ const env = { ...process.env }
 
     // prepare database
     await exec('npx prisma migrate deploy')
-    if (newDb) await exec('npx prisma db seed')
+    if (newDb) await exec('node prisma/seed.js')
   }
 
   // launch application

@@ -16,7 +16,7 @@ if (process.argv.slice(-2).join(' ') === 'node ./build/index.js') {
 
   // prepare database
   await exec('npx prisma migrate deploy')
-  if (newDb) await exec('npx prisma db seed')
+  if (newDb) await exec('tsx prisma/seed.ts')
 }
 
 // launch application
