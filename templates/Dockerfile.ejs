@@ -89,7 +89,7 @@ RUN RELEASE=$(awk -F'@' '{print $2}' /home/meteor/.meteor/release) && curl https
 <% } -%>
 # Install node modules
 COPY<% if (options.link) { %> --link<% } %> <%= packageFiles.join(' ') %> ./
-<% if (trpc && prisma) { -%>
+<% if (nextjs && prisma) { -%>
 COPY<% if (options.link) { %> --link<% } %> prisma .
 <% } -%>
 RUN <%- buildCache %><%= packagerInstall %>
@@ -99,7 +99,7 @@ RUN meteor npm install
 <% } -%>
 <% if (prisma) { -%>
 # Generate Prisma Client
-<% if (!trpc) { -%>
+<% if (!nextjs) { -%>
 COPY<% if (options.link) { %> --link<% } %> prisma .
 <% } -%>
 RUN <%= npx %> prisma generate
