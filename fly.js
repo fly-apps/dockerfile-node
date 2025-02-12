@@ -86,7 +86,7 @@ GDF.extend(class extends GDF {
 
     const extensions = (process.env.PATHEXT || '').split(';')
 
-    const candidates = function* () {
+    const candidates = function * () {
       for (const dir of paths) {
         for (const ext of extensions) {
           yield path.join(dir, exe + ext)
@@ -318,7 +318,7 @@ GDF.extend(class extends GDF {
 
   async selectShopifyConfig() {
     // Search for both shopify.app.toml and shopify.app.*.toml
-    const files = await glob('shopify.app{.,*.}toml');
+    const files = await glob('shopify.app{.,*.}toml')
 
     if (files.length === 0) {
       return null
