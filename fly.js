@@ -1,5 +1,7 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
+import { glob } from 'glob'
+import inquirer from 'inquirer'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
 
@@ -9,7 +11,7 @@ import { GDF } from './gdf.js'
 
 // Fly.io mixin
 GDF.extend(class extends GDF {
-  run() {
+  async run() {
     if (!this.flySetup()) return
 
     // create volume for sqlite3
@@ -27,8 +29,11 @@ GDF.extend(class extends GDF {
 
     // set secrets, healthcheck for remix apps
     if (this.shopify) {
-      this.flyShopifyEnv(this.flyApp)
-      this.flyShopifyConfig(this.flyApp)
+      const shopifyConfig = await this.selectShopifyConfig()
+      if (!shopifyConfig) {
+        this.flyShopifyEnv(this.flyApp, shopifyConfig)
+        this.flyShopifyConfig(this.flyApp, shopifyConfig)
+      }
     } else if (this.remix) {
       this.flyRemixSecrets(this.flyApp)
       this.flyHealthCheck('/healthcheck')
@@ -81,7 +86,7 @@ GDF.extend(class extends GDF {
 
     const extensions = (process.env.PATHEXT || '').split(';')
 
-    const candidates = function * () {
+    const candidates = function* () {
       for (const dir of paths) {
         for (const ext of extensions) {
           yield path.join(dir, exe + ext)
@@ -311,16 +316,44 @@ GDF.extend(class extends GDF {
     })
   }
 
+  async selectShopifyConfig() {
+    // Search for both shopify.app.toml and shopify.app.*.toml
+    const files = await glob('shopify.app{.,*.}toml');
+
+    if (files.length === 0) {
+      return null
+    }
+
+    if (files.length === 1) {
+      return files[0]
+    }
+
+    // Multiple files found, prompt user to select one
+    const { selectedFile } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'selectedFile',
+        message: 'Multiple configuration files found. Please select one:',
+        choices: files.map(file => ({
+          name: file,
+          value: file
+        }))
+      }
+    ])
+
+    return selectedFile
+  }
+
   // set environment and secrets for Shopify apps
-  flyShopifyEnv(app) {
+  flyShopifyEnv(app, configFile) {
     let toml = ''
-    if (fs.existsSync('shopify.app.toml')) {
-      toml = fs.readFileSync('shopify.app.toml', 'utf-8')
+    if (fs.existsSync(configFile)) {
+      toml = fs.readFileSync(configFile, 'utf-8')
     }
 
     if (!toml.includes('client_id')) {
       this.setExit(42)
-      console.log(`${chalk.bold.red('shopify.app.toml')} is not complete; run ${chalk.bold.blue('shopify app config create')} first.`)
+      console.log(`${chalk.bold.red(configFile)} is not complete; run ${chalk.bold.blue('shopify app config create')} first.`)
       return
     }
 
@@ -330,7 +363,7 @@ GDF.extend(class extends GDF {
     }
 
     try {
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app env show`)
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app env show --config ${configFile}`)
       const stdout = execSync('shopify app env show', { encoding: 'utf8' })
       for (const match of stdout.matchAll(/^\s*(\w+)=(.*)/mg)) {
         if (match[1] === 'SHOPIFY_API_SECRET') {
@@ -348,15 +381,15 @@ GDF.extend(class extends GDF {
   }
 
   // update config for Shopify apps
-  flyShopifyConfig(app) {
-    const original = fs.readFileSync('shopify.app.toml', 'utf-8')
+  flyShopifyConfig(app, configFile) {
+    const original = fs.readFileSync(configFile, 'utf-8')
     const url = `https://${app}.fly.dev`
     const config = original.replaceAll(/"https:\/\/[-\w.]+/g, '"' + url)
       .replace(/(redirect_urls\s*=\s*\[).*?\]/s,
         `$1\n  "${url}/auth/callback",\n  "${url}/auth/shopify/callback",\n  "${url}/api/auth/callback"\n]`)
     if (original !== config) {
       console.log(`${chalk.bold.green('update'.padStart(11, ' '))}  shopify.app.toml`)
-      fs.writeFileSync('shopify.app.toml', config)
+      fs.writeFileSync(configFile, config)
       console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app deploy --force`)
       execSync('shopify app deploy --force', { stdio: 'inherit' })
     }
