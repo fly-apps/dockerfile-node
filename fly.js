@@ -318,7 +318,7 @@ GDF.extend(class extends GDF {
 
   async selectShopifyConfig() {
     // Search for both shopify.app.toml and shopify.app.*.toml
-    const files = await glob('shopify.app{.,*.}toml')
+    const files = await glob('shopify.app{.,.*.}toml')
 
     if (files.length === 0) {
       return null
