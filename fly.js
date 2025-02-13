@@ -391,8 +391,8 @@ GDF.extend(class extends GDF {
     if (original !== config) {
       console.log(`${chalk.bold.green('update'.padStart(11, ' '))}  ${configFile}`)
       fs.writeFileSync(configFile, config)
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app deploy --force`)
-      execSync('shopify app deploy --force', { stdio: 'inherit' })
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app deploy --force --config ${configFile}`)
+      execSync(`shopify app deploy --force --config ${configFile}`, { stdio: 'inherit' })
     }
   }
 
