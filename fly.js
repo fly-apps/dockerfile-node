@@ -389,7 +389,7 @@ GDF.extend(class extends GDF {
       .replace(/(redirect_urls\s*=\s*\[).*?\]/s,
         `$1\n  "${url}/auth/callback",\n  "${url}/auth/shopify/callback",\n  "${url}/api/auth/callback"\n]`)
     if (original !== config) {
-      console.log(`${chalk.bold.green('update'.padStart(11, ' '))}  shopify.app.toml`)
+      console.log(`${chalk.bold.green('update'.padStart(11, ' '))}  ${configFile}`)
       fs.writeFileSync(configFile, config)
       console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app deploy --force`)
       execSync('shopify app deploy --force', { stdio: 'inherit' })
