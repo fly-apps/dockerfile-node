@@ -1,6 +1,5 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
-import { glob } from 'glob'
 import inquirer from 'inquirer'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
@@ -318,7 +317,9 @@ GDF.extend(class extends GDF {
 
   async selectShopifyConfig() {
     // Search for both shopify.app.toml and shopify.app.*.toml
-    const files = await glob('shopify.app{.,.*.}toml')
+    const files = fs.readdirSync('.')
+      .filter(file => file.startsWith('shopify.app.') && file.endsWith('.toml'))
+      .sort()
 
     if (files.length === 0) {
       return null
