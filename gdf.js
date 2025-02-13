@@ -1042,7 +1042,7 @@ export class GDF {
 
     // run mixin runners
     for (const runner of GDF.runners) {
-      runner.apply(this)
+      await runner.apply(this)
     }
 
     if (this.#exitCode) process.exit(this.#exitCode)
