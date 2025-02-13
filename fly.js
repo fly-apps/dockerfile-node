@@ -29,7 +29,7 @@ GDF.extend(class extends GDF {
     // set secrets, healthcheck for remix apps
     if (this.shopify) {
       const shopifyConfig = await this.selectShopifyConfig()
-      if (!shopifyConfig) {
+      if (shopifyConfig) {
         this.flyShopifyEnv(this.flyApp, shopifyConfig)
         this.flyShopifyConfig(this.flyApp, shopifyConfig)
       }
