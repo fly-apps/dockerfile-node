@@ -75,12 +75,11 @@ if (process.env.DATABASE_URL) {
 <%= tab(n) %>// place Sqlite3 database on volume
 <%= tab(n) %><%= nuxtjs ? 'let' : 'const' %> source = path.resolve('<%- prismaFile %>')
 <%= tab(n) %>const target = '/data/' + path.basename(source)
-<%= tab(n) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
 <% if (nuxtjs) { -%>
 <%= tab(n) %>source = path.resolve('./.output/server', '<%- prismaFile %>')
-<%= tab(n) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
 <% } -%>
-<% } else if (prismaSeed && sqlite3 && prismaEnv) { -%>
+<%= tab(n) %>if (!fs.existsSync(source) && fs.existsSync('/data')) fs.symlinkSync(target, source)
+<% } else if (sqlite3 && prismaEnv) { -%>
 <%= tab(n) %>const url = new URL(process.env.<%= prismaEnv %>)
 <%= tab(n) %>const target = url.protocol === 'file:' && url.pathname
 <% if (litestream && sqlite3 && (prismaFile || prismaEnv)) { -%>
@@ -100,7 +99,7 @@ if (process.env.DATABASE_URL) {
 <%= tab(n) %>}
 <% } -%>
 <% if (sqlite3) { -%>
-<% if (prismaFile) { -%>
+<% if (prismaFile || litestream) { -%>
 
 <%= tab(n) %>// prepare database
 <% } -%>
