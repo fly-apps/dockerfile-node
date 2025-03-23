@@ -3,17 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
+    "dev": "nuxt dev",
     "build": "nuxt build",
-    "start": "nuxt start",
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "core-js": "^3.32.1",
-    "nuxt": "^2.17.1",
-    "vue": "^2.7.14",
-    "vue-server-renderer": "^2.7.14",
-    "vue-template-compiler": "^2.7.14"
+    "nuxt": "^3.16.1"
   },
+  "packageManager": "yarn@1.22.21",
   "devDependencies": {}
 }
