@@ -49,7 +49,7 @@ RUN wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/lit
     rm litestream-v0.3.13-linux-amd64.deb
 
 # Copy built application
-COPY --from=build /app /app
+COPY --from=build /app/.output /app/.output
 
 # Setup sqlite3 on a separate volume
 RUN mkdir -p /data

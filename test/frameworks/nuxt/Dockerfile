@@ -32,15 +32,12 @@ COPY . .
 # Build application
 RUN yarn run build
 
-# Remove development dependencies
-RUN yarn install --production=true
-
 
 # Final stage for app image
 FROM base
 
 # Copy built application
-COPY --from=build /app /app
+COPY --from=build /app/.output /app/.output
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000

@@ -120,7 +120,7 @@ RUN cd bundle/bundle/programs/server && meteor npm install
 # Build application
 RUN <%- mountSecrets %><%= build %>
 
-<% if (devDependencies && !options.dev && !nestjs && !adonisjs && !prismaSeed) { -%>
+<% if (devDependencies && !options.dev && !nestjs && !adonisjs && !prismaSeed && !nuxtjs) { -%>
 # Remove development dependencies
 RUN <%- buildCache %><%- packagerPrune %>
 
@@ -188,6 +188,8 @@ COPY --from=build /app/bundle/bundle /app
 COPY --from=build /app/.next/standalone /app
 COPY --from=build /app/.next/static /app/.next/static
 COPY --from=build /app/public /app/public
+<% } else if (nuxtjs) { -%>
+COPY --from=build /app/.output /app/.output
 <% } else { -%>
 COPY --from=build /app /app
 <% } -%>
