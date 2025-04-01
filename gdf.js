@@ -173,9 +173,9 @@ export class GDF {
     const schemaContent = fs.readFileSync(schema, 'utf-8')
     const urlMatch = schemaContent.match(/url\s*=\s*"(.*?)"/)
     if (!urlMatch) return null
-    const url = urlMatch[1]
-    if (url.startsWith('file:.')) return url.slice(5)
-    if (url.startsWith('file:')) return URL.parse(url).pathname
+    const dbUrl = urlMatch[1]
+    if (dbUrl.startsWith('file:.')) return dbUrl.slice(5)
+    if (dbUrl.startsWith('file:')) return new URL(dbUrl).pathname
   }
 
   get prismaEnv() {
