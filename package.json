@@ -10,16 +10,15 @@
   "scripts": {
     "eslint": "eslint .",
     "eslint:fix": "eslint --fix .",
-    "test": "mocha  --spec test/test.js --timeout 5000",
-    "test:capture": "TEST_CAPTURE=1 mocha"
+    "test": "node --test test/test.js",
+    "test:capture": "TEST_CAPTURE=1 node --test test/test.js"
   },
   "author": "Sam Ruby",
   "license": "MIT",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
-    "chalk": "^5.4.1",
     "diff": "^7.0.0",
     "ejs": "^3.1.10",
     "inquirer": "^12.4.1",
@@ -34,12 +33,10 @@
     "access": "public"
   },
   "devDependencies": {
-    "chai": "^5.1.2",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-promise": "^6.6.0",
-    "mocha": "^11.1.0"
+    "eslint-plugin-promise": "^6.6.0"
   },
   "files": [
     "index.js",

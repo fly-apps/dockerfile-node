@@ -3,8 +3,7 @@ import fs from 'node:fs'
 import inquirer from 'inquirer'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
-
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 
 import { GDF } from './gdf.js'
 
@@ -53,7 +52,7 @@ GDF.extend(class extends GDF {
       if (this.prismaFile && !fs.existsSync(path.join(this._appdir, 'prisma', this.prismaFile)) && fs.existsSync(path.join(this._appdir, 'node_modules'))) {
         execSync(`${this.npx} prisma migrate dev --name init --create-only`, { stdio: 'inherit' })
       } else {
-        console.error(chalk.bold.red('\nNo migrations found. Please run `npx prisma migrate dev` to create an initial migration.'))
+        console.error(styleText(['bold', 'red'], '\nNo migrations found. Please run `npx prisma migrate dev` to create an initial migration.'))
         this.setExit(42)
       }
     }
@@ -201,7 +200,7 @@ GDF.extend(class extends GDF {
     // see if secret is already set?
     if (this.flySecrets.includes('FLY_CONSUL_URL')) return
 
-    console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl consul attach`)
+    console.log(`${styleText(['bold', 'green'], 'execute'.padStart(11))}  flyctl consul attach`)
     execSync(
       `${this.flyctl} consul attach --app ${app}`,
       { stdio: 'inherit' }
@@ -266,7 +265,7 @@ GDF.extend(class extends GDF {
 
       const value = crypto.randomBytes(32).toString('hex')
 
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl secrets set ${name}`)
+      console.log(`${styleText(['bold', 'green'], 'execute'.padStart(11))}  flyctl secrets set ${name}`)
       execSync(
         `${this.flyctl} secrets set ${name}=${value} --app ${app}`,
         { stdio: 'inherit' }
@@ -354,7 +353,7 @@ GDF.extend(class extends GDF {
 
     if (!toml.includes('client_id')) {
       this.setExit(42)
-      console.log(`${chalk.bold.red(configFile)} is not complete; run ${chalk.bold.blue('shopify app config create')} first.`)
+      console.log(`${styleText(['bold', 'red'], configFile)} is not complete; run ${styleText(['bold', 'blue'], 'shopify app config create')} first.`)
       return
     }
 
@@ -364,11 +363,11 @@ GDF.extend(class extends GDF {
     }
 
     try {
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app env show --config ${configFile}`)
+      console.log(`${styleText(['bold', 'green'], 'execute'.padStart(11))}  shopify app env show --config ${configFile}`)
       const stdout = execSync('shopify app env show', { encoding: 'utf8' })
       for (const match of stdout.matchAll(/^\s*(\w+)=(.*)/mg)) {
         if (match[1] === 'SHOPIFY_API_SECRET') {
-          console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl secrets set SHOPIFY_API_SECRET`)
+          console.log(`${styleText(['bold', 'green'], 'execute'.padStart(11))}  flyctl secrets set SHOPIFY_API_SECRET`)
           execSync(`${this.flyctl} secrets set SHOPIFY_API_SECRET=${match[2]} --app ${app}`, { stdio: 'inherit' })
         } else {
           env[match[1]] = match[2]
@@ -389,9 +388,9 @@ GDF.extend(class extends GDF {
       .replace(/(redirect_urls\s*=\s*\[).*?\]/s,
         `$1\n  "${url}/auth/callback",\n  "${url}/auth/shopify/callback",\n  "${url}/api/auth/callback"\n]`)
     if (original !== config) {
-      console.log(`${chalk.bold.green('update'.padStart(11, ' '))}  ${configFile}`)
+      console.log(`${styleText(['bold', 'green'], 'update'.padStart(11, ' '))}  ${configFile}`)
       fs.writeFileSync(configFile, config)
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app deploy --force --config ${configFile}`)
+      console.log(`${styleText(['bold', 'green'], 'execute'.padStart(11))}  shopify app deploy --force --config ${configFile}`)
       execSync(`shopify app deploy --force --config ${configFile}`, { stdio: 'inherit' })
     }
   }
@@ -401,7 +400,7 @@ GDF.extend(class extends GDF {
     const deploy = fs.readFileSync('.github/workflows/deploy.yml', 'utf-8')
 
     if (!fs.existsSync('.git')) {
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  git init`)
+      console.log(`${styleText(['bold', 'green'], 'execute'.padStart(11))}  git init`)
       execSync('git init', { stdio: 'inherit' })
     }
 
@@ -417,7 +416,7 @@ GDF.extend(class extends GDF {
 
         if (base && !apps.find(app => app.Name === stagingApp)) {
           const cmd = `apps create ${stagingApp} --org ${base.Organization.Slug}`
-          console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl ${cmd}`)
+          console.log(`${styleText(['bold', 'green'], 'execute'.padStart(11))}  flyctl ${cmd}`)
           execSync(`${this.flyctl} ${cmd}`, { stdio: 'inherit' })
         }
       } catch {

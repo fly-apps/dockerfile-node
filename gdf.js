@@ -3,9 +3,9 @@ import url from 'node:url'
 import path from 'node:path'
 import * as readline from 'node:readline'
 import { execSync } from 'node:child_process'
+import { styleText } from 'node:util'
 
 import * as ejs from 'ejs'
-import chalk from 'chalk'
 import * as Diff from 'diff'
 import * as ShellQuote from 'shell-quote'
 
@@ -1065,10 +1065,10 @@ export class GDF {
       const current = fs.readFileSync(dest, 'utf-8')
 
       if (current === proposed) {
-        console.log(`${chalk.bold.blue('identical'.padStart(11))}  ${name}`)
+        console.log(`${styleText(['bold', 'blue'], 'identical'.padStart(11))}  ${name}`)
         return dest
       } else if (this.options.skip) {
-        console.log(`${chalk.bold.yellow('skip'.padStart(11))}  ${name}`)
+        console.log(`${styleText(['bold', 'yellow'], 'skip'.padStart(11))}  ${name}`)
         return current
       }
 
@@ -1077,7 +1077,7 @@ export class GDF {
 
       try {
         if (this.#answer !== 'a') {
-          console.log(`${chalk.bold.red('conflict'.padStart(11))}  ${name}`)
+          console.log(`${styleText(['bold', 'red'], 'conflict'.padStart(11))}  ${name}`)
 
           if (typeof Bun === 'undefined') {
             prompt = readline.createInterface({
@@ -1105,12 +1105,12 @@ export class GDF {
             case '':
             case 'y':
             case 'a':
-              console.log(`${chalk.bold.yellow('force'.padStart(11, ' '))}  ${name}`)
+              console.log(`${styleText(['bold', 'yellow'], 'force'.padStart(11, ' '))}  ${name}`)
               fs.writeFileSync(dest, proposed)
               return dest
 
             case 'n':
-              console.log(`${chalk.bold.yellow('skip'.padStart(11, ' '))}  ${name}`)
+              console.log(`${styleText(['bold', 'yellow'], 'skip'.padStart(11, ' '))}  ${name}`)
               return dest
 
             case 'q':
@@ -1134,7 +1134,7 @@ export class GDF {
         if (prompt && typeof Bun === 'undefined') prompt.close()
       }
     } else {
-      console.log(`${chalk.bold.green('create'.padStart(11, ' '))}  ${name}`)
+      console.log(`${styleText(['bold', 'green'], 'create'.padStart(11, ' '))}  ${name}`)
       fs.writeFileSync(dest, proposed)
     }
 

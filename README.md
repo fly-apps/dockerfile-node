@@ -65,7 +65,7 @@ Args and environment variables can be tailored to a specific build phase by addi
 Techniques such as static site generation using databases may require access to secrets at build time.  To enable this you will need to _mount_ the secret:
 
 * `--mount-secret=name` - add _name_ to the list of secrets to mount when running the build script
-* `--unmount-secret-name` - remove _name_ from the list of secrets to mount when running the build script
+* `--unmount-secret=name` - remove _name_ from the list of secrets to mount when running the build script
 
 See [Secret to expose to the build](https://docs.docker.com/engine/reference/commandline/buildx_build/#secret) for examples on how to pass secrets to a docker build.
 
