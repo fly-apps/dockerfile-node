@@ -1,8 +1,8 @@
 import path from 'node:path'
 import os from 'node:os'
 import fs from 'node:fs'
-
-import { expect } from 'chai'
+import assert from 'node:assert'
+import test from 'node:test'
 
 import { GDF, defaults } from '../gdf.js'
 import '../fly.js'
@@ -15,7 +15,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
   for (const entry of fs.readdirSync(path.join('test', group.name), { withFileTypes: true })) {
     if (!fs.existsSync(path.join('test', group.name, entry.name, 'package.json'))) continue
 
-    describe(`${group.name}: ${entry.name}`, function() {
+    test.describe(`${group.name}: ${entry.name}`, function() {
       const workdir = path.join(os.tmpdir(), group.name, entry.name)
       const testdir = path.join('test', group.name, entry.name)
 
@@ -28,7 +28,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
       if (options.envs) options.vars = options.envs
       options.force = true
 
-      it('should produce a dockerfile', async function() {
+      test('should produce a dockerfile', async function() {
         await new GDF().run(workdir, options)
 
         let argmask = /^(ARG\s+\w+\s*=).*?(\s*\\?)$/gm
@@ -44,10 +44,10 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
         const expectedResults = fs.readFileSync(path.join(testdir, 'Dockerfile'), 'utf-8')
           .replaceAll(argmask, '$1xxx$2')
 
-        expect(expectedResults).to.equal(actualResults)
+        assert.equal(expectedResults, actualResults)
       })
 
-      it('should produce a .dockerignore', async function() {
+      test('should produce a .dockerignore', async function() {
         await new GDF().run(workdir, options)
 
         const actualResults = fs.readFileSync(path.join(workdir, '.dockerignore'), 'utf-8')
@@ -58,11 +58,11 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
 
         const expectedResults = fs.readFileSync(path.join(testdir, '.dockerignore'), 'utf-8')
 
-        expect(expectedResults).to.equal(actualResults)
+        assert.equal(expectedResults, actualResults)
       })
 
       if (fs.existsSync(path.join(testdir, 'docker-entrypoint.js'))) {
-        it('should produce a docker-entrypoint', async function() {
+        test('should produce a docker-entrypoint', async function() {
           await new GDF().run(workdir, options)
 
           let entrypoint = path.join(workdir, 'docker-entrypoint.js')
@@ -77,12 +77,12 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
 
           const expectedResults = fs.readFileSync(path.join(testdir, 'docker-entrypoint.js'), 'utf-8')
 
-          expect(expectedResults).to.equal(actualResults)
+          assert.equal(expectedResults, actualResults)
         })
       }
 
       if (fs.existsSync(path.join(testdir, 'litefs.yml'))) {
-        it('should produce a litefs.yml', async function() {
+        test('should produce a litefs.yml', async function() {
           await new GDF().run(workdir, options)
 
           const actualResults = fs.readFileSync(path.join(workdir, 'litefs.yml'), 'utf-8')
@@ -93,12 +93,12 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
 
           const expectedResults = fs.readFileSync(path.join(testdir, 'litefs.yml'), 'utf-8')
 
-          expect(expectedResults).to.equal(actualResults)
+          assert.equal(expectedResults, actualResults)
         })
       }
 
       if (fs.existsSync(path.join(testdir, 'litestream.yml'))) {
-        it('should produce a litestream.yml', async function() {
+        test('should produce a litestream.yml', async function() {
           await new GDF().run(workdir, options)
 
           const actualResults = fs.readFileSync(path.join(workdir, 'litestream.yml'), 'utf-8')
@@ -109,12 +109,12 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
 
           const expectedResults = fs.readFileSync(path.join(testdir, 'litestream.yml'), 'utf-8')
 
-          expect(expectedResults).to.equal(actualResults)
+          assert.equal(expectedResults, actualResults)
         })
       }
 
       if (fs.existsSync(path.join(testdir, 'fly.toml'))) {
-        it('should produce a fly.toml', async function() {
+        test('should produce a fly.toml', async function() {
           let expectedResults = fs.readFileSync(path.join(testdir, 'fly.toml'), 'utf-8')
           fs.writeFileSync(path.join(workdir, 'fly.toml'), '')
 
@@ -127,7 +127,7 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
             expectedResults = actualResults
           }
 
-          expect(expectedResults).to.equal(actualResults)
+          assert.equal(expectedResults, actualResults)
         })
       }
     })
