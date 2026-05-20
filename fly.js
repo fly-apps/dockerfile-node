@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
-import inquirer from 'inquirer'
+import { select } from '@clack/prompts'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
 
@@ -330,17 +330,13 @@ GDF.extend(class extends GDF {
     }
 
     // Multiple files found, prompt user to select one
-    const { selectedFile } = await inquirer.prompt([
-      {
-        type: 'list',
-        name: 'selectedFile',
-        message: 'Multiple configuration files found. Please select one:',
-        choices: files.map(file => ({
-          name: file,
-          value: file
-        }))
-      }
-    ])
+    const selectedFile = await select({
+      message: 'Multiple configuration files found. Please select one:',
+      options: files.map(file => ({
+        label: file,
+        value: file
+      }))
+    })
 
     return selectedFile
   }
