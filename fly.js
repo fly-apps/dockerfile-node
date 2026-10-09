@@ -365,7 +365,7 @@ GDF.extend(class extends GDF {
 
     try {
       console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app env show --config ${configFile}`)
-      const stdout = execSync('shopify app env show', { encoding: 'utf8' })
+      const stdout = execSync(`shopify app env show --config ${configFile}`, { encoding: 'utf8' })
       for (const match of stdout.matchAll(/^\s*(\w+)=(.*)/mg)) {
         if (match[1] === 'SHOPIFY_API_SECRET') {
           console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl secrets set SHOPIFY_API_SECRET`)
@@ -391,8 +391,13 @@ GDF.extend(class extends GDF {
     if (original !== config) {
       console.log(`${chalk.bold.green('update'.padStart(11, ' '))}  ${configFile}`)
       fs.writeFileSync(configFile, config)
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app deploy --force --config ${configFile}`)
-      execSync(`shopify app deploy --force --config ${configFile}`, { stdio: 'inherit' })
+      const cmd = `shopify app deploy --allow-updates --config ${configFile}`
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  ${cmd}`)
+      try {
+        execSync(cmd, { stdio: 'inherit' })
+      } catch {
+        console.log(`${chalk.bold.yellow('warn'.padStart(11))}  ${chalk.bold.blue(cmd)} failed; run it yourself to update your app's URLs in Shopify.`)
+      }
     }
   }
 
