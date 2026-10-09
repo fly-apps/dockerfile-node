@@ -133,3 +133,80 @@ for (const group of fs.readdirSync('test', { withFileTypes: true })) {
     })
   }
 }
+
+describe('fly: shopify', function() {
+  const savedPath = process.env.PATH
+  const savedCwd = process.cwd()
+  let workdir, bindir, log
+
+  // write an executable stub that logs its arguments
+  function stub(name, script = '') {
+    const file = path.join(bindir, name)
+    fs.writeFileSync(file, `#!/bin/sh\necho "${name} $*" >> "${log}"\n${script}`)
+    fs.chmodSync(file, 0o755)
+  }
+
+  beforeEach(function() {
+    workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'shopify-'))
+    bindir = fs.mkdtempSync(path.join(os.tmpdir(), 'shopify-bin-'))
+    log = path.join(bindir, 'log')
+    fs.writeFileSync(log, '')
+
+    fs.writeFileSync(path.join(workdir, 'package.json'), JSON.stringify({ name: 'shopify-app', scripts: { start: 'node index.js' } }))
+    fs.writeFileSync(path.join(workdir, 'fly.toml'), 'app = "shopify-test"\n')
+    fs.writeFileSync(path.join(workdir, 'shopify.app.toml'), [
+      'client_id = "abc123"',
+      'application_url = "https://example.trycloudflare.com"',
+      '',
+      '[auth]',
+      'redirect_urls = ["https://example.trycloudflare.com/auth/callback"]',
+      ''
+    ].join('\n'))
+
+    stub('flyctl', 'case "$*" in *" list "*) echo "[]";; esac\n')
+
+    // fly.js looks for shopify.app*.toml in the current directory
+    process.chdir(workdir)
+    process.env.PATH = [bindir, path.dirname(process.execPath), '/usr/bin', '/bin'].join(path.delimiter)
+  })
+
+  afterEach(function() {
+    process.chdir(savedCwd)
+    process.env.PATH = savedPath
+    fs.rmSync(workdir, { recursive: true })
+    fs.rmSync(bindir, { recursive: true })
+  })
+
+  it('deploys with --allow-updates', async function() {
+    // Shopify CLI 4.x rejects --force
+    stub('shopify', 'case "$*" in *--force*) exit 2;; esac\n')
+
+    await new GDF().run(workdir, { ...defaults, force: true })
+
+    const calls = fs.readFileSync(log, 'utf-8')
+    expect(calls).to.include('shopify app env show --config shopify.app.toml')
+    expect(calls).to.include('shopify app deploy --allow-updates --config shopify.app.toml')
+    expect(calls).not.to.include('--force')
+
+    const config = fs.readFileSync(path.join(workdir, 'shopify.app.toml'), 'utf-8')
+    expect(config).to.include('application_url = "https://shopify-test.fly.dev"')
+    expect(config).to.include('"https://shopify-test.fly.dev/auth/callback"')
+  })
+
+  it('continues when shopify app deploy fails', async function() {
+    stub('shopify', 'exit 1\n')
+
+    await new GDF().run(workdir, { ...defaults, force: true })
+
+    const config = fs.readFileSync(path.join(workdir, 'shopify.app.toml'), 'utf-8')
+    expect(config).to.include('application_url = "https://shopify-test.fly.dev"')
+    expect(fs.existsSync(path.join(workdir, 'Dockerfile'))).to.equal(true)
+  })
+
+  it('continues when the shopify CLI is not installed', async function() {
+    await new GDF().run(workdir, { ...defaults, force: true })
+
+    const config = fs.readFileSync(path.join(workdir, 'shopify.app.toml'), 'utf-8')
+    expect(config).to.include('application_url = "https://shopify-test.fly.dev"')
+  })
+})
