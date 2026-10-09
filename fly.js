@@ -364,8 +364,9 @@ GDF.extend(class extends GDF {
     }
 
     try {
-      console.log(`${chalk.bold.green('execute'.padStart(11))}  shopify app env show --config ${configFile}`)
-      const stdout = execSync(`shopify app env show --config ${configFile}`, { encoding: 'utf8' })
+      const cmd = `shopify app env show --config ${configFile}`
+      console.log(`${chalk.bold.green('execute'.padStart(11))}  ${cmd}`)
+      const stdout = execSync(cmd, { encoding: 'utf8' })
       for (const match of stdout.matchAll(/^\s*(\w+)=(.*)/mg)) {
         if (match[1] === 'SHOPIFY_API_SECRET') {
           console.log(`${chalk.bold.green('execute'.padStart(11))}  flyctl secrets set SHOPIFY_API_SECRET`)
@@ -391,7 +392,14 @@ GDF.extend(class extends GDF {
     if (original !== config) {
       console.log(`${chalk.bold.green('update'.padStart(11, ' '))}  ${configFile}`)
       fs.writeFileSync(configFile, config)
-      const cmd = `shopify app deploy --allow-updates --config ${configFile}`
+      // Shopify CLI 3.90 added --allow-updates; 4.0 removed --force
+      let flag = '--allow-updates'
+      try {
+        const help = execSync('shopify app deploy --help', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+        if (!help.includes('--allow-updates')) flag = '--force'
+      } catch { }
+
+      const cmd = `shopify app deploy ${flag} --config ${configFile}`
       console.log(`${chalk.bold.green('execute'.padStart(11))}  ${cmd}`)
       try {
         execSync(cmd, { stdio: 'inherit' })

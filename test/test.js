@@ -179,7 +179,7 @@ describe('fly: shopify', function() {
 
   it('deploys with --allow-updates', async function() {
     // Shopify CLI 4.x rejects --force
-    stub('shopify', 'case "$*" in *--force*) exit 2;; esac\n')
+    stub('shopify', 'case "$*" in *--help*) echo "--allow-updates";; *--force*) exit 2;; esac\n')
 
     await new GDF().run(workdir, { ...defaults, force: true })
 
@@ -191,6 +191,16 @@ describe('fly: shopify', function() {
     const config = fs.readFileSync(path.join(workdir, 'shopify.app.toml'), 'utf-8')
     expect(config).to.include('application_url = "https://shopify-test.fly.dev"')
     expect(config).to.include('"https://shopify-test.fly.dev/auth/callback"')
+  })
+
+  it('deploys with --force on Shopify CLI before 3.90', async function() {
+    stub('shopify', 'case "$*" in *--help*) echo "--force";; *--allow-updates*) exit 2;; esac\n')
+
+    await new GDF().run(workdir, { ...defaults, force: true })
+
+    const calls = fs.readFileSync(log, 'utf-8')
+    expect(calls).to.include('shopify app deploy --force --config shopify.app.toml')
+    expect(calls).not.to.include('deploy --allow-updates')
   })
 
   it('continues when shopify app deploy fails', async function() {
