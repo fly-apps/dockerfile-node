@@ -1,0 +1,21 @@
+{
+  "name": "tanstack-start",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 3000",
+    "build": "vite build",
+    "start": "node .output/server/index.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tanstack/solid-router": "1.169.3",
+    "@tanstack/solid-start": "1.169.3",
+    "solid-js": "^1.9.9"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2",
+    "vite": "^8.0.0",
+    "vite-plugin-solid": "^2.11.10"
+  }
+}
