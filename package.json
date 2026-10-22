@@ -11,7 +11,7 @@
     "eslint": "eslint .",
     "eslint:fix": "eslint --fix .",
     "test": "mocha --spec test/test.js --spec 'test/*.test.js' --timeout 10000",
-    "test:capture": "TEST_CAPTURE=1 mocha"
+    "test:capture": "TEST_CAPTURE=1 mocha --spec test/test.js --timeout 10000"
   },
   "author": "Sam Ruby",
   "license": "MIT",

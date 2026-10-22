@@ -16,6 +16,7 @@ try {
   const bindir = fs.mkdtempSync(path.join(os.tmpdir(), 'bun-stub-'))
   fs.writeFileSync(path.join(bindir, 'bun'), '#!/bin/sh\necho 1.2.0\n', { mode: 0o755 })
   process.env.PATH = [bindir, process.env.PATH].join(path.delimiter)
+  process.on('exit', () => fs.rmSync(bindir, { recursive: true, force: true }))
 }
 
 for (const group of fs.readdirSync('test', { withFileTypes: true })) {
