@@ -203,7 +203,8 @@ export class GDF {
   // Experimental nextjs generation?
   get nextjsGeneration() {
     if (!this.nextjs) return false
-    if (this.#pj.scripts?.build !== 'next build') return false
+    // only `next build`, optionally with flags; anything more is a custom build
+    if (!/^next build(\s+-[-\w=.]+)*$/.test(this.#pj.scripts?.build?.trim() ?? '')) return false
     // standalone images contain neither the next CLI nor the sources
     if (this.standaloneNextjs) return false
     const version = this.#pj.dependencies.next.match(/\d[.\d]*/)
