@@ -203,23 +203,28 @@ export class GDF {
   // Experimental nextjs generation?
   get nextjsGeneration() {
     if (!this.nextjs) return false
-    if (!this.#pj.scripts.build === 'next build') return false
-    if (!this.#pj.dependencies.next) return false
+    // only `next build`, optionally with flags; anything more is a custom build
+    if (!/^next build(\s+-[-\w=.]+)*$/.test(this.#pj.scripts?.build?.trim() ?? '')) return false
+    // standalone images contain neither the next CLI nor the sources
+    if (this.standaloneNextjs) return false
     const version = this.#pj.dependencies.next.match(/\d[.\d]*/)
-    if (!version || version[0] < '14.2') return false
+    if (!version) return false
+    const [major, minor = 0] = version[0].split('.').map(Number)
+    if (major < 14 || (major === 14 && minor < 2)) return false
     return true
   }
 
   get standaloneNextjs() {
     if (!this.nextjs) return false
 
-    if (fs.existsSync(path.join(this._appdir, 'next.config.mjs'))) {
-      const config = fs.readFileSync(path.join(this._appdir, 'next.config.mjs'), 'utf-8')
+    for (const ext of ['mjs', 'js', 'cjs', 'ts', 'mts']) {
+      const file = path.join(this._appdir, `next.config.${ext}`)
+      if (!fs.existsSync(file)) continue
+      const config = fs.readFileSync(file, 'utf-8')
       return /output\s*:\s*(["'`])standalone\1/.test(config)
-    } else if (fs.existsSync(path.join(this._appdir, 'next.config.js'))) {
-      const config = fs.readFileSync(path.join(this._appdir, 'next.config.js'), 'utf-8')
-      return /output\s*:\s*(["'`])standalone\1/.test(config)
-    } else return false
+    }
+
+    return false
   }
 
   // Does this application use trpc?
