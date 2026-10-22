@@ -141,7 +141,7 @@ export class GDF {
   }
 
   get vite() {
-    return !!(this.#pj.scripts?.dev === 'vite')
+    return !!(this.#pj.scripts?.dev === 'vite') && !this.tanstackStart
   }
 
   // Does this application use remix.run?
@@ -236,6 +236,17 @@ export class GDF {
   // Does this application use nuxt.js?
   get nuxtjs() {
     return !!this.#pj.dependencies?.nuxt
+  }
+
+  // Does this application use TanStack Start?
+  get tanstackStart() {
+    return !!(this.#pj.dependencies?.['@tanstack/react-start'] ||
+      this.#pj.dependencies?.['@tanstack/solid-start'])
+  }
+
+  // Does this application build with the nitro vite plugin?
+  get nitro() {
+    return !!(this.#pj.dependencies?.nitro || this.#pj.devDependencies?.nitro)
   }
 
   // Does this application use gatsby?
@@ -802,6 +813,7 @@ export class GDF {
     if (this.meteor) runtime = 'Meteor'
     if (this.nextjs) runtime = 'Next.js'
     if (this.nuxtjs) runtime = 'Nuxt'
+    if (this.tanstackStart) runtime = 'TanStack'
     if (this.nestjs) runtime = 'NestJS'
     if (this.gatsby) runtime = 'Gatsby'
     if (this.svelte) runtime = 'SvelteKit'
@@ -846,6 +858,11 @@ export class GDF {
       return ['node', '/app/build/server.js']
     } else if (this.nuxtjs) {
       return ['node', '.output/server/index.mjs']
+    } else if (this.tanstackStart && this.nitro) {
+      return [this.bun ? 'bun' : 'node', '.output/server/index.mjs']
+    } else if (this.tanstackStart) {
+      // srvx is a dependency of TanStack Start itself
+      return [this.npx, 'srvx', '--prod', '-s', '../client', 'dist/server/server.js']
     } else if (this.meteor) {
       return ['node', 'main.js']
     } else if (this.gatsby) {
