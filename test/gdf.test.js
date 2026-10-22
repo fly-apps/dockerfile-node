@@ -656,12 +656,48 @@ describe('gdf: start command and port', function() {
   it('uses bun for module, main and the default entry point', async function() {
     sandbox().stub('bun', 'echo 1.1.20\n')
     sandbox().write('bun.lockb', '')
+    sandbox().write('app.ts', '')
 
     let gdf = await sandbox().run({ main: 'app.ts' })
     expect(gdf.startCommand).to.deep.equal(['bun', 'app.ts'])
 
     gdf = await sandbox().run({})
     expect(gdf.startCommand).to.deep.equal(['bun', 'index.ts'])
+  })
+
+  it('resolves a Bun module entry point to its TypeScript file when type is unspecified', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/index.ts', '')
+
+    const gdf = await sandbox().run({ module: 'src/index.js' })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/index.ts'])
+  })
+
+  it('uses the Bun dev entry point without --watch', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/server.ts', '')
+
+    const gdf = await sandbox().run({ scripts: { dev: 'bun --watch src/server.ts' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/server.ts'])
+  })
+
+  it('runs a Bun start script when one is defined', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+
+    const gdf = await sandbox().run({ scripts: { start: 'bun src/server.ts' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'run', 'start'])
+  })
+
+  it('uses src/index.ts when a Bun project has no module or dev entry point', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/index.ts', '')
+
+    const gdf = await sandbox().run({})
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/index.ts'])
   })
 
   it('starts standalone next.js with server.js', async function() {

@@ -836,6 +836,42 @@ export class GDF {
     return this.bun ? 'bunx' : 'npx'
   }
 
+  get bunStartCommand() {
+    const candidates = []
+
+    for (const entry of [this.#pj.module, this.#pj.main]) {
+      if (!entry) continue
+
+      candidates.push(entry)
+      const extension = path.extname(entry)
+      const typescriptEntry = extension
+        ? `${entry.slice(0, -extension.length)}.ts`
+        : `${entry}.ts`
+      if (typescriptEntry !== entry) candidates.push(typescriptEntry)
+    }
+
+    const devScript = this.#pj.scripts?.dev
+    if (devScript) {
+      const commands = new Set(['bun', 'bunx', 'node', 'npx', 'npm', 'pnpm', 'yarn', 'tsx', 'ts-node', 'run', 'exec'])
+      const entries = ShellQuote.parse(devScript)
+        .filter(entry => typeof entry === 'string' && !entry.startsWith('-') && !commands.has(entry))
+        .reverse()
+
+      for (const entry of entries) {
+        candidates.push(entry)
+        const extension = path.extname(entry)
+        const typescriptEntry = extension
+          ? `${entry.slice(0, -extension.length)}.ts`
+          : `${entry}.ts`
+        if (typescriptEntry !== entry) candidates.push(typescriptEntry)
+      }
+    }
+
+    candidates.push('src/index.ts', 'index.ts')
+    const entry = candidates.find(filename => fs.existsSync(path.join(this._appdir, filename)))
+    return ['bun', entry || 'index.ts']
+  }
+
   // command to start the web server
   get startCommand() {
     if (this.options.cmd) return this.options.cmd
@@ -882,6 +918,8 @@ export class GDF {
       return start
     } else if (this.#pj.scripts?.start) {
       return [this.packager, 'run', 'start']
+    } else if (this.bun) {
+      return this.bunStartCommand
     } else if (this.#pj.type === 'module' && this.#pj.module) {
       return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.module]
     } else if (this.#pj.main) {
