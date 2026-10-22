@@ -190,6 +190,9 @@ if (pj) {
   pj.dockerfile ||= {}
 
   for (const prop in defaults) {
+    // --instructions is an alias for --instructions-deploy, handled below
+    if (prop === 'instructions') continue
+
     if (prop in options && options[prop] !== pj.dockerfile[prop]) {
       if (options[prop] === defaults[prop]) {
         delete pj.dockerfile[prop]
