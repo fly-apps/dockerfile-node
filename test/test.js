@@ -6,6 +6,18 @@ import { expect } from 'chai'
 
 import { GDF, defaults } from '../gdf.js'
 import '../fly.js'
+import { execSync } from 'node:child_process'
+
+// bun projects are only detected as such when `bun --version` works; the
+// version itself is masked below, so a stub will do when bun isn't installed
+try {
+  execSync('bun --version', { stdio: 'ignore' })
+} catch {
+  const bindir = fs.mkdtempSync(path.join(os.tmpdir(), 'bun-stub-'))
+  fs.writeFileSync(path.join(bindir, 'bun'), '#!/bin/sh\necho 1.2.0\n', { mode: 0o755 })
+  process.env.PATH = [bindir, process.env.PATH].join(path.delimiter)
+  process.on('exit', () => fs.rmSync(bindir, { recursive: true, force: true }))
+}
 
 for (const group of fs.readdirSync('test', { withFileTypes: true })) {
   if (!group.isDirectory()) continue

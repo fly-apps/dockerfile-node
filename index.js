@@ -283,7 +283,7 @@ if (pj) {
     if (Object.keys(options.args[stage]).length === 0) {
       delete df.args[stage]
     } else {
-      df.args[stage] = options.vars[stage]
+      df.args[stage] = options.args[stage]
     }
 
     // instructions
