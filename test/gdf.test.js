@@ -742,6 +742,32 @@ describe('gdf: start command and port', function() {
     }
   })
 
+  it('runs a Bun dev entry point in the directory the dev script changes to', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/index.ts', '')
+    sandbox().write('apps/api/src/index.ts', '')
+
+    let gdf = await sandbox().run({ scripts: { dev: 'cd apps/api && bun --watch src/index.ts' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', '--cwd', 'apps/api', 'src/index.ts'])
+
+    gdf = await sandbox().run({ scripts: { dev: 'cd apps && cd api && bun --watch ./src/index.js' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', '--cwd', 'apps/api', 'src/index.ts'])
+
+    expect(sandbox().read('Dockerfile')).to.include('CMD [ "bun", "--cwd", "apps/api", "src/index.ts" ]')
+  })
+
+  it('ignores Bun dev script entry points outside the app', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/index.ts', '')
+
+    for (const dev of ['cd .. && bun --watch src/index.ts', 'cd /srv && bun src/index.ts', 'cd ~ && bun src/index.ts']) {
+      const gdf = await sandbox().run({ scripts: { dev } })
+      expect(gdf.startCommand, dev).to.deep.equal(['bun', 'src/index.ts'])
+    }
+  })
+
   it('prefers a Bun src/index.ts over the dev script entry point', async function() {
     sandbox().stub('bun', 'echo 1.1.20\n')
     sandbox().write('bun.lockb', '')

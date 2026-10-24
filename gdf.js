@@ -851,21 +851,29 @@ export class GDF {
     return ['.ts', '.tsx', '.mts'].map(ext => base + ext).find(file => this.bunScript(file)) || entry
   }
 
-  // The file run by the last `bun` command in the dev script, e.g.
-  // src/server.ts in "bun run codegen.ts && bun --watch src/server.ts"
+  // The directory and file run by the last `bun` command in the dev script,
+  // e.g. src/server.ts in "bun run codegen.ts && bun --watch src/server.ts",
+  // or apps/api and src/index.ts in "cd apps/api && bun --watch src/index.ts"
   get bunDevEntry() {
     const devScript = this.#pj.scripts?.dev
     if (!devScript) return null
 
     let entry = null
     let command = null
+    let dir = '.'
     for (const token of ShellQuote.parse(devScript)) {
       if (typeof token !== 'string') {
         command = null
       } else if (command === null) {
         if (!/^\w+=/.test(token)) command = token
-      } else if (command === 'bun' && this.bunScript(this.bunEntry(token))) {
-        entry = this.bunEntry(token)
+      } else if (command === 'cd') {
+        // only follow relative directories that stay within the app
+        const target = dir === null || path.isAbsolute(token) ? null : path.normalize(path.join(dir, token))
+        dir = target === null || target.startsWith('..') || /^[~-]/.test(token) ? null : target
+        command = 'cd ' + token
+      } else if (command === 'bun' && dir !== null) {
+        const file = this.bunEntry(path.join(dir, token))
+        if (this.bunScript(file)) entry = { dir, file: path.relative(dir, file) }
       }
     }
 
@@ -880,10 +888,14 @@ export class GDF {
 
     const module = this.#pj.module && this.bunEntry(this.#pj.module)
     if (module && this.bunScript(module)) return ['bun', module]
+
+    // a dev script that changes directory names the app explicitly
+    const dev = this.bunDevEntry
+    if (dev && dev.dir !== '.') return ['bun', '--cwd', dev.dir, dev.file]
     if (this.bunScript('src/index.ts')) return ['bun', 'src/index.ts']
 
     // a declared module that doesn't exist yet is likely build output
-    return ['bun', this.bunDevEntry || module || 'index.ts']
+    return ['bun', dev?.file || module || 'index.ts']
   }
 
   // command to start the web server
