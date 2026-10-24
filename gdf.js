@@ -50,6 +50,12 @@ const ALPINE_MAPPINGS = {
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
 // Generate Dockerfile class
+const BUN_SCRIPT_EXTENSIONS = ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs']
+
+// bun flags that take a separate value, e.g. --preload ./instrument.ts
+const BUN_VALUE_FLAGS = ['--preload', '-r', '--require', '--import', '--config', '-c', '--cwd',
+  '--env-file', '--tsconfig-override', '--define', '-d', '--loader', '-l', '--conditions']
+
 export class GDF {
   static templates = path.join(__dirname, 'templates')
   static runners = []
@@ -838,17 +844,30 @@ export class GDF {
 
   // Is filename an existing script file in the app directory?
   bunScript(filename) {
-    if (!['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs'].includes(path.extname(filename))) return false
+    if (!BUN_SCRIPT_EXTENSIONS.includes(path.posix.extname(filename))) return false
     return !!fs.statSync(path.join(this._appdir, filename), { throwIfNoEntry: false })?.isFile()
   }
 
-  // Bun can run TypeScript directly: when a declared foo.js is missing, look
-  // for its TypeScript source
-  bunEntry(entry) {
+  // The TypeScript source of a missing foo.js, if there is one
+  bunSource(entry) {
     if (fs.existsSync(path.join(this._appdir, entry))) return entry
-    const extension = path.extname(entry)
+    const extension = path.posix.extname(entry)
     const base = extension ? entry.slice(0, -extension.length) : entry
-    return ['.ts', '.tsx', '.mts'].map(ext => base + ext).find(file => this.bunScript(file)) || entry
+    const sources = extension === '.cjs' ? ['.cts'] : ['.ts', '.tsx', '.mts']
+    return sources.map(ext => base + ext).find(file => this.bunScript(file)) || entry
+  }
+
+  // Could a script produce a declared entry point that doesn't exist yet?
+  get bunBuildsEntry() {
+    const { build, prepare, postinstall } = this.#pj.scripts || {}
+    return !!(build || prepare || postinstall)
+  }
+
+  // A declared foo.js may be missing because only foo.ts exists.  Bun 1.2+
+  // runs foo.ts in that case, older versions fail, so point at the source,
+  // unless foo.js could be build output.
+  bunEntry(entry) {
+    return this.bunBuildsEntry ? entry : this.bunSource(entry)
   }
 
   // The directory and file run by the last `bun` command in the dev script,
@@ -859,21 +878,59 @@ export class GDF {
     if (!devScript) return null
 
     let entry = null
-    let command = null
-    let dir = '.'
+    let command // the current command, null once its file is found
+    let skip = false // the next token is a flag value or redirect target
+    let dir = '.' // null when the directory can't be followed
+    let listDir = dir // directory at the start of the current command list
+    const dirs = [] // directories outside of (subshells)
+
     for (const token of ShellQuote.parse(devScript)) {
       if (typeof token !== 'string') {
-        command = null
-      } else if (command === null) {
+        if (token.comment !== undefined) continue
+        if (token.op === 'glob') {
+          if (command === 'bun') command = null
+          continue
+        }
+        if (/^\d*[<>]/.test(token.op)) {
+          skip = true
+          continue
+        }
+
+        // a bare cd changes to $HOME
+        if (command === 'cd') dir = null
+
+        if (token.op === '(') {
+          dirs.push(dir)
+        } else if (token.op === ')') {
+          dir = dirs.length ? dirs.pop() : null
+        } else if (token.op === '&' || token.op === '|') {
+          // background lists and pipelines run in subshells
+          dir = listDir
+        }
+
+        if (token.op === ';' || token.op === '&') listDir = dir
+        command = undefined
+        skip = false
+      } else if (skip) {
+        skip = false
+      } else if (command === undefined) {
         if (!/^\w+=/.test(token)) command = token
       } else if (command === 'cd') {
         // only follow relative directories that stay within the app
-        const target = dir === null || path.isAbsolute(token) ? null : path.normalize(path.join(dir, token))
-        dir = target === null || target.startsWith('..') || /^[~-]/.test(token) ? null : target
-        command = 'cd ' + token
-      } else if (command === 'bun' && dir !== null) {
-        const file = this.bunEntry(path.join(dir, token))
-        if (this.bunScript(file)) entry = { dir, file: path.relative(dir, file) }
+        const target = dir === null || path.posix.isAbsolute(token) || /^[~-]/.test(token)
+          ? null
+          : path.posix.normalize(path.posix.join(dir, token)).replace(/\/+$/, '') || '.'
+        dir = target === null || target === '..' || target.startsWith('../') ? null : target
+        command = null
+      } else if (command === 'bun') {
+        if (token.startsWith('-')) {
+          skip = BUN_VALUE_FLAGS.includes(token)
+        } else if (token !== 'run') {
+          // the first file is the entry; anything after it is its argv
+          const file = dir === null ? null : this.bunSource(path.posix.join(dir, token))
+          if (file && this.bunScript(file)) entry = { dir, file: path.posix.relative(dir, file) }
+          command = null
+        }
       }
     }
 
@@ -886,15 +943,15 @@ export class GDF {
   get bunStartCommand() {
     if (this.bunScript('index.ts')) return ['bun', 'index.ts']
 
+    // a declared module that doesn't exist yet is likely build output
     const module = this.#pj.module && this.bunEntry(this.#pj.module)
-    if (module && this.bunScript(module)) return ['bun', module]
+    if (module && (this.bunScript(module) || this.bunBuildsEntry)) return ['bun', module]
 
     // a dev script that changes directory names the app explicitly
     const dev = this.bunDevEntry
     if (dev && dev.dir !== '.') return ['bun', '--cwd', dev.dir, dev.file]
     if (this.bunScript('src/index.ts')) return ['bun', 'src/index.ts']
 
-    // a declared module that doesn't exist yet is likely build output
     return ['bun', dev?.file || module || 'index.ts']
   }
 
@@ -945,9 +1002,9 @@ export class GDF {
     } else if (this.#pj.scripts?.start) {
       return [this.packager, 'run', 'start']
     } else if (this.#pj.type === 'module' && this.#pj.module) {
-      return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.module]
+      return this.packager === 'bun' ? ['bun', this.bunEntry(this.#pj.module)] : ['node', this.#pj.module]
     } else if (this.#pj.main) {
-      return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.main]
+      return this.packager === 'bun' ? ['bun', this.bunEntry(this.#pj.main)] : ['node', this.#pj.main]
     } else if (this.svelte) {
       return [this.bun ? 'bun' : 'node', './build/index.js']
     } else if (this.packager === 'bun') {

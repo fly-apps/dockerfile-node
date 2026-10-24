@@ -757,12 +757,78 @@ describe('gdf: start command and port', function() {
     expect(sandbox().read('Dockerfile')).to.include('CMD [ "bun", "--cwd", "apps/api", "src/index.ts" ]')
   })
 
+  it('treats arguments after the Bun dev entry point as its argv', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/server.ts', '')
+    sandbox().write('drizzle.config.ts', '')
+
+    for (const dev of [
+      'bun --watch src/server.ts --config drizzle.config.ts',
+      'bun --watch src/server.ts > log.txt 2>&1',
+      'bun --watch src/server.ts # drizzle.config.ts'
+    ]) {
+      const gdf = await sandbox().run({ scripts: { dev } })
+      expect(gdf.startCommand, dev).to.deep.equal(['bun', 'src/server.ts'])
+    }
+  })
+
+  it('does not follow cd out of Bun dev script subshells and background jobs', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('server.ts', '')
+    sandbox().write('web/server.ts', '')
+
+    for (const dev of [
+      '(cd web && vite) & bun --watch server.ts',
+      'cd web && vite & bun --watch server.ts',
+      'cd ./ && bun --watch server.ts'
+    ]) {
+      const gdf = await sandbox().run({ scripts: { dev } })
+      expect(gdf.startCommand, dev).to.deep.equal(['bun', 'server.ts'])
+    }
+
+    const gdf = await sandbox().run({ scripts: { dev: 'cd web/ && bun --watch server.ts' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', '--cwd', 'web', 'server.ts'])
+  })
+
+  it('resolves a missing Bun main or module to its TypeScript source unless a script builds it', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/index.ts', '')
+    sandbox().write('src/worker.cts', '')
+
+    let gdf = await sandbox().run({ type: 'module', module: 'src/index.js' })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/index.ts'])
+
+    gdf = await sandbox().run({ main: 'src/worker.cjs' })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/worker.cts'])
+
+    gdf = await sandbox().run({ type: 'module', module: 'src/index.js', scripts: { build: 'tsc' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/index.js'])
+
+    gdf = await sandbox().run({ main: 'src/index.js', scripts: { prepare: 'tsc' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/index.js'])
+  })
+
+  it('prefers a Bun module built by a script over the dev script entry point', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/server.ts', '')
+
+    const gdf = await sandbox().run({
+      module: 'dist/index.mjs',
+      scripts: { build: 'bun build src/server.ts --outdir dist', dev: 'bun --watch src/server.ts' }
+    })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'dist/index.mjs'])
+  })
+
   it('ignores Bun dev script entry points outside the app', async function() {
     sandbox().stub('bun', 'echo 1.1.20\n')
     sandbox().write('bun.lockb', '')
     sandbox().write('src/index.ts', '')
 
-    for (const dev of ['cd .. && bun --watch src/index.ts', 'cd /srv && bun src/index.ts', 'cd ~ && bun src/index.ts']) {
+    for (const dev of ['cd .. && bun --watch src/index.ts', 'cd /srv && bun src/index.ts', 'cd ~ && bun src/index.ts', 'cd && bun src/index.ts']) {
       const gdf = await sandbox().run({ scripts: { dev } })
       expect(gdf.startCommand, dev).to.deep.equal(['bun', 'src/index.ts'])
     }
