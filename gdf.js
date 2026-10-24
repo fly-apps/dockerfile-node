@@ -201,6 +201,10 @@ export class GDF {
     return !!this.#pj.dependencies?.['meteor-node-stubs']
   }
 
+  get waku() {
+    return !!this.#pj.dependencies?.waku
+  }
+
   // Does this application use next.js?
   get nextjs() {
     return !!this.#pj.dependencies?.next
@@ -485,6 +489,8 @@ export class GDF {
       env.DRIVE_DISK = 'local'
       if (this.postgres) env.DB_CONNECTION = 'pg'
     }
+
+    if (this.waku) env.PORT = '3000'
 
     if (this.puppeteer) env.PUPPETEER_EXECUTABLE_PATH = '/usr/bin/chromium'
 
@@ -818,6 +824,7 @@ export class GDF {
     if (this.remix) runtime = 'Remix'
     if (this.meteor) runtime = 'Meteor'
     if (this.nextjs) runtime = 'Next.js'
+    if (this.waku) runtime = 'Waku'
     if (this.nuxtjs) runtime = 'Nuxt'
     if (this.tanstackStart) runtime = 'TanStack'
     if (this.nestjs) runtime = 'NestJS'
@@ -984,6 +991,8 @@ export class GDF {
       return [this.npx, 'srvx', '--prod', '-s', '../client', 'dist/server/server.js']
     } else if (this.meteor) {
       return ['node', 'main.js']
+    } else if (this.waku) {
+      return ['node', 'dist/serve-node.js']
     } else if (this.gatsby) {
       return [this.npx, 'gatsby', 'serve', '-H', '0.0.0.0']
     } else if (this.vite || this.astroStatic) {

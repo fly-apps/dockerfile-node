@@ -17,6 +17,7 @@ describe('gdf: framework detection', function() {
     ['remix (legacy package)', { dependencies: { remix: '^1' } }, 'Remix'],
     ['meteor', { dependencies: { 'meteor-node-stubs': '^1' } }, 'Meteor'],
     ['next', { dependencies: { next: '13.0.0' }, scripts: {} }, 'Next.js'],
+    ['waku', { dependencies: { waku: '1.0.0-rc.4' } }, 'Waku'],
     ['nuxt', { dependencies: { nuxt: '^3' } }, 'Nuxt'],
     ['nest', { dependencies: { '@nestjs/core': '^10' } }, 'NestJS'],
     ['gatsby', { dependencies: { gatsby: '^5' } }, 'Gatsby'],
@@ -632,6 +633,7 @@ describe('gdf: start command and port', function() {
     ['vite', { scripts: { dev: 'vite' } }, ['/usr/sbin/nginx', '-g', 'daemon off;']],
     ['astro static', { dependencies: { astro: '*' } }, ['/usr/sbin/nginx', '-g', 'daemon off;']],
     ['astro ssr', { dependencies: { astro: '*', '@astrojs/node': '*' } }, ['node', './dist/server/entry.mjs']],
+    ['waku', { dependencies: { waku: '*' } }, ['node', 'dist/serve-node.js']],
     ['sveltekit', { devDependencies: { '@sveltejs/kit': '*' } }, ['node', './build/index.js']],
     ['remix-serve', { dependencies: { '@remix-run/node': '*' }, scripts: { start: 'remix-serve build' } }, ['npx', 'remix-serve', './build/index.js']],
     ['fastify', { scripts: { start: 'fastify start app.js' } }, ['npx', 'fastify', 'start', '--address', '0.0.0.0', 'app.js']],
@@ -943,6 +945,12 @@ describe('gdf: start command and port', function() {
       expect(sandbox().read('Dockerfile')).to.include(`EXPOSE ${port}\n`)
     })
   }
+
+  it('sets PORT for the Waku production server', async function() {
+    const gdf = await sandbox().run({ dependencies: { waku: '*' } })
+    expect(gdf.port).to.equal(3000)
+    expect(gdf.deployEnv.PORT).to.equal('3000')
+  })
 
   it('--port overrides the port', async function() {
     const gdf = await sandbox().run({ dependencies: { gatsby: '*' } }, { port: 9999 })
