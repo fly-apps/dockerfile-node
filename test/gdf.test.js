@@ -674,6 +674,15 @@ describe('gdf: start command and port', function() {
     expect(gdf.startCommand).to.deep.equal(['bun', 'src/index.ts'])
   })
 
+  it('keeps a Bun main entry point that has not been built yet', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/index.ts', '')
+
+    const gdf = await sandbox().run({ main: 'dist/index.js' })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'dist/index.js'])
+  })
+
   it('uses the Bun dev entry point without --watch', async function() {
     sandbox().stub('bun', 'echo 1.1.20\n')
     sandbox().write('bun.lockb', '')

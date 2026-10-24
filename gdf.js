@@ -836,38 +836,32 @@ export class GDF {
     return this.bun ? 'bunx' : 'npx'
   }
 
+  // Bun can run TypeScript directly: prefer foo.ts when the declared foo.js
+  // is missing.  A declared entry that doesn't exist yet is kept as is, as it
+  // is likely build output.
+  bunEntry(entry) {
+    const extension = path.extname(entry)
+    const typescriptEntry = `${extension ? entry.slice(0, -extension.length) : entry}.ts`
+    const exists = filename => fs.existsSync(path.join(this._appdir, filename))
+    return !exists(entry) && exists(typescriptEntry) ? typescriptEntry : entry
+  }
+
+  // Bun apps without a start script, module or main, or with a module entry
+  // and no type: module (e.g. the Elysia template)
   get bunStartCommand() {
+    if (this.#pj.module) return ['bun', this.bunEntry(this.#pj.module)]
+
     const candidates = []
-
-    for (const entry of [this.#pj.module, this.#pj.main]) {
-      if (!entry) continue
-
-      candidates.push(entry)
-      const extension = path.extname(entry)
-      const typescriptEntry = extension
-        ? `${entry.slice(0, -extension.length)}.ts`
-        : `${entry}.ts`
-      if (typescriptEntry !== entry) candidates.push(typescriptEntry)
-    }
-
     const devScript = this.#pj.scripts?.dev
     if (devScript) {
       const commands = new Set(['bun', 'bunx', 'node', 'npx', 'npm', 'pnpm', 'yarn', 'tsx', 'ts-node', 'run', 'exec'])
       const entries = ShellQuote.parse(devScript)
         .filter(entry => typeof entry === 'string' && !entry.startsWith('-') && !commands.has(entry))
         .reverse()
-
-      for (const entry of entries) {
-        candidates.push(entry)
-        const extension = path.extname(entry)
-        const typescriptEntry = extension
-          ? `${entry.slice(0, -extension.length)}.ts`
-          : `${entry}.ts`
-        if (typescriptEntry !== entry) candidates.push(typescriptEntry)
-      }
+      for (const entry of entries) candidates.push(this.bunEntry(entry))
     }
 
-    candidates.push('src/index.ts', 'index.ts')
+    candidates.push('src/index.ts')
     const entry = candidates.find(filename => fs.existsSync(path.join(this._appdir, filename)))
     return ['bun', entry || 'index.ts']
   }
@@ -918,16 +912,14 @@ export class GDF {
       return start
     } else if (this.#pj.scripts?.start) {
       return [this.packager, 'run', 'start']
-    } else if (this.bun) {
-      return this.bunStartCommand
     } else if (this.#pj.type === 'module' && this.#pj.module) {
-      return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.module]
+      return this.packager === 'bun' ? ['bun', this.bunEntry(this.#pj.module)] : ['node', this.#pj.module]
     } else if (this.#pj.main) {
-      return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.main]
+      return this.packager === 'bun' ? ['bun', this.bunEntry(this.#pj.main)] : ['node', this.#pj.main]
     } else if (this.svelte) {
       return [this.bun ? 'bun' : 'node', './build/index.js']
     } else if (this.packager === 'bun') {
-      return ['bun', 'index.ts']
+      return this.bunStartCommand
     } else {
       return ['node', 'index.js']
     }
