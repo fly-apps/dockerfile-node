@@ -714,6 +714,61 @@ describe('gdf: start command and port', function() {
     expect(gdf.startCommand).to.deep.equal(['bun', 'src/server.ts'])
   })
 
+  it('keeps a Bun main entry point that is compiled from TypeScript', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('index.ts', '')
+
+    const gdf = await sandbox().run({ main: 'index.js', scripts: { build: 'tsc' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'index.js'])
+  })
+
+  it('uses the file run by the last bun command in the dev script', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/server.ts', '')
+    sandbox().write('scripts/codegen.ts', '')
+    sandbox().write('drizzle.config.ts', '')
+    sandbox().write('instrument.ts', '')
+
+    for (const dev of [
+      'bun run scripts/codegen.ts && bun --watch src/server.ts',
+      'bunx drizzle-kit push --config drizzle.config.ts && bun --watch src/server.ts',
+      'bun --preload ./instrument.ts src/server.ts',
+      'NODE_ENV=development bun --watch src/server.ts'
+    ]) {
+      const gdf = await sandbox().run({ scripts: { dev } })
+      expect(gdf.startCommand, dev).to.deep.equal(['bun', 'src/server.ts'])
+    }
+  })
+
+  it('prefers a Bun src/index.ts over the dev script entry point', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/index.ts', '')
+    sandbox().write('src/dev.ts', '')
+
+    const gdf = await sandbox().run({ scripts: { dev: 'bun --watch src/dev.ts' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/index.ts'])
+  })
+
+  it('resolves a Bun module entry point to its TSX file', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/index.tsx', '')
+
+    const gdf = await sandbox().run({ module: 'src/index.js' })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/index.tsx'])
+  })
+
+  it('keeps a Bun module entry point that has not been built yet', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+
+    const gdf = await sandbox().run({ module: 'dist/index.mjs' })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'dist/index.mjs'])
+  })
+
   it('skips a Bun module entry point that does not exist', async function() {
     sandbox().stub('bun', 'echo 1.1.20\n')
     sandbox().write('bun.lockb', '')

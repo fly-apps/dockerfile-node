@@ -842,14 +842,34 @@ export class GDF {
     return !!fs.statSync(path.join(this._appdir, filename), { throwIfNoEntry: false })?.isFile()
   }
 
-  // Bun can run TypeScript directly: prefer foo.ts when the declared foo.js
-  // is missing.  A declared entry that doesn't exist yet is kept as is, as it
-  // is likely build output.
+  // Bun can run TypeScript directly: when a declared foo.js is missing, look
+  // for its TypeScript source
   bunEntry(entry) {
+    if (fs.existsSync(path.join(this._appdir, entry))) return entry
     const extension = path.extname(entry)
-    const typescriptEntry = `${extension ? entry.slice(0, -extension.length) : entry}.ts`
-    const exists = fs.existsSync(path.join(this._appdir, entry))
-    return !exists && this.bunScript(typescriptEntry) ? typescriptEntry : entry
+    const base = extension ? entry.slice(0, -extension.length) : entry
+    return ['.ts', '.tsx', '.mts'].map(ext => base + ext).find(file => this.bunScript(file)) || entry
+  }
+
+  // The file run by the last `bun` command in the dev script, e.g.
+  // src/server.ts in "bun run codegen.ts && bun --watch src/server.ts"
+  get bunDevEntry() {
+    const devScript = this.#pj.scripts?.dev
+    if (!devScript) return null
+
+    let entry = null
+    let command = null
+    for (const token of ShellQuote.parse(devScript)) {
+      if (typeof token !== 'string') {
+        command = null
+      } else if (command === null) {
+        if (!/^\w+=/.test(token)) command = token
+      } else if (command === 'bun' && this.bunScript(this.bunEntry(token))) {
+        entry = this.bunEntry(token)
+      }
+    }
+
+    return entry
   }
 
   // Bun apps without a start script, main, or module with type: module.
@@ -858,18 +878,12 @@ export class GDF {
   get bunStartCommand() {
     if (this.bunScript('index.ts')) return ['bun', 'index.ts']
 
-    const candidates = []
-    if (this.#pj.module) candidates.push(this.bunEntry(this.#pj.module))
+    const module = this.#pj.module && this.bunEntry(this.#pj.module)
+    if (module && this.bunScript(module)) return ['bun', module]
+    if (this.bunScript('src/index.ts')) return ['bun', 'src/index.ts']
 
-    const devScript = this.#pj.scripts?.dev
-    if (devScript) {
-      for (const entry of ShellQuote.parse(devScript)) {
-        if (typeof entry === 'string' && entry) candidates.push(this.bunEntry(entry))
-      }
-    }
-
-    candidates.push('src/index.ts')
-    return ['bun', candidates.find(entry => this.bunScript(entry)) || 'index.ts']
+    // a declared module that doesn't exist yet is likely build output
+    return ['bun', this.bunDevEntry || module || 'index.ts']
   }
 
   // command to start the web server
@@ -919,9 +933,9 @@ export class GDF {
     } else if (this.#pj.scripts?.start) {
       return [this.packager, 'run', 'start']
     } else if (this.#pj.type === 'module' && this.#pj.module) {
-      return this.packager === 'bun' ? ['bun', this.bunEntry(this.#pj.module)] : ['node', this.#pj.module]
+      return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.module]
     } else if (this.#pj.main) {
-      return this.packager === 'bun' ? ['bun', this.bunEntry(this.#pj.main)] : ['node', this.#pj.main]
+      return [this.packager === 'bun' ? 'bun' : 'node', this.#pj.main]
     } else if (this.svelte) {
       return [this.bun ? 'bun' : 'node', './build/index.js']
     } else if (this.packager === 'bun') {
