@@ -836,34 +836,40 @@ export class GDF {
     return this.bun ? 'bunx' : 'npx'
   }
 
+  // Is filename an existing script file in the app directory?
+  bunScript(filename) {
+    if (!['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs'].includes(path.extname(filename))) return false
+    return !!fs.statSync(path.join(this._appdir, filename), { throwIfNoEntry: false })?.isFile()
+  }
+
   // Bun can run TypeScript directly: prefer foo.ts when the declared foo.js
   // is missing.  A declared entry that doesn't exist yet is kept as is, as it
   // is likely build output.
   bunEntry(entry) {
     const extension = path.extname(entry)
     const typescriptEntry = `${extension ? entry.slice(0, -extension.length) : entry}.ts`
-    const exists = filename => fs.existsSync(path.join(this._appdir, filename))
-    return !exists(entry) && exists(typescriptEntry) ? typescriptEntry : entry
+    const exists = fs.existsSync(path.join(this._appdir, entry))
+    return !exists && this.bunScript(typescriptEntry) ? typescriptEntry : entry
   }
 
-  // Bun apps without a start script, module or main, or with a module entry
-  // and no type: module (e.g. the Elysia template)
+  // Bun apps without a start script, main, or module with type: module.
+  // An existing index.ts is what has always been used here, so it wins;
+  // otherwise look for the entry (e.g. src/index.ts in the Elysia template).
   get bunStartCommand() {
-    if (this.#pj.module) return ['bun', this.bunEntry(this.#pj.module)]
+    if (this.bunScript('index.ts')) return ['bun', 'index.ts']
 
     const candidates = []
+    if (this.#pj.module) candidates.push(this.bunEntry(this.#pj.module))
+
     const devScript = this.#pj.scripts?.dev
     if (devScript) {
-      const commands = new Set(['bun', 'bunx', 'node', 'npx', 'npm', 'pnpm', 'yarn', 'tsx', 'ts-node', 'run', 'exec'])
-      const entries = ShellQuote.parse(devScript)
-        .filter(entry => typeof entry === 'string' && !entry.startsWith('-') && !commands.has(entry))
-        .reverse()
-      for (const entry of entries) candidates.push(this.bunEntry(entry))
+      for (const entry of ShellQuote.parse(devScript)) {
+        if (typeof entry === 'string' && entry) candidates.push(this.bunEntry(entry))
+      }
     }
 
     candidates.push('src/index.ts')
-    const entry = candidates.find(filename => fs.existsSync(path.join(this._appdir, filename)))
-    return ['bun', entry || 'index.ts']
+    return ['bun', candidates.find(entry => this.bunScript(entry)) || 'index.ts']
   }
 
   // command to start the web server

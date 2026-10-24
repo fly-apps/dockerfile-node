@@ -683,6 +683,46 @@ describe('gdf: start command and port', function() {
     expect(gdf.startCommand).to.deep.equal(['bun', 'dist/index.js'])
   })
 
+  it('keeps an existing Bun index.ts over module and dev script entries', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('index.ts', '')
+    sandbox().write('lib/index.js', '')
+    sandbox().write('src/app.css', '')
+
+    let gdf = await sandbox().run({ module: 'lib/index.js' })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'index.ts'])
+
+    gdf = await sandbox().run({ module: 'dist/index.mjs' })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'index.ts'])
+
+    gdf = await sandbox().run({ scripts: { dev: 'bun --watch index.ts & bunx tailwindcss -i src/app.css' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'index.ts'])
+  })
+
+  it('skips Bun dev script arguments that are not script files', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/server.ts', '')
+    sandbox().write('src/app.css', '')
+    sandbox().write('prisma/schema.prisma', '')
+
+    let gdf = await sandbox().run({ scripts: { dev: 'bun --watch src/server.ts --port $PORT' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/server.ts'])
+
+    gdf = await sandbox().run({ scripts: { dev: 'bun --watch src/server.ts & bunx tailwindcss -i src/app.css & bunx prisma studio' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/server.ts'])
+  })
+
+  it('skips a Bun module entry point that does not exist', async function() {
+    sandbox().stub('bun', 'echo 1.1.20\n')
+    sandbox().write('bun.lockb', '')
+    sandbox().write('src/server.ts', '')
+
+    const gdf = await sandbox().run({ module: 'dist/index.mjs', scripts: { dev: 'bun --watch src/server.ts' } })
+    expect(gdf.startCommand).to.deep.equal(['bun', 'src/server.ts'])
+  })
+
   it('uses the Bun dev entry point without --watch', async function() {
     sandbox().stub('bun', 'echo 1.1.20\n')
     sandbox().write('bun.lockb', '')
