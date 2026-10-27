@@ -1,0 +1,16 @@
+{
+  "name": "astro-middleware",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "start": "node ./server.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.0",
+    "astro": "^5.15.0",
+    "express": "^5.1.0"
+  }
+}

@@ -33,6 +33,7 @@ Options are saved between runs into `package.json`. To invert a boolean options,
 * `--alpine` - use [alpine](https://www.alpinelinux.org/) as base image
 * `--build=CMD` - command to be used to build your application.
 * `--cache` - use build caching to speed up builds
+* `--caddy` - serve static sites (Vite, static Astro) with [Caddy](https://caddyserver.com/) instead of nginx.
 * `--cmd=CMD` - CMD to use in Dockerfile
 * `--defer-build` - may be needed when your build step requires access to secrets that are not available at image build time. Results in larger images and slower deployments.
 * `--dev` - include `devDependencies` in the production image.

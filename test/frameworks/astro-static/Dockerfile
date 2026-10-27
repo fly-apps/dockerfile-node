@@ -37,6 +37,17 @@ FROM nginx
 # Copy built application
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Serve the site, with its own 404 page and relative redirects
+COPY <<-"EOF" /etc/nginx/conf.d/default.conf
+server {
+  listen 80;
+  listen [::]:80;
+  root /usr/share/nginx/html;
+  absolute_redirect off;
+  error_page 404 /404.html;
+}
+EOF
+
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 80
 CMD [ "/usr/sbin/nginx", "-g", "daemon off;" ]
