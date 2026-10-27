@@ -120,7 +120,7 @@ RUN cd bundle/bundle/programs/server && meteor npm install
 # Build application
 RUN <%- mountSecrets %><%= build %>
 
-<% if (devDependencies && !options.dev && !nestjs && !adonisjs && !prismaSeed && !nuxtjs) { -%>
+<% if (devDependencies && !options.dev && !nestjs && !adonisjs && !prismaSeed && !nuxtjs && !astroStatic && !astroSSRDevDependencies) { -%>
 # Remove development dependencies
 RUN <%- buildCache %><%- packagerPrune %>
 
@@ -142,6 +142,8 @@ WORKDIR /app
 
 # Set production environment
 <%- emitEnv(baseEnv) %>
+<% } else if ((vite || astroStatic) && options.caddy) { -%>
+FROM caddy:2-alpine
 <% } else if (vite || astroStatic) { -%>
 FROM nginx
 <% } else { -%>
@@ -170,11 +172,13 @@ RUN wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/lit
 
 <% } -%>
 # Copy built application
-<% if (vite || astroStatic) { -%>
-COPY --from=build /app/dist /usr/share/nginx/html
+<% if ((vite || astroStatic) && options.caddy) { -%>
+COPY --from=build /app/<%= staticDir %> /srv<%= astroBase %>
+<% } else if (vite || astroStatic) { -%>
+COPY --from=build /app/<%= staticDir %> /usr/share/nginx/html<%= astroBase %>
 <% } else if (astroSSR) { -%>
 COPY --from=build /app/node_modules /app/node_modules
-COPY --from=build /app/dist /app/dist
+COPY --from=build /app/<%= astroOutDir %> /app/<%= astroOutDir %>
 
 ENV PORT=4321
 ENV HOST=0.0.0.0
@@ -240,6 +244,41 @@ ENTRYPOINT <%- entrypoint %>
 # Deploy arguments 
 <%- emitArgs(options.args.deploy) %>
             
+<% } -%>
+<% if (astroStatic && options.caddy) { -%>
+# Serve the site, with its own 404 page
+COPY <<-"EOF" /etc/caddy/Caddyfile
+:<%= port %> {
+  root * /srv
+  file_server
+  handle_errors 404 {
+    rewrite * <%= astroBase %>/404.html
+    file_server
+  }
+}
+EOF
+
+<% } else if (vite && options.caddy) { -%>
+# Serve the site
+COPY <<-"EOF" /etc/caddy/Caddyfile
+:<%= port %> {
+  root * /srv
+  file_server
+}
+EOF
+
+<% } else if (astroStatic) { -%>
+# Serve the site, with its own 404 page and relative redirects
+COPY <<-"EOF" /etc/nginx/conf.d/default.conf
+server {
+  listen <%= port %>;
+  listen [::]:<%= port %>;
+  root /usr/share/nginx/html;
+  absolute_redirect off;
+  error_page 404 <%= astroBase %>/404.html;
+}
+EOF
+
 <% } -%>
 <% if (options.nginxRoot) { -%>
 # configure nginx

@@ -50,6 +50,41 @@ describe('gdf: framework detection', function() {
     expect(gdf.astroSSR).to.equal(true)
   })
 
+  it('detects astro and its adapter in devDependencies', async function() {
+    let gdf = await sandbox().run({ devDependencies: { astro: '^5' } })
+    expect(gdf.runtime).to.equal('Astro')
+    expect(gdf.astroStatic).to.equal(true)
+
+    gdf = await sandbox().run({ dependencies: { astro: '^5' }, devDependencies: { '@astrojs/node': '^9' } })
+    expect(gdf.astroSSR).to.equal(true)
+    // the adapter is needed at runtime, so it must not be pruned
+    expect(sandbox().read('Dockerfile')).not.to.include('npm prune')
+  })
+
+  it('runs the start script for astro middleware mode', async function() {
+    sandbox().write('astro.config.mjs', "export default defineConfig({ adapter: node({ mode: 'middleware' }) })")
+    const gdf = await sandbox().run({ dependencies: { astro: '^5', '@astrojs/node': '^9' }, scripts: { start: 'node server.mjs' } })
+    expect(gdf.astroSSR).to.equal(false)
+    expect(gdf.astroStatic).to.equal(false)
+    expect(gdf.startCommand).to.deep.equal(['npm', 'run', 'start'])
+  })
+
+  it('reads outDir and base from astro.config', async function() {
+    sandbox().write('astro.config.ts', "export default defineConfig({ outDir: './build/', base: 'docs/' })")
+    const gdf = await sandbox().run({ dependencies: { astro: '^5' } })
+    expect(gdf.astroOutDir).to.equal('build')
+    expect(gdf.astroBase).to.equal('/docs')
+    expect(sandbox().read('Dockerfile')).to.include('COPY --from=build /app/build /usr/share/nginx/html/docs')
+  })
+
+  it('serves static sites with caddy when asked', async function() {
+    await sandbox().run({ dependencies: { astro: '^5' } }, { caddy: true })
+    const dockerfile = sandbox().read('Dockerfile')
+    expect(dockerfile).to.include('FROM caddy:2-alpine')
+    expect(dockerfile).to.include('COPY --from=build /app/dist /srv')
+    expect(dockerfile).not.to.include('nginx')
+  })
+
   it('detects trpc only when both client and server are present', async function() {
     let gdf = await sandbox().run({ dependencies: { '@trpc/server': '^10' } })
     expect(gdf.trpc).to.equal(false)

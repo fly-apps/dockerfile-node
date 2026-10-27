@@ -15,6 +15,7 @@ export const defaults = {
   bun: false,
   build: '',
   cache: false,
+  caddy: false,
   cmd: '',
   deferBuild: false,
   dev: false,
@@ -130,16 +131,67 @@ export class GDF {
   }
 
   get astro() {
-    return !!(this.#pj.dependencies?.astro)
+    return !!(this.#pj.dependencies?.astro || this.#pj.devDependencies?.astro)
+  }
+
+  // contents of astro.config.*, or an empty string
+  get astroConfig() {
+    if (!this.astro) return ''
+
+    for (const ext of ['mjs', 'js', 'ts', 'mts', 'cjs', 'cts']) {
+      const file = path.join(this._appdir, `astro.config.${ext}`)
+      if (fs.existsSync(file)) return fs.readFileSync(file, 'utf-8')
+    }
+
+    return ''
+  }
+
+  // value of a top level string option in astro.config.*, eg. outDir or base
+  astroOption(name) {
+    const match = this.astroConfig.match(new RegExp(`\\b${name}\\s*:\\s*(["'\`])(.+?)\\1`))
+    return match?.[2]
+  }
+
+  get astroAdapter() {
+    return !!(this.#pj.dependencies?.['@astrojs/node'] || this.#pj.devDependencies?.['@astrojs/node'])
+  }
+
+  // middleware mode builds a handler for a custom server, which the start script runs
+  get astroMiddleware() {
+    return this.astroAdapter && /mode\s*:\s*(["'`])middleware\1/.test(this.astroConfig)
   }
 
   get astroSSR() {
-    return !!(this.#pj.dependencies?.astro) &&
-      !!(this.#pj.dependencies?.['@astrojs/node'])
+    return this.astro && this.astroAdapter && !this.astroMiddleware
+  }
+
+  // the server imports astro, the adapter and their dependencies at runtime
+  get astroSSRDevDependencies() {
+    return this.astroSSR &&
+      !!(this.#pj.devDependencies?.astro || this.#pj.devDependencies?.['@astrojs/node'])
   }
 
   get astroStatic() {
-    return this.astro && !this.astroSSR
+    return this.astro && !this.astroAdapter
+  }
+
+  get astroOutDir() {
+    const outDir = this.astroOption('outDir')
+    if (!outDir) return 'dist'
+    return path.posix.normalize(outDir).replace(/\/$/, '')
+  }
+
+  // path prefix the site is served from, eg. /docs; empty for the root
+  get astroBase() {
+    if (!this.astroStatic) return ''
+    const base = this.astroOption('base')
+    if (!base) return ''
+    return path.posix.join('/', base).replace(/\/$/, '')
+  }
+
+  // directory containing the built static site
+  get staticDir() {
+    return this.astroStatic ? this.astroOutDir : 'dist'
   }
 
   get svelte() {
@@ -986,10 +1038,12 @@ export class GDF {
       return ['node', 'main.js']
     } else if (this.gatsby) {
       return [this.npx, 'gatsby', 'serve', '-H', '0.0.0.0']
+    } else if ((this.vite || this.astroStatic) && this.options.caddy) {
+      return ['caddy', 'run', '--config', '/etc/caddy/Caddyfile', '--adapter', 'caddyfile']
     } else if (this.vite || this.astroStatic) {
       return ['/usr/sbin/nginx', '-g', 'daemon off;']
     } else if (this.astroSSR) {
-      return ['node', './dist/server/entry.mjs']
+      return ['node', `./${this.astroOutDir}/server/entry.mjs`]
     } else if (this.runtime === 'Node.js' && this.#pj.scripts?.start?.includes('fastify')) {
       let start = this.#pj.scripts.start
       if (!start.includes('-a') && !start.includes('--address')) {

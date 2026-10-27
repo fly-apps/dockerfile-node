@@ -40,6 +40,10 @@ const options = yargs((hideBin(process.argv)))
     describe: 'use build caching to speed up builds',
     type: 'string'
   })
+  .option('caddy', {
+    describe: 'serve static sites with caddy instead of nginx',
+    type: 'boolean'
+  })
   .option('defer-build', {
     describe: 'if true, run build at deploy time',
     type: 'boolean'
